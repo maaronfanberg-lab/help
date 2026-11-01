@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "LensGuard SE",
+    "slug": "lensguard-se",
+    "scheme": "lensguardse",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.lensguard.se.privacy",
+      "infoPlist": {
+        "NSMotionUsageDescription": "Measure magnetic-field changes using the iPhone magnetometer.",
+        "NSBluetoothAlwaysUsageDescription": "Discover nearby advertising Bluetooth LE devices and measure signal strength.",
+        "NSCameraUsageDescription": "Use camera and flashlight to inspect suspicious reflections.",
+        "NSLocalNetworkUsageDescription": "Inspect reachable network devices on a Wi-Fi network that you own or are authorized to examine.",
+        "NSAppTransportSecurity": {
+          "NSAllowsLocalNetworking": true
+        }
+      }
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Use your camera for manual inspection",
+          "recordAudioAndroid": false,
+          "barcodeScannerEnabled": false
+        }
+      ],
+      "react-native-ble-plx"
+    ]
+  }
+}
