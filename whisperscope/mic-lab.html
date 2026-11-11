@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/><meta name="theme-color" content="#101c20"/><title>WhisperScope · Microphone Lab</title>
+<style>
+:root{color-scheme:dark;--bg:#0c181b;--card:#14292b;--line:#315050;--fg:#e8f5ed;--sub:#a8c1ba;--mint:#a7e7d2;--gold:#f2d19b;--red:#ffc4b9}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% 0%,#274541,var(--bg) 62%);color:var(--fg);font-family:-apple-system,system-ui,sans-serif}main{width:min(520px,100%);padding:calc(24px + env(safe-area-inset-top)) 20px calc(40px + env(safe-area-inset-bottom));margin:auto}.brand{color:var(--mint);letter-spacing:.15em;font-size:12px;font-weight:750;text-decoration:none}.top{display:flex;align-items:center;justify-content:space-between;gap:10px}.tag{font-size:11px;color:var(--sub)}h1{font-size:37px;letter-spacing:-.06em;line-height:1.08;margin:30px 0 10px;font-weight:670}p{line-height:1.55}p.sub{font-size:14px;color:var(--sub);margin:0 0 23px}.card{border:1px solid var(--line);background:linear-gradient(140deg,#192f30,#102023);border-radius:19px;padding:18px;margin:15px 0}.card h2{color:var(--mint);font-size:12px;text-transform:uppercase;letter-spacing:.12em;margin:0 0 15px}button{width:100%;background:var(--mint);color:#12312b;border:0;border-radius:13px;min-height:50px;padding:11px 15px;font:700 15px system-ui;touch-action:manipulation}button.secondary{background:#2b4645;color:var(--fg)}button.danger{background:#662d35;color:#ffdddd}button:disabled{opacity:.42}select{background:#20383a;border:1px solid #4a6664;border-radius:12px;color:var(--fg);width:100%;padding:14px;font-size:14px;margin:6px 0 13px}label{font-size:13px;color:var(--sub)}.small{font-size:12px;color:var(--sub)}.notice{border-left:2px solid var(--gold);padding-left:11px;color:var(--gold);font-size:12px}.pair{display:grid;grid-template-columns:1fr 1fr;gap:9px}.pair button{font-size:13px}.meter{height:8px;background:#263c3c;border-radius:10px;overflow:hidden;margin:9px 0 6px}.fill{height:100%;width:0;background:linear-gradient(90deg,#418d87,#adebd3);transition:width 110ms}.readout{font-size:12px;color:var(--sub)}.label-row{display:flex;justify-content:space-between;gap:10px;align-items:center}.checkbox{display:flex;gap:10px;align-items:flex-start;margin:15px 0}.checkbox input{accent-color:#a7e7d2;min-width:20px;min-height:20px;margin:0}.checkbox span{font-size:13px;line-height:1.5}.status{padding:12px;border:1px solid #345151;background:#0d1e20;border-radius:12px;font-size:13px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}.log{font:11px/1.6 ui-monospace,Menlo,monospace;color:var(--sub);white-space:pre-wrap;max-height:220px;overflow:auto;border:1px solid #284243;padding:10px;border-radius:10px}.hidden{display:none!important}a{color:var(--mint)}.foot{font-size:12px;color:var(--sub);line-height:1.6;margin-top:17px}b{font-weight:700}
+</style></head>
+<body><main>
+<div class="top"><a class="brand" href="./">◉ WHISPERSCOPE</a><span class="tag">MICROPHONE LAB · EXPERIMENT</span></div>
+<h1>Find every usable microphone.</h1>
+<p class="sub">Tests the microphone sources your iPhone browser can actually see. Seven physical microphones inside the PXC 550-II do not necessarily mean seven accessible inputs.</p>
+<div class="card"><h2>01 · Discover available inputs</h2>
+<button id="discover">Discover microphones</button><p class="small">Allow microphone access in Safari. Discovery captures audio locally and does not record or upload it.</p>
+<div id="summary" class="status">Not tested. The Sennheiser ANC microphones may not appear in this list.</div>
+</div>
+<div class="card"><h2>02 · Compare two input sources</h2>
+<label for="selectA">Input A</label><select id="selectA" disabled><option>Discover first</option></select>
+<label for="selectB">Input B</label><select id="selectB" disabled><option>Discover first</option></select>
+<button id="dual" class="secondary" disabled>Test two microphones simultaneously</button>
+<p class="notice">Safari may route both selections to one microphone or disable the first one when opening the second. A stream count isn't proof of independent hardware.</p>
+<div id="results" class="status">No simultaneous capture test yet.</div>
+<div class="label-row" style="margin-top:14px"><span class="small">A · captured signal</span><span id="levelA" class="readout">not active</span></div><div class="meter"><div class="fill" id="fillA"></div></div>
+<div class="label-row" style="margin-top:12px"><span class="small">B · captured signal</span><span id="levelB" class="readout">not active</span></div><div class="meter"><div class="fill" id="fillB"></div></div>
+</div>
+<div class="card"><h2>03 · Combined listening · if supported</h2>
+<p class="small">Only enabled if Safari reports two separately selected, live input streams. Both are mixed conservatively through a limiter, and the output must already be your headphones.</p>
+<label class="checkbox"><input type="checkbox" id="safety"/><span>My headphones are selected as output, the volume is very low, and I can immediately tap Stop if feedback occurs.</span></label>
+<div class="pair"><button id="mix" disabled>Listen to both</button><button id="stop" class="danger">Stop all audio</button></div>
+<div id="playStatus" class="status" style="margin-top:14px">Dual-microphone monitoring is off.</div>
+<audio id="monitor" playsinline webkit-playsinline preload="none" style="position:absolute;opacity:0;width:1px;height:1px;pointer-events:none" aria-hidden="true"></audio>
+</div>
+<div class="card"><h2>04 · Event log</h2><div class="log" id="log">No events yet.</div><button id="copy" class="secondary" style="margin-top:11px">Copy diagnostic report</button></div>
+<p class="foot">This experiment cannot bypass Sennheiser's firmware or force access to raw ANC microphone signals. For ordinary listening, return to <a href="./">WhisperScope Enhanced mode</a>. The safest result is an honest measurement, not a louder feedback loop.</p>
+</main>
+<script>
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+const el={discover:$('discover'),dual:$('dual'),mix:$('mix'),stop:$('stop'),safety:$('safety'),selectA:$('selectA'),selectB:$('selectB'),summary:$('summary'),results:$('results'),playStatus:$('playStatus'),levelA:$('levelA'),levelB:$('levelB'),fillA:$('fillA'),fillB:$('fillB'),log:$('log'),copy:$('copy'),monitor:$('monitor')};
+let devices=[],streams=[],ctx=null,meterNodes=[],raf=0,playing=false,busy=false,events=[],captureResult=null,dest=null;
+function note(message){const e=new Date().toLocaleTimeString()+' · '+message;events.push(e);events=events.slice(-32);el.log.textContent=events.join('\n');}
+function audioReset(){try{if(navigator.audioSession){navigator.audioSession.type='playback';navigator.audioSession.type='auto';}}catch(e){}}
+function clearPlayback(){playing=false;try{el.monitor.pause();el.monitor.srcObject=null;}catch(e){}dest=null;if(ctx){const c=ctx;ctx=null;c.close().catch(()=>{});}ctx=null;if(raf)cancelAnimationFrame(raf);raf=0;meterNodes=[];el.fillA.style.width='0%';el.fillB.style.width='0%';el.levelA.textContent='not active';el.levelB.textContent='not active';el.playStatus.textContent='Dual-microphone monitoring is off.';}
+function stopAll(msg='Stopped manually'){clearPlayback();for(const s of streams){for(const t of s.getTracks())t.stop();}streams=[];captureResult=null;audioReset();el.mix.disabled=true;el.dual.disabled=devices.length<2;if(msg)note(msg);el.results.textContent='No active dual-input capture. Re-run the simultaneous test before listening.';}
+function describe(stream){const t=stream.getAudioTracks()[0];const p=t?.getSettings?.()||{};return {label:t?.label||'unidentified',id:p.deviceId||'',channels:p.channelCount??'not reported',sampleRate:p.sampleRate??'not reported',noiseSuppression:p.noiseSuppression??'not reported',echoCancellation:p.echoCancellation??'not reported',muted:!!t?.muted,state:t?.readyState||'missing'};}
+async function getMic(id){const audio={echoCancellation:false,noiseSuppression:false,autoGainControl:false,channelCount:{ideal:2}};if(id)audio.deviceId={exact:id};return navigator.mediaDevices.getUserMedia({audio,video:false});}
+async function discover(){if(busy)return;busy=true;el.discover.disabled=true;stopAll('Discovering microphone devices');el.summary.textContent='Requesting browser microphone permission…';
+ try{
+  if(!navigator.mediaDevices?.getUserMedia)throw new Error('getUserMedia is unavailable. Open this HTTPS page directly in Safari.');
+  if(navigator.audioSession)try{navigator.audioSession.type='auto';}catch(e){}
+  const s=await getMic();
+  const initial=describe(s);
+  devices=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='audioinput'&&d.deviceId);
+  el.selectA.replaceChildren();el.selectB.replaceChildren();
+  devices.forEach((d,i)=>{for(const sel of [el.selectA,el.selectB]){const o=document.createElement('option');o.value=d.deviceId;o.textContent=d.label||'Input '+(i+1);sel.append(o);}});
+  el.selectA.disabled=devices.length<1;el.selectB.disabled=devices.length<2;el.dual.disabled=devices.length<2;
+  if(devices.length>1)el.selectB.selectedIndex=1;
+  el.summary.textContent='Safari reports '+devices.length+' input(s).\n'+devices.map((d,i)=>(i+1)+'. '+(d.label||'Unidentified')).join('\n')+'\n\nInitial active input: '+initial.label+'\nChannels: '+initial.channels+'; sample rate: '+initial.sampleRate+' Hz\nThese channels are not a physical microphone count.';
+  note('Discovered '+devices.length+' microphone input(s); initial '+initial.label);
+  s.getTracks().forEach(t=>t.stop());audioReset();
+ }catch(e){el.summary.textContent='Discovery failed: '+(e?.name||'Error')+' · '+(e?.message||String(e));note('Discovery failed: '+(e?.message||String(e)));}finally{busy=false;el.discover.disabled=false;}
+}
+function refreshMeters(){if(!ctx||meterNodes.length!==2)return;const buffers=meterNodes.map(n=>new Float32Array(n.fftSize));
+ const frame=()=>{if(!ctx||meterNodes.length!==2)return;meterNodes.forEach((node,i)=>{node.getFloatTimeDomainData(buffers[i]);let sum=0;for(const v of buffers[i])sum+=v*v;const db=20*Math.log10(Math.max(.00001,Math.sqrt(sum/buffers[i].length)));const pct=Math.max(0,Math.min(100,(db+80)*1.5));[el.fillA,el.fillB][i].style.width=pct+'%';[el.levelA,el.levelB][i].textContent=Math.round(db)+' dBFS';});raf=requestAnimationFrame(frame);};frame();
+}
+function attachAnalyse(){if(ctx){const c=ctx;ctx=null;c.close().catch(()=>{});}if(raf)cancelAnimationFrame(raf);raf=0;ctx=new (window.AudioContext||window.webkitAudioContext)();meterNodes=[];for(const s of streams){const src=ctx.createMediaStreamSource(s);const an=ctx.createAnalyser();an.fftSize=1024;src.connect(an);meterNodes.push(an);}const c=ctx;c.resume().catch(e=>note('Meter audio context: '+(e?.message||String(e))));refreshMeters();}
+async function dual(){if(busy)return;const a=el.selectA.value,b=el.selectB.value;
+ if(!a||!b||a===b){el.results.textContent='Select two different inputs. Reusing one microphone twice cannot expose more acoustic information.';return;}
+ busy=true;el.dual.disabled=true;el.mix.disabled=true;stopAll('Starting simultaneous microphone capture');
+ try{
+  let sa=await getMic(a);streams.push(sa);note('First microphone open: '+describe(sa).label);
+  let sb=await getMic(b);streams.push(sb);note('Second microphone open: '+describe(sb).label);
+  if(navigator.audioSession)try{navigator.audioSession.type='play-and-record';}catch(e){}
+  await new Promise(r=>setTimeout(r,1000));
+  const x=describe(sa),y=describe(sb);
+  const distinct=!!x.id&&!!y.id&&x.id!==y.id;
+  const live=x.state==='live'&&y.state==='live'&&!x.muted&&!y.muted;
+  captureResult={a:x,b:y,distinct,live};
+  el.results.textContent='A: '+x.label+' | '+x.channels+' channel(s), '+x.sampleRate+' Hz | '+x.state+(x.muted?' muted':'')+'\nB: '+y.label+' | '+y.channels+' channel(s), '+y.sampleRate+' Hz | '+y.state+(y.muted?' muted':'')+'\n\n'+(!live?'One input became inactive when the other opened.':!distinct?'Inputs were not verified as distinct by Safari.':'Two apparently distinct, live input streams. Physical microphone separation still needs listening verification.');
+  note('Dual probe: '+(live?'two live tracks':'capture interrupted')+', '+(distinct?'different IDs':'same/unknown IDs'));
+  if(live&&distinct){
+   for(const stream of streams){for(const t of stream.getTracks()){t.addEventListener('ended',()=>{if(streams.includes(stream))stopAll('An input stream ended. Monitoring stopped for safety.');});}}
+   attachAnalyse();
+   el.mix.disabled=!el.safety.checked;
+  }else{for(const stream of streams)stream.getTracks().forEach(t=>t.stop());streams=[];audioReset();}
+ }catch(e){el.results.textContent='Dual capture unavailable: '+(e?.name||'Error')+' · '+(e?.message||String(e))+'\nThis is an iOS/Bluetooth routing limitation, not a missing permission for extra physical microphones.';note('Dual capture error: '+(e?.message||String(e)));streams.forEach(s=>s.getTracks().forEach(t=>t.stop()));streams=[];audioReset();}
+ finally{busy=false;el.dual.disabled=devices.length<2;}
+}
+async function listen(){if(playing){stopAll('Combined listening stopped');return;}
+ if(!captureResult?.live||!captureResult?.distinct||streams.length!==2||!el.safety.checked)return;
+ if(streams.some(s=>s.getAudioTracks()[0]?.readyState!=='live'||s.getAudioTracks()[0]?.muted)){stopAll('An input is not active.');return;}
+ try{
+  if(ctx){const c=ctx;ctx=null;c.close().catch(()=>{});}if(raf)cancelAnimationFrame(raf);raf=0;
+  const c=new (window.AudioContext||window.webkitAudioContext)();ctx=c;
+  const sourceA=c.createMediaStreamSource(streams[0]),sourceB=c.createMediaStreamSource(streams[1]);
+  const gainA=c.createGain(),gainB=c.createGain();gainA.gain.value=0.28;gainB.gain.value=0.28;
+  const limiter=c.createDynamicsCompressor();limiter.threshold.value=-14;limiter.knee.value=0;limiter.ratio.value=20;limiter.attack.value=.002;limiter.release.value=.22;
+  const out=c.createMediaStreamDestination();dest=out;
+  const a=c.createAnalyser(),b=c.createAnalyser();a.fftSize=1024;b.fftSize=1024;sourceA.connect(a);sourceB.connect(b);sourceA.connect(gainA);sourceB.connect(gainB);gainA.connect(limiter);gainB.connect(limiter);limiter.connect(out);meterNodes=[a,b];
+  el.monitor.srcObject=out.stream;
+  const p=el.monitor.play(),q=c.resume();await Promise.race([Promise.all([p,q]),new Promise((_,reject)=>setTimeout(()=>reject(new Error('Safari playback timed out')),6000))]);
+  if(c.state!=='running')throw new Error('Audio engine '+c.state);
+  playing=true;el.playStatus.textContent='Two-input mixed playback active at conservative gain. This is not boosted hearing. Stop if feedback occurs.';el.mix.textContent='Stop combined listening';el.mix.disabled=false;note('Combined listening started; two apparent inputs');
+  refreshMeters();
+ }catch(e){note('Combined monitoring failed: '+(e?.message||String(e)));el.playStatus.textContent='Combined listening failed: '+(e?.message||String(e));stopAll('Combined playback failed');}
+}
+el.discover.addEventListener('click',discover);el.dual.addEventListener('click',dual);el.mix.addEventListener('click',listen);el.stop.addEventListener('click',()=>stopAll('Stopped by user'));
+el.safety.addEventListener('change',()=>el.mix.disabled=!(captureResult?.live&&captureResult?.distinct&&streams.length===2&&el.safety.checked));
+el.copy.addEventListener('click',()=>{const report='WhisperScope Microphone Lab\n'+el.summary.textContent+'\n\n'+el.results.textContent+'\n\n'+events.join('\n');if(navigator.clipboard?.writeText)navigator.clipboard.writeText(report).then(()=>el.copy.textContent='Report copied').catch(()=>el.copy.textContent='Select and copy the event log above');});
+if(navigator.mediaDevices?.addEventListener)navigator.mediaDevices.addEventListener('devicechange',()=>{if(playing)stopAll('Audio device changed; output may no longer be headphones.');else note('Device-change notification received');});
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&streams.length)stopAll('Safari was hidden or screen locked.');});
+window.addEventListener('pagehide',()=>stopAll('Lab page closed'));
+})();
+</script></body></html>
