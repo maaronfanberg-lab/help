@@ -16,7 +16,7 @@
 <label for="selectB">Input B</label><select id="selectB" disabled><option>Discover first</option></select>
 <button id="dual" class="secondary" disabled>Test two microphones simultaneously</button>
 <p class="notice">Safari may route both selections to one microphone or disable the first one when opening the second. A stream count isn't proof of independent hardware.</p>
-<div id="results" class="status">No simultaneous capture test yet.</div>
+<div id="results" class="status">No simultaneous capture test yet.</div><p class="small">Try the Sennheiser headset source against the iPhone microphone. Keep each source's physical position consistent while playing the same faint music. A source that drops out when the second opens cannot be mixed in Safari.</p>
 <div class="label-row" style="margin-top:14px"><span class="small">A · captured signal</span><span id="levelA" class="readout">not active</span></div><div class="meter"><div class="fill" id="fillA"></div></div>
 <div class="label-row" style="margin-top:12px"><span class="small">B · captured signal</span><span id="levelB" class="readout">not active</span></div><div class="meter"><div class="fill" id="fillB"></div></div>
 </div>
@@ -27,7 +27,8 @@
 <div id="playStatus" class="status" style="margin-top:14px">Dual-microphone monitoring is off.</div>
 <audio id="monitor" playsinline webkit-playsinline preload="none" style="position:absolute;opacity:0;width:1px;height:1px;pointer-events:none" aria-hidden="true"></audio>
 </div>
-<div class="card"><h2>04 · Event log</h2><div class="log" id="log">No events yet.</div><button id="copy" class="secondary" style="margin-top:11px">Copy diagnostic report</button></div>
+<div class="card"><h2>04 · Headphone hardware checks</h2><p class="small">In the official <b>Sennheiser Smart Control</b> app, set ANC USER to <b>Anti Wind</b>, put the headphone ANC switch in the middle USER position, and compare it with Adaptive and MAX. Transparent Hearing is activated by a double-tap of the right earcup. These are headphone-internal settings, not microphone inputs available to Safari. There is no documented setting to amplify Transparent Hearing beyond its normal level.</p><p class="small">If your iPhone or a future USB microphone appears in the device list, compare it using the two selectors above. Do not assume that several listed input sources are simultaneously usable.</p></div>
+<div class="card"><h2>05 · Event log</h2><div class="log" id="log">No events yet.</div><button id="copy" class="secondary" style="margin-top:11px">Copy diagnostic report</button></div>
 <p class="foot">This experiment cannot bypass Sennheiser's firmware or force access to raw ANC microphone signals. For ordinary listening, return to <a href="./">WhisperScope Enhanced mode</a>. The safest result is an honest measurement, not a louder feedback loop.</p>
 </main>
 <script>
@@ -38,7 +39,7 @@ const el={discover:$('discover'),dual:$('dual'),mix:$('mix'),stop:$('stop'),safe
 let devices=[],streams=[],ctx=null,meterNodes=[],raf=0,playing=false,busy=false,events=[],captureResult=null,dest=null;
 function note(message){const e=new Date().toLocaleTimeString()+' · '+message;events.push(e);events=events.slice(-32);el.log.textContent=events.join('\n');}
 function audioReset(){try{if(navigator.audioSession){navigator.audioSession.type='playback';navigator.audioSession.type='auto';}}catch(e){}}
-function clearPlayback(){playing=false;try{el.monitor.pause();el.monitor.srcObject=null;}catch(e){}dest=null;if(ctx){const c=ctx;ctx=null;c.close().catch(()=>{});}ctx=null;if(raf)cancelAnimationFrame(raf);raf=0;meterNodes=[];el.fillA.style.width='0%';el.fillB.style.width='0%';el.levelA.textContent='not active';el.levelB.textContent='not active';el.playStatus.textContent='Dual-microphone monitoring is off.';}
+function clearPlayback(){playing=false;el.mix.textContent='Listen to both';try{el.monitor.pause();el.monitor.srcObject=null;}catch(e){}dest=null;if(ctx){const c=ctx;ctx=null;c.close().catch(()=>{});}ctx=null;if(raf)cancelAnimationFrame(raf);raf=0;meterNodes=[];el.fillA.style.width='0%';el.fillB.style.width='0%';el.levelA.textContent='not active';el.levelB.textContent='not active';el.playStatus.textContent='Dual-microphone monitoring is off.';}
 function stopAll(msg='Stopped manually'){clearPlayback();for(const s of streams){for(const t of s.getTracks())t.stop();}streams=[];captureResult=null;audioReset();el.mix.disabled=true;el.dual.disabled=devices.length<2;if(msg)note(msg);el.results.textContent='No active dual-input capture. Re-run the simultaneous test before listening.';}
 function describe(stream){const t=stream.getAudioTracks()[0];const p=t?.getSettings?.()||{};return {label:t?.label||'unidentified',id:p.deviceId||'',channels:p.channelCount??'not reported',sampleRate:p.sampleRate??'not reported',noiseSuppression:p.noiseSuppression??'not reported',echoCancellation:p.echoCancellation??'not reported',muted:!!t?.muted,state:t?.readyState||'missing'};}
 async function getMic(id){const audio={echoCancellation:false,noiseSuppression:false,autoGainControl:false,channelCount:{ideal:2}};if(id)audio.deviceId={exact:id};return navigator.mediaDevices.getUserMedia({audio,video:false});}
