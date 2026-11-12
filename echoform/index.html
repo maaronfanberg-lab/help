@@ -3,12 +3,13 @@
 <style>
 :root{color-scheme:dark;--bg:#071018;--panel:#0e1c27;--panel2:#10212d;--line:#284354;--cyan:#5be8e4;--dim:#98b7c4;--amber:#ffc47b;--white:#ecfafb;--red:#ff857e}*{box-sizing:border-box}body{margin:0;background:radial-gradient(100% 60% at 50% 0%,#163240 0%,var(--bg) 65%) fixed;color:var(--white);font:15px/1.48 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input,select{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.45}.shell{max-width:1040px;margin:auto;padding:20px max(16px,env(safe-area-inset-right)) max(32px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}.top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:18px}.eyebrow{font-size:10px;letter-spacing:.25em;color:var(--cyan);font-weight:800}h1{font-size:clamp(31px,7vw,50px);font-weight:520;letter-spacing:-.055em;margin:1px 0;line-height:1}h1 b{font-weight:800}h2{font-size:13px;letter-spacing:.13em;font-weight:750;margin:0 0 9px;text-transform:uppercase;color:#c9e7ec}.subtitle{font-size:12px;color:var(--dim);margin-top:8px;max-width:500px}.pill{white-space:nowrap;border:1px solid var(--line);background:#10222e;border-radius:100px;padding:7px 10px;font-size:11px;color:#b5d0db;display:flex;align-items:center;gap:7px}.dot{height:7px;width:7px;background:#778995;border-radius:100%}.dot.online{background:var(--cyan);box-shadow:0 0 14px #5be8e460}.dot.error{background:var(--red)}.status{background:linear-gradient(90deg,#163441,#142632);border:1px solid #31566a;border-radius:13px;padding:12px 14px;color:#c9eaf2;font-size:12px;display:flex;gap:9px;align-items:flex-start;margin-bottom:12px}.status.error{border-color:#75474b;background:#342028;color:#ffd4d1}.actionbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}.btn{border:1px solid #436070;background:#17313f;color:#d6f4f6;border-radius:11px;padding:11px 13px;font-size:12px;font-weight:700;min-height:44px;transition:background .16s}.btn:active{background:#286075}.btn.primary{background:var(--cyan);border-color:var(--cyan);color:#052129}.btn.stop{color:#ffc7c3;border-color:#63494f}.btn.muted{background:transparent;color:#b0d1dc}.layout{display:grid;grid-template-columns:1.22fr .78fr;gap:12px}.panel{background:linear-gradient(145deg,#10222c,#0b1721);border:1px solid #26404f;border-radius:17px;padding:14px;min-width:0}.radarpanel{grid-row:span 2}.panelheader{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:5px}.tiny{font-size:10px;color:var(--dim)}.radarwrap{position:relative;width:100%;aspect-ratio:1;max-height:565px;max-width:565px;margin:auto}.radarwrap canvas{height:100%;width:100%;display:block}.overlay{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none;text-align:center}.overlay strong{font-size:11px;color:#a8dadd;font-weight:550}.radarlegend{display:flex;justify-content:space-between;font-size:11px;color:var(--dim);margin-top:8px}.statrow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:12px 0}.stat{border:1px solid var(--line);border-radius:12px;padding:11px;background:#0f202c;min-width:0}.stat .num{font-size:clamp(17px,3.9vw,25px);letter-spacing:-.045em;font-variant-numeric:tabular-nums;font-weight:650;color:var(--white);overflow:hidden;text-overflow:ellipsis}.stat .unit{font-size:11px;color:var(--dim)}.graph{width:100%;display:block;height:150px;border-radius:10px;background:#081822;border:1px solid #203a49}.graph.short{height:114px}.smallnote{font-size:11px;color:var(--dim);margin:9px 1px 0}.optiongroup{display:grid;grid-template-columns:1fr 1fr;gap:13px}.control{margin:12px 0}.control label{display:flex;justify-content:space-between;color:#c5dce1;font-size:12px;margin-bottom:7px}.control select{width:100%;padding:11px 8px;background:#0a1b25;color:#ecfaff;border:1px solid #385361;border-radius:9px}.control input[type=range]{width:100%;accent-color:var(--cyan)}.ref{color:var(--amber);font-size:11px}.echoes{margin-top:12px;font-variant-numeric:tabular-nums}.echo{display:flex;gap:9px;align-items:center;margin:7px 0;font-size:12px;color:#d1eaf0}.echobar{height:5px;background:linear-gradient(90deg,#2a8b96,var(--cyan));border-radius:10px;max-width:115px;min-width:3px}.footer{color:var(--dim);font-size:11px;line-height:1.6;margin-top:18px}.footer strong{color:#bdeaf0}.diagnostics{font:11px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;overflow-wrap:anywhere;color:#91aebc;background:#0a1821;border:1px solid #26404f;padding:10px;border-radius:9px;margin-top:11px;white-space:pre-line}details{margin-top:13px;color:#c6dce6}summary{cursor:pointer;font-size:12px}.readme{font-size:12px;color:#b1cbd6;padding-left:18px}a{color:var(--cyan)}@media(max-width:760px){.layout{display:block}.panel{margin-bottom:12px}.radarpanel{grid-row:auto}.statrow{grid-template-columns:repeat(4,1fr)}.top{margin-bottom:15px}.actionbar .btn{flex:1 1 auto}.radarwrap{max-height:none}.stat .num{font-size:19px}.optiongroup{grid-template-columns:1fr 1fr}}@media(max-width:380px){.statrow{grid-template-columns:repeat(2,1fr)}.btn{padding:9px}.shell{padding-left:12px;padding-right:12px}}
 </style></head><body><main class="shell">
-<header class="top"><div><div class="eyebrow">EXPERIMENTAL ACOUSTIC SENSING · v2</div><h1>ECHO<b>FORM</b><span style="color:var(--cyan)">◌</span></h1><div class="subtitle">A real echo scanner for the space around your phone. Sound out. Reflections back. No camera, no uploaded audio.</div></div><div class="pill"><span id="dot" class="dot"></span><span id="modeBadge">OFFLINE</span></div></header>
+<header class="top"><div><div class="eyebrow">EXPERIMENTAL ACOUSTIC SENSING · v3</div><h1>ECHO<b>FORM</b><span style="color:var(--cyan)">◌</span></h1><div class="subtitle">A real echo scanner for the space around your phone. Sound out. Reflections back. No camera, no uploaded audio.</div></div><div class="pill"><span id="dot" class="dot"></span><span id="modeBadge">OFFLINE</span></div></header>
 <div class="status" id="status" role="status" aria-live="polite"><span>◉</span><span id="statusText">For real microphone scanning, open the HTTPS webpage in Safari. The downloaded file preview cannot run the sonar engine.</span></div>
 <div class="status" id="boot" role="status">Loading engine… If this remains unchanged, the file viewer blocked JavaScript. Open the hosted HTTPS version in Safari instead.</div>
 <div class="actionbar">
-<button id="healthBtn" class="btn muted">✓ Check app</button><button id="startBtn" class="btn primary">1 · Enable microphone</button><button id="pingBtn" class="btn" disabled>2 · Ping once</button><button id="autoBtn" class="btn" disabled>↻ Auto scan</button><button id="refBtn" class="btn" disabled>◈ Calibrate reference</button><button id="clearBtn" class="btn muted">⌫ Clear map</button><button id="stopBtn" class="btn stop" disabled>■ Stop audio</button>
+<button id="healthBtn" class="btn muted">✓ Check app</button><button id="startBtn" class="btn primary">1 · Enable microphone</button><button id="retryBtn" class="btn muted">↻ Resume audio</button><button id="pingBtn" class="btn" disabled>2 · Ping once</button><button id="autoBtn" class="btn" disabled>↻ Auto scan</button><button id="refBtn" class="btn" disabled>◈ Calibrate reference</button><button id="clearBtn" class="btn muted">⌫ Clear map</button><button id="stopBtn" class="btn stop" disabled>■ Stop audio</button>
 </div>
+<div id="micDebug" class="diagnostics" role="status" aria-live="polite">Microphone: not requested · Audio: not started · Captured samples: 0</div>
 <div class="statrow"><div class="stat"><div id="dist" class="num">—</div><div class="unit">Nearest candidate echo</div></div><div class="stat"><div id="echonum" class="num">0</div><div class="unit">Echo candidates</div></div><div class="stat"><div id="mic" class="num">—</div><div class="unit">Live mic level, dBFS</div></div><div class="stat"><div id="pings" class="num">0</div><div class="unit">Measured pings</div></div></div>
 <div class="layout"><section class="panel radarpanel"><div class="panelheader"><h2>Experimental spatial scan</h2><span class="tiny">0–8 m · estimated</span></div><div class="radarwrap"><canvas id="radar" aria-label="Radar style plot of measured echo delays by phone rotation"></canvas><div class="overlay" id="centerHint"><strong>NO MEASUREMENTS</strong></div></div><div class="radarlegend"><span>Distance = measured echo delay</span><span>Angle = phone orientation*</span></div><p class="smallnote">*Echo direction is <strong>not</strong> independently measured. This plot places reflections at the direction the phone was pointed when pinged. It is an exploratory acoustic sketch, not a verified floor plan.</p></section>
 <section class="panel"><div class="panelheader"><h2>Echo impulse profile</h2><span class="tiny" id="traceMeta">Waiting for ping</span></div><canvas class="graph" id="profile"></canvas><div class="radarlegend"><span>0 m</span><span>Relative reflected energy</span><span>8 m</span></div><div class="echoes" id="echoList"><span class="tiny">Echo candidates will appear after a successful recorded ping.</span></div></section>
@@ -158,65 +159,118 @@ if(typeof module!=='undefined')module.exports=EchoDSP;
 <script>
 (()=>{'use strict';
 const $=(id)=>document.getElementById(id);
-const S={ctx:null,stream:null,source:null,capture:null,silent:null,chunks:[],lastFrame:0,samples:0,level:-100,raw:new Float32Array(1024),phase:'idle',pings:0,busy:false,auto:null,points:[],history:[],last:null,ref:null,orientation:false,orientationZero:null,heading:0,workletBlob:null,lastError:'',fallback:false};
+const S={ctx:null,stream:null,source:null,capture:null,silent:null,chunks:[],lastFrame:0,samples:0,level:-100,raw:new Float32Array(1024),phase:'idle',starting:false,serial:0,micWarning:'',pings:0,busy:false,auto:null,points:[],history:[],last:null,ref:null,orientation:false,orientationZero:null,heading:0,workletBlob:null,lastError:'',fallback:false};
 const SPEED=343,MAX_POINTS=700;
 function status(msg,error=false){$('statusText').textContent=msg;$('status').classList.toggle('error',error);S.lastError=error?msg:'';}
 function readiness(){const live=location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1';const embedded=window.self!==window.top;const mic=!!navigator.mediaDevices?.getUserMedia;const audio=!!(window.AudioContext||window.webkitAudioContext);const ok=live&&!embedded&&mic&&audio;const msg=ok?'✓ Engine loaded. Secure browser context; speaker and microphone APIs available. Tap Enable microphone.':'✕ Cannot scan here: '+(!live?'Requires an HTTPS web address. ': '')+(embedded?'Open in Safari, not an embedded preview. ':'')+(!mic?'Microphone API missing. ':'')+(!audio?'Web Audio unavailable. ':'');$('boot').textContent=msg;$('boot').classList.toggle('error',!ok);return {ok,live,embedded,mic,audio};}
-function updateEnabled(){const on=!!S.ctx; $('startBtn').disabled=on;$('pingBtn').disabled=!on;$('autoBtn').disabled=!on;$('refBtn').disabled=!on;$('stopBtn').disabled=!on;$('modeBadge').textContent=on?'MIC ACTIVE':'OFFLINE';$('dot').className='dot '+(on?'online':S.lastError?'error':'');$('micState').textContent=on?'live microphone':'mic off';}
+function debugMic(){
+ const track=S.stream?.getAudioTracks()?.[0];
+ const permission=track?(track.readyState==='live'?(track.muted?'granted, muted':'granted, live'):'ended'):(S.starting?'requesting':'not requested');
+ $('micDebug').textContent=`Microphone: ${permission} · Audio: ${S.ctx?.state||'not started'} · Captured samples: ${S.samples.toLocaleString()} · Stage: ${S.phase}${S.micWarning?' · '+S.micWarning:''}`;
+}
+function updateEnabled(){
+ const track=S.stream?.getAudioTracks()?.[0], permission=!!track&&track.readyState==='live';
+ const flowing=permission&&S.samples>=1024&&!track.muted;
+ const playable=flowing&&S.ctx?.state==='running';
+ $('startBtn').disabled=S.starting||playable;
+ $('startBtn').textContent=permission?'↻ Restart microphone':'1 · Enable microphone';
+ $('retryBtn').disabled=!permission||!S.ctx;
+ $('pingBtn').disabled=!playable;
+ $('autoBtn').disabled=!playable;
+ $('refBtn').disabled=!playable;
+ $('stopBtn').disabled=!(S.ctx||S.stream||S.starting);
+ $('modeBadge').textContent=flowing?'MIC LIVE':permission?'MIC GRANTED':S.starting?'CONNECTING':'OFFLINE';
+ $('dot').className='dot '+(flowing?'online':S.lastError?'error':'');
+ $('micState').textContent=flowing?'real samples arriving':permission?'permission granted, waiting for audio samples':'mic off';
+ debugMic();
+}
 function chunk(frame,samples){
  if(!S.ctx||!samples?.length)return;
+ const first=S.samples===0;
  S.chunks.push({frame, data:samples}); S.lastFrame=Math.max(S.lastFrame,frame+samples.length);S.samples+=samples.length;
  const keep=frame-S.ctx.sampleRate*2.2;while(S.chunks.length && S.chunks[0].frame+S.chunks[0].data.length<keep)S.chunks.shift();
  let rms=0;for(let i=0;i<samples.length;i++)rms+=samples[i]*samples[i];rms=Math.sqrt(rms/samples.length);
  const dB=20*Math.log10(Math.max(rms,1e-5));S.level=S.level===-100?dB:S.level*.82+dB*.18;
  S.raw=samples;$('mic').textContent=Math.round(S.level)+' dB';
+ if(first){S.phase='capturing';status('✓ Real microphone samples received. The indicator is green. Tap Ping once to try a reflection measurement.');updateEnabled();}
 }
 async function start(){
- if(!navigator.mediaDevices?.getUserMedia){status('Microphone unavailable. This file must be hosted on HTTPS, then opened in Safari. A local file or HTTP address may not have microphone access.',true);return;}
+ if(S.starting)return;
+ if(!navigator.mediaDevices?.getUserMedia){status('Microphone API unavailable. Open the HTTPS URL in Safari, outside the ChatGPT in-app file viewer.',true);return;}
+ if(!window.isSecureContext){status('Microphone blocked: this must be an HTTPS page in Safari.',true);return;}
+ if(S.stream||S.ctx)stop(false);
+ const ticket=++S.serial;S.starting=true;S.phase='starting';S.samples=0;S.micWarning='';updateEnabled();
+ let pendingTimer=null;
  try{
-  // IMPORTANT for iOS: unlock the AudioContext synchronously in the original tap, BEFORE any await.
   const AudioCtx=window.AudioContext||window.webkitAudioContext;
-  if(!AudioCtx)throw new Error('This browser does not support Web Audio.');
-  const ctx=new AudioCtx({latencyHint:'interactive'});
-  S.ctx=ctx;
-  const unlocked=ctx.resume();
-  // Safari can route "play-and-record" through the tiny phone receiver; start with automatic routing.
-  try{if(navigator.audioSession && 'type' in navigator.audioSession)navigator.audioSession.type='auto';}catch{}
-  status('Requesting microphone permission…');
-  const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false,channelCount:1},video:false});
-  S.stream=stream;
-  await unlocked;
-  if(ctx.state!=='running')await ctx.resume();
-  if(ctx.state!=='running')throw new Error('Audio playback is suspended. Tap Stop audio then Enable microphone again in Safari.');
+  if(!AudioCtx)throw new Error('The browser does not provide Web Audio.');
+  // Start an audio context directly inside the user's tap. Never await its resume()
+  // before requesting microphone permission: WebKit can leave that promise pending.
+  const ctx=new AudioCtx({latencyHint:'interactive'});S.ctx=ctx;
+  try{const r=ctx.resume();if(r?.catch)r.catch(e=>{S.micWarning='Audio resume: '+e.name;debugMic();});}catch(e){S.micWarning='Audio resume: '+e.name;}
+  try{if(navigator.audioSession&&'type' in navigator.audioSession)navigator.audioSession.type='auto';}catch{}
+  S.phase='permission request';status('Step 1 of 3: Safari microphone permission requested. Please tap Allow if prompted.');updateEnabled();
+  pendingTimer=setTimeout(()=>{if(ticket===S.serial&&!S.stream){status('Safari has not answered the microphone request. Check if a permission popup is waiting; or open the link directly in Safari and reload.',true);}},12000);
+  // Simple constraints maximizes iOS compatibility. Apply optional signal-processing constraints afterward.
+  const stream=await navigator.mediaDevices.getUserMedia({audio:true,video:false});
+  if(ticket!==S.serial){stream.getTracks().forEach(t=>t.stop());return;}
+  clearTimeout(pendingTimer);pendingTimer=null;
+  const track=stream.getAudioTracks()[0];
+  if(!track||track.readyState!=='live')throw new Error('Safari returned no live microphone audio track.');
+  S.stream=stream;S.phase='permission granted';status('✓ Step 1: Microphone permission granted. Step 2: Connecting capture, then checking for real samples.');updateEnabled();
+  track.onmute=()=>{if(ticket!==S.serial)return;status('Microphone track muted by iOS. Close other recording apps and tap Resume audio.',true);updateEnabled();};
+  track.onunmute=()=>{if(ticket!==S.serial)return;status('Microphone track unmuted; checking live samples.');updateEnabled();};
+  track.onended=()=>{if(ticket!==S.serial)return;status('iOS ended the microphone track. Tap Restart microphone.',true);stop(false);};
+  try{const setting=track.applyConstraints?.({echoCancellation:false,noiseSuppression:false,autoGainControl:false});if(setting?.catch)setting.catch(()=>{S.micWarning='iOS may be applying noise processing';});}catch{S.micWarning='iOS may be applying noise processing';}
+  try{if(navigator.audioSession&&'type' in navigator.audioSession)navigator.audioSession.type='play-and-record';}catch{}
   S.source=ctx.createMediaStreamSource(stream);S.samples=0;S.chunks=[];S.lastFrame=0;
   S.silent=ctx.createGain();S.silent.gain.value=0;S.silent.connect(ctx.destination);
+  S.phase='connecting audio graph';
   let workletReady=false;
-  if(ctx.audioWorklet){
-   try{const worklet=`class EchoInput extends AudioWorkletProcessor {constructor(){super();this.data=new Float32Array(2048);this.i=0;this.frame=0;}process(inputs){const ch=inputs[0]&&inputs[0][0];if(ch){for(let j=0;j<ch.length;j++){if(this.i===0)this.frame=currentFrame+j;this.data[this.i++]=ch[j];if(this.i===2048){this.port.postMessage({frame:this.frame,buf:this.data},[this.data.buffer]);this.data=new Float32Array(2048);this.i=0;}}}return true;}} registerProcessor('echo-input',EchoInput);`;
-   S.workletBlob=URL.createObjectURL(new Blob([worklet],{type:'text/javascript'}));await ctx.audioWorklet.addModule(S.workletBlob);
-   S.capture=new AudioWorkletNode(ctx,'echo-input');S.capture.port.onmessage=ev=>{const m=ev.data;chunk(m.frame,m.buf);};
-   S.source.connect(S.capture);S.capture.connect(S.silent);S.fallback=false;workletReady=true;
-   }catch(workletError){console.warn('AudioWorklet unavailable, using fallback capture:',workletError);}
+  if(ctx.audioWorklet&&typeof AudioWorkletNode!=='undefined'){
+   try{
+    const worklet=`class EchoInput extends AudioWorkletProcessor {constructor(){super();this.data=new Float32Array(2048);this.i=0;this.frame=0;}process(inputs){const ch=inputs[0]&&inputs[0][0];if(ch){for(let j=0;j<ch.length;j++){if(this.i===0)this.frame=currentFrame+j;this.data[this.i++]=ch[j];if(this.i===2048){this.port.postMessage({frame:this.frame,buf:this.data},[this.data.buffer]);this.data=new Float32Array(2048);this.i=0;}}}return true;}} registerProcessor('echo-input',EchoInput);`;
+    S.workletBlob=URL.createObjectURL(new Blob([worklet],{type:'text/javascript'}));
+    await Promise.race([ctx.audioWorklet.addModule(S.workletBlob),new Promise((_,reject)=>setTimeout(()=>reject(new Error('worklet timed out')),2500))]);
+    if(ticket!==S.serial)return;
+    S.capture=new AudioWorkletNode(ctx,'echo-input');S.capture.port.onmessage=ev=>{const m=ev.data;chunk(m.frame,m.buf);};
+    S.source.connect(S.capture);S.capture.connect(S.silent);S.fallback=false;workletReady=true;
+   }catch(workletError){S.micWarning='Fallback capture ('+workletError.message+')';}
   }
   if(!workletReady){
-   const proc=ctx.createScriptProcessor(2048,1,1);proc.onaudioprocess=ev=>{
-     const x=ev.inputBuffer.getChannelData(0),samples=new Float32Array(x);
-     chunk(Math.round(ev.playbackTime*ctx.sampleRate),samples);
-   };
+   if(!ctx.createScriptProcessor)throw new Error('Both microphone processing methods are unavailable.');
+   const proc=ctx.createScriptProcessor(2048,1,1);proc.onaudioprocess=ev=>{const x=ev.inputBuffer.getChannelData(0);chunk(Math.round(ev.playbackTime*ctx.sampleRate),new Float32Array(x));};
    S.capture=proc;S.source.connect(proc);proc.connect(S.silent);S.fallback=true;
   }
-  S.phase='active';updateEnabled();
-  stream.getAudioTracks().forEach(tr=>tr.onended=()=>{status('Microphone permission or audio route ended. Tap Stop audio and then Enable microphone.',true);stop();});
-  status('Microphone active. Tap Ping once to transmit a chirp and measure its echoes. Use the phone speaker, not headphones.');
- }catch(e){status('Cannot start microphone: '+(e?.message||e)+'. Check Safari microphone permission and an HTTPS address.',true);stop(false);}
+  S.starting=false;S.phase='waiting for samples';updateEnabled();
+  if(ctx.state!=='running'){try{ctx.resume().catch(()=>{});}catch{}}
+  status('✓ Microphone permission granted. Waiting for microphone samples; if the badge stays amber, tap Resume audio.');
+  setTimeout(()=>{
+    if(ticket!==S.serial||!S.stream)return;
+    if(S.samples===0){S.phase='no audio samples';status(`Microphone permission was granted, but NO sound samples arrived. AudioContext is ${ctx.state}. Tap Resume audio. If still amber, quit/reopen Safari.`,true);}
+    else if(ctx.state!=='running'){status(`Samples arrived, but playback is ${ctx.state}. Tap Resume audio before pinging.`,true);}
+    updateEnabled();
+  },4500);
+ }catch(e){if(ticket!==S.serial)return;S.phase='failed';const msg=`Microphone initialization failed: ${e?.name||'Error'}: ${e?.message||e}. `+(e?.name==='NotAllowedError'?'In Safari, tap aA / Page Settings → Microphone → Allow, then reload.':'Try Safari directly, close other apps using the microphone, then reload.');stop(false);status(msg,true);updateEnabled();}
+ finally{if(pendingTimer)clearTimeout(pendingTimer);if(ticket===S.serial){S.starting=false;updateEnabled();}}
+}
+async function resumeAudio(){
+ if(!S.stream||!S.ctx){status('Enable microphone first.',true);return;}
+ const ctx=S.ctx;
+ try{const resumed=ctx.resume();await Promise.race([resumed,new Promise(r=>setTimeout(r,1800))]);}catch(e){status('Resume failed: '+e.message,true);}
+ if(ctx.state==='running')status(S.samples>0?'Audio resumed and receiving microphone samples. You can Ping once.':'Audio running, waiting for microphone samples; if no samples arrive, tap Restart microphone.');
+ else status(`Audio still ${ctx.state}. iOS may have interrupted its audio engine. Close other audio apps, reload Safari and tap Enable microphone.`,true);
+ updateEnabled();
 }
 function stop(updateMessage=true){
+ ++S.serial;S.starting=false;
  if(S.auto){clearInterval(S.auto);S.auto=null;}$('autoBtn').textContent='↻ Auto scan';
  try{S.source?.disconnect();S.capture?.disconnect();S.silent?.disconnect();}catch{}
  try{S.stream?.getTracks().forEach(t=>t.stop());}catch{}
  try{S.ctx?.close();}catch{}
  if(S.workletBlob)try{URL.revokeObjectURL(S.workletBlob)}catch{}
- S.ctx=null;S.stream=null;S.source=null;S.capture=null;S.silent=null;S.workletBlob=null;S.chunks=[];S.busy=false;S.phase='idle';S.level=-100;
+ try{if(navigator.audioSession&&'type' in navigator.audioSession){navigator.audioSession.type='playback';navigator.audioSession.type='auto';}}catch{}
+ S.ctx=null;S.stream=null;S.source=null;S.capture=null;S.silent=null;S.workletBlob=null;S.chunks=[];S.busy=false;S.phase='idle';S.level=-100;S.samples=0;
  $('mic').textContent='—';updateEnabled();if(updateMessage)status('Audio stopped. Measurements remain visible until you clear the map.');
 }
 function assemble(first,last){
@@ -371,13 +425,13 @@ function wave(){const {ctx:c,w,h}=fit($('waveform'));c.clearRect(0,0,w,h);c.stro
 }
 function draw(){radar();plot();heat();wave();}
 $('healthBtn').onclick=()=>{const p=readiness();status(p.ok?'App controls loaded. Next: enable microphone, check live level, then Ping once.':'This viewer cannot run live sonar. Use the HTTPS Safari page.',!p.ok);};
-$('startBtn').onclick=start;$('stopBtn').onclick=()=>stop();$('pingBtn').onclick=()=>ping();$('autoBtn').onclick=auto;$('refBtn').onclick=calibrate;$('clearBtn').onclick=clearMap;$('toneBtn').onclick=speakerTest;$('orientationBtn').onclick=enableOrientation;$('saveBtn').onclick=exportScan;
+$('startBtn').onclick=start;$('retryBtn').onclick=resumeAudio;$('stopBtn').onclick=()=>stop();$('pingBtn').onclick=()=>ping();$('autoBtn').onclick=auto;$('refBtn').onclick=calibrate;$('clearBtn').onclick=clearMap;$('toneBtn').onclick=speakerTest;$('orientationBtn').onclick=enableOrientation;$('saveBtn').onclick=exportScan;
 $('checkBtn').onclick=()=>{const r=EchoDSP.syntheticTest();status(r.passed?`DSP self-check passed: a synthetic ${r.expectedMetres.toFixed(2)} m echo was recovered. This does NOT test iPhone speaker/microphone hardware.`:'DSP self-check failed; ranging math needs review.',!r.passed);};
 $('bearing').oninput=ev=>{S.orientation=false;$('orientationBtn').textContent='⌖ Use phone motion';setAngle(Number(ev.target.value));};
 $('volume').oninput=ev=>{$('volText').textContent=ev.target.value+'%';};
 $('repeat').onchange=()=>{if(S.auto){clearInterval(S.auto);S.auto=null;auto();}};
 window.addEventListener('pagehide',()=>{if(S.ctx)stop(false);});
-window.addEventListener('resize',draw);setInterval(()=>{if(document.visibilityState==='visible'){updateResults();draw();}},180);
+window.addEventListener('resize',draw);setInterval(()=>{if(document.visibilityState==='visible'){updateResults();draw();if(S.stream)updateEnabled();}},180);
 if(location.protocol!=='https:'&&location.hostname!=='localhost')$('technical').textContent='Local file or HTTP detected: actual microphone capture requires the HTTPS-hosted page in Safari.';
 readiness();updateEnabled();draw();
 if('serviceWorker' in navigator && location.protocol==='https:'){navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>{if(r.scope.includes('/echoform/'))r.unregister();})).catch(()=>{});}
