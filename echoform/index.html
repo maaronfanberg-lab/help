@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#08121b"><link rel="icon" type="image/svg+xml" href="icon.svg"><title>ECHOFORM · Real Acoustic Scanner</title>
+<style>
+:root{color-scheme:dark;--bg:#071018;--panel:#0e1c27;--panel2:#10212d;--line:#284354;--cyan:#5be8e4;--dim:#98b7c4;--amber:#ffc47b;--white:#ecfafb;--red:#ff857e}*{box-sizing:border-box}body{margin:0;background:radial-gradient(100% 60% at 50% 0%,#163240 0%,var(--bg) 65%) fixed;color:var(--white);font:15px/1.48 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input,select{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.45}.shell{max-width:1040px;margin:auto;padding:20px max(16px,env(safe-area-inset-right)) max(32px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}.top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:18px}.eyebrow{font-size:10px;letter-spacing:.25em;color:var(--cyan);font-weight:800}h1{font-size:clamp(31px,7vw,50px);font-weight:520;letter-spacing:-.055em;margin:1px 0;line-height:1}h1 b{font-weight:800}h2{font-size:13px;letter-spacing:.13em;font-weight:750;margin:0 0 9px;text-transform:uppercase;color:#c9e7ec}.subtitle{font-size:12px;color:var(--dim);margin-top:8px;max-width:500px}.pill{white-space:nowrap;border:1px solid var(--line);background:#10222e;border-radius:100px;padding:7px 10px;font-size:11px;color:#b5d0db;display:flex;align-items:center;gap:7px}.dot{height:7px;width:7px;background:#778995;border-radius:100%}.dot.online{background:var(--cyan);box-shadow:0 0 14px #5be8e460}.dot.error{background:var(--red)}.status{background:linear-gradient(90deg,#163441,#142632);border:1px solid #31566a;border-radius:13px;padding:12px 14px;color:#c9eaf2;font-size:12px;display:flex;gap:9px;align-items:flex-start;margin-bottom:12px}.status.error{border-color:#75474b;background:#342028;color:#ffd4d1}.actionbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}.btn{border:1px solid #436070;background:#17313f;color:#d6f4f6;border-radius:11px;padding:11px 13px;font-size:12px;font-weight:700;min-height:44px;transition:background .16s}.btn:active{background:#286075}.btn.primary{background:var(--cyan);border-color:var(--cyan);color:#052129}.btn.stop{color:#ffc7c3;border-color:#63494f}.btn.muted{background:transparent;color:#b0d1dc}.layout{display:grid;grid-template-columns:1.22fr .78fr;gap:12px}.panel{background:linear-gradient(145deg,#10222c,#0b1721);border:1px solid #26404f;border-radius:17px;padding:14px;min-width:0}.radarpanel{grid-row:span 2}.panelheader{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:5px}.tiny{font-size:10px;color:var(--dim)}.radarwrap{position:relative;width:100%;aspect-ratio:1;max-height:565px;max-width:565px;margin:auto}.radarwrap canvas{height:100%;width:100%;display:block}.overlay{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none;text-align:center}.overlay strong{font-size:11px;color:#a8dadd;font-weight:550}.radarlegend{display:flex;justify-content:space-between;font-size:11px;color:var(--dim);margin-top:8px}.statrow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:12px 0}.stat{border:1px solid var(--line);border-radius:12px;padding:11px;background:#0f202c;min-width:0}.stat .num{font-size:clamp(17px,3.9vw,25px);letter-spacing:-.045em;font-variant-numeric:tabular-nums;font-weight:650;color:var(--white);overflow:hidden;text-overflow:ellipsis}.stat .unit{font-size:11px;color:var(--dim)}.graph{width:100%;display:block;height:150px;border-radius:10px;background:#081822;border:1px solid #203a49}.graph.short{height:114px}.smallnote{font-size:11px;color:var(--dim);margin:9px 1px 0}.optiongroup{display:grid;grid-template-columns:1fr 1fr;gap:13px}.control{margin:12px 0}.control label{display:flex;justify-content:space-between;color:#c5dce1;font-size:12px;margin-bottom:7px}.control select{width:100%;padding:11px 8px;background:#0a1b25;color:#ecfaff;border:1px solid #385361;border-radius:9px}.control input[type=range]{width:100%;accent-color:var(--cyan)}.ref{color:var(--amber);font-size:11px}.echoes{margin-top:12px;font-variant-numeric:tabular-nums}.echo{display:flex;gap:9px;align-items:center;margin:7px 0;font-size:12px;color:#d1eaf0}.echobar{height:5px;background:linear-gradient(90deg,#2a8b96,var(--cyan));border-radius:10px;max-width:115px;min-width:3px}.footer{color:var(--dim);font-size:11px;line-height:1.6;margin-top:18px}.footer strong{color:#bdeaf0}.diagnostics{font:11px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;overflow-wrap:anywhere;color:#91aebc;background:#0a1821;border:1px solid #26404f;padding:10px;border-radius:9px;margin-top:11px;white-space:pre-line}details{margin-top:13px;color:#c6dce6}summary{cursor:pointer;font-size:12px}.readme{font-size:12px;color:#b1cbd6;padding-left:18px}a{color:var(--cyan)}@media(max-width:760px){.layout{display:block}.panel{margin-bottom:12px}.radarpanel{grid-row:auto}.statrow{grid-template-columns:repeat(4,1fr)}.top{margin-bottom:15px}.actionbar .btn{flex:1 1 auto}.radarwrap{max-height:none}.stat .num{font-size:19px}.optiongroup{grid-template-columns:1fr 1fr}}@media(max-width:380px){.statrow{grid-template-columns:repeat(2,1fr)}.btn{padding:9px}.shell{padding-left:12px;padding-right:12px}}
+</style></head><body><main class="shell">
+<header class="top"><div><div class="eyebrow">EXPERIMENTAL ACOUSTIC SENSING · v2</div><h1>ECHO<b>FORM</b><span style="color:var(--cyan)">◌</span></h1><div class="subtitle">A real echo scanner for the space around your phone. Sound out. Reflections back. No camera, no uploaded audio.</div></div><div class="pill"><span id="dot" class="dot"></span><span id="modeBadge">OFFLINE</span></div></header>
+<div class="status" id="status" role="status" aria-live="polite"><span>◉</span><span id="statusText">For real microphone scanning, open the HTTPS webpage in Safari. The downloaded file preview cannot run the sonar engine.</span></div>
+<div class="status" id="boot" role="status">Loading engine… If this remains unchanged, the file viewer blocked JavaScript. Open the hosted HTTPS version in Safari instead.</div>
+<div class="actionbar">
+<button id="healthBtn" class="btn muted">✓ Check app</button><button id="startBtn" class="btn primary">1 · Enable microphone</button><button id="pingBtn" class="btn" disabled>2 · Ping once</button><button id="autoBtn" class="btn" disabled>↻ Auto scan</button><button id="refBtn" class="btn" disabled>◈ Calibrate reference</button><button id="clearBtn" class="btn muted">⌫ Clear map</button><button id="stopBtn" class="btn stop" disabled>■ Stop audio</button>
+</div>
+<div class="statrow"><div class="stat"><div id="dist" class="num">—</div><div class="unit">Nearest candidate echo</div></div><div class="stat"><div id="echonum" class="num">0</div><div class="unit">Echo candidates</div></div><div class="stat"><div id="mic" class="num">—</div><div class="unit">Live mic level, dBFS</div></div><div class="stat"><div id="pings" class="num">0</div><div class="unit">Measured pings</div></div></div>
+<div class="layout"><section class="panel radarpanel"><div class="panelheader"><h2>Experimental spatial scan</h2><span class="tiny">0–8 m · estimated</span></div><div class="radarwrap"><canvas id="radar" aria-label="Radar style plot of measured echo delays by phone rotation"></canvas><div class="overlay" id="centerHint"><strong>NO MEASUREMENTS</strong></div></div><div class="radarlegend"><span>Distance = measured echo delay</span><span>Angle = phone orientation*</span></div><p class="smallnote">*Echo direction is <strong>not</strong> independently measured. This plot places reflections at the direction the phone was pointed when pinged. It is an exploratory acoustic sketch, not a verified floor plan.</p></section>
+<section class="panel"><div class="panelheader"><h2>Echo impulse profile</h2><span class="tiny" id="traceMeta">Waiting for ping</span></div><canvas class="graph" id="profile"></canvas><div class="radarlegend"><span>0 m</span><span>Relative reflected energy</span><span>8 m</span></div><div class="echoes" id="echoList"><span class="tiny">Echo candidates will appear after a successful recorded ping.</span></div></section>
+<section class="panel"><div class="panelheader"><h2>Echo history</h2><span class="tiny">real recordings only</span></div><canvas class="graph short" id="history"></canvas><div class="radarlegend"><span>Older ↑</span><span>Recent ↓</span></div><div class="panelheader" style="margin-top:14px"><h2>Microphone waveform</h2><span id="micState" class="tiny">mic off</span></div><canvas class="graph short" id="waveform"></canvas></section>
+<section class="panel"><div class="panelheader"><h2>Scan controls</h2><span class="tiny">built-in phone hardware</span></div><div class="control"><label for="band">Chirp frequency</label><select id="band"><option selected value="3000,7500">3–7.5 kHz · easier speaker output</option><option value="5000,11000">5–11 kHz · balanced</option><option value="8000,14500">8–14.5 kHz · high-pitched</option></select></div><div class="control"><label for="volume">Transmit level <span id="volText">8%</span></label><input id="volume" type="range" min="2" max="12" value="8" step="1"></div><div class="optiongroup"><div class="control"><label for="bearing">Scan angle <span id="angleText">0°</span></label><input id="bearing" type="range" min="0" max="359" value="0"></div><div class="control"><label for="repeat">Auto interval</label><select id="repeat"><option value="1800">1.8 seconds</option><option selected value="2600">2.6 seconds</option><option value="4000">4 seconds</option></select></div></div><div class="actionbar"><button class="btn" id="orientationBtn">⌖ Use phone motion</button><button class="btn muted" id="toneBtn">♪ Speaker test</button><button class="btn muted" id="checkBtn">✓ DSP self-check</button><button class="btn muted" id="saveBtn">↓ Export scan</button></div><p class="smallnote">Keep the iPhone stationary for a ping, then turn it slowly. Disconnect Bluetooth audio or headphones. Use moderate volume; don't point a high-pitched sound close to anyone's ears or sensitive animals.</p>
+<div id="diagnostics" class="diagnostics">Session: inactive
+Audio samples: 0
+Direct chirp timing: —
+DSP confidence: —</div><details><summary>How to scan & what this can actually show</summary><ol class="readme"><li>Open over HTTPS in Safari, and enable the microphone.</li><li>Disconnect headphones and use the iPhone's built-in speaker. Press Speaker test and check whether sound actually comes out.</li><li>Press Ping once. You should hear a short chirp, see the live input waveform and get a measured echo profile.</li><li>If chirp detection fails, try the 3–7.5 kHz band, face a wall, reduce room noise and ping again.</li><li>Calibrate reference to capture a comparison acoustic signature. This is not a geometry or hardware calibration.</li><li>Press Use phone motion or adjust the angle manually, and rotate the phone between pings. Radar dots show measured delays at your scanning angle, not independently known directions.</li><li>Export scan saves only local calculated data. No microphone recordings are sent to a server.</li></ol><p class="smallnote">Large soft objects absorb sound, multiple paths confuse ranging, and the direct speaker-to-mic path can hide close objects. Do not use this prototype for safety-critical navigation.</p></details></section></div>
+<footer class="footer"><strong>MEASUREMENT, NOT MAGIC.</strong> Uses real microphone capture and chirp matched filtering. A green mic status means capture is active, not that the range estimate is correct. Room reconstruction from one phone is fundamentally underdetermined. <span id="technical">iOS Safari: HTTPS + permission required.</span></footer>
+</main>
+<script>
+/* DSP inserted here during packaging */
+/* Echoform's self-contained signal processor. Does not require browser APIs. */
+const EchoDSP = (() => {
+  function fft(re, im, inverse=false) {
+    const n=re.length;
+    for(let i=1,j=0;i<n;i++){
+      let bit=n>>1;
+      for(;j&bit;bit>>=1)j^=bit;
+      j^=bit;
+      if(i<j){let t=re[i];re[i]=re[j];re[j]=t;t=im[i];im[i]=im[j];im[j]=t;}
+    }
+    for(let len=2;len<=n;len<<=1){
+      const a=(inverse?2:-2)*Math.PI/len, wR=Math.cos(a),wI=Math.sin(a);
+      for(let i=0;i<n;i+=len){let wr=1,wi=0;
+        for(let j=0;j<len/2;j++){
+          const u=i+j,v=u+len/2,vr=re[v]*wr-im[v]*wi,vi=re[v]*wi+im[v]*wr;
+          re[v]=re[u]-vr; im[v]=im[u]-vi; re[u]+=vr; im[u]+=vi;
+          const nr=wr*wR-wi*wI;wi=wr*wI+wi*wR;wr=nr;
+        }
+      }
+    }
+    if(inverse){for(let i=0;i<n;i++){re[i]/=n;im[i]/=n;}}
+  }
+  function correlate(signal,template){
+    if(signal.length<template.length)return new Float32Array(0);
+    let n=1;while(n<signal.length+template.length-1)n<<=1;
+    const a=new Float64Array(n),ai=new Float64Array(n),b=new Float64Array(n),bi=new Float64Array(n);
+    a.set(signal);b.set(template);fft(a,ai);fft(b,bi);
+    for(let i=0;i<n;i++){
+      const rr=a[i]*b[i]+ai[i]*bi[i],ii=ai[i]*b[i]-a[i]*bi[i];
+      a[i]=rr;ai[i]=ii;
+    }
+    fft(a,ai,true);
+    return Float32Array.from(a.subarray(0,signal.length-template.length+1));
+  }
+  function chirp(sampleRate, startHz=3400,endHz=9000,duration=.014) {
+    const n=Math.max(64,Math.round(duration*sampleRate)),x=new Float32Array(n);
+    for(let i=0;i<n;i++){
+      const t=i/sampleRate,T=n/sampleRate;
+      const ph=2*Math.PI*(startHz*t+(endHz-startHz)*t*t/(2*T));
+      const win=.5-.5*Math.cos(2*Math.PI*i/(n-1));
+      x[i]=Math.sin(ph)*win;
+    }
+    return x;
+  }
+  function median(a){if(!a.length)return 0;const s=[...a].sort((a,b)=>a-b);return s[Math.floor(s.length/2)];}
+  function extract(signal,template, sampleRate, expectedIndex){
+    const response=correlate(signal,template),n=response.length;
+    if(!n)return {ok:false,reason:'Not enough microphone samples',trace:[],echoes:[]};
+    const magnitude=new Float32Array(n);
+    for(let i=0;i<n;i++)magnitude[i]=Math.abs(response[i]);
+    // Envelope smoothing over ~0.16 ms reduces phase-sensitive oscillation but preserves echoes.
+    const win=Math.max(3,Math.round(sampleRate*.00016)|1), half=win>>1;
+    const prefix=new Float64Array(n+1);
+    for(let i=0;i<n;i++)prefix[i+1]=prefix[i]+magnitude[i];
+    const env=new Float32Array(n);
+    for(let i=0;i<n;i++){const lo=Math.max(0,i-half),hi=Math.min(n,i+half+1);env[i]=(prefix[hi]-prefix[lo])/(hi-lo);}
+    const noiseSamples=[];
+    for(let i=0;i<n;i+=Math.max(1,Math.round(sampleRate*.001))){
+      if(Math.abs(i-expectedIndex)>sampleRate*.10)noiseSamples.push(env[i]);
+    }
+    const noise=Math.max(median(noiseSamples),1e-9);
+    // The direct acoustic coupling should lie near the output time; actual input/output latency varies.
+    const min=Math.max(0,Math.round(expectedIndex-sampleRate*.045)),max=Math.min(n-1,Math.round(expectedIndex+sampleRate*.115));
+    let best=-1,bestValue=0;
+    for(let i=min;i<=max;i++)if(env[i]>bestValue){best=i;bestValue=env[i];}
+    const ratio=bestValue/noise;
+    // A strong correlation peak by itself is insufficient. An unrelated steady
+    // tone can produce false peaks; also require matched waveform coherence.
+    let coherence=0;
+    if(best>=0){
+      let templateEnergy=0;for(let i=0;i<template.length;i++)templateEnergy+=template[i]*template[i];
+      const squarePrefix=new Float64Array(signal.length+1);
+      for(let i=0;i<signal.length;i++)squarePrefix[i+1]=squarePrefix[i]+signal[i]*signal[i];
+      for(let i=Math.max(0,best-12);i<=Math.min(n-1,best+12);i++){
+        const signalEnergy=squarePrefix[i+template.length]-squarePrefix[i];
+        const score=Math.abs(response[i])/Math.sqrt(Math.max(1e-12,templateEnergy*signalEnergy));
+        if(score>coherence)coherence=score;
+      }
+    }
+    const ok=best>=0&&ratio>=5&&coherence>=.22&&bestValue>1e-6;
+    const echoes=[];
+    if(ok){
+      const from=best+Math.round(sampleRate*.0019);
+      const to=Math.min(n-3,best+Math.round(sampleRate*.048));
+      const threshold=Math.max(noise*5,bestValue*.038);
+      const candidates=[];
+      const separation=Math.max(3,Math.round(sampleRate*.0006));
+      for(let i=from;i<to;i++){
+        if(env[i]<threshold)continue;
+        if(env[i]<env[Math.max(0,i-separation)]||env[i]<env[Math.min(n-1,i+separation)])continue;
+        let peak=true;
+        for(let j=Math.max(from,i-separation);j<=Math.min(to,i+separation);j++)if(env[j]>env[i]){peak=false;break;}
+        if(peak){const delay=(i-best)/sampleRate, distance=343*delay/2;
+          candidates.push({distance,delayMs:delay*1000,power:env[i]/bestValue,score:env[i]/noise});
+        }
+      }
+      candidates.sort((a,b)=>b.power-a.power);
+      for(const c of candidates){
+        if(echoes.every(p=>Math.abs(p.distance-c.distance)>.28))echoes.push(c);
+        if(echoes.length>=8)break;
+      }
+      echoes.sort((a,b)=>a.distance-b.distance);
+    }
+    // Draw a bounded real trace over 0 to 8 metres, with 140 bins.
+    const trace=[];
+    for(let k=0;k<140;k++){
+      let maxAmp=0;
+      if(ok){
+        const minI=best+Math.round((k/140*8)*2/343*sampleRate);
+        const maxI=best+Math.round(((k+1)/140*8)*2/343*sampleRate);
+        for(let i=Math.max(0,minI);i<Math.min(maxI,n);i++)maxAmp=Math.max(maxAmp,env[i]);
+      }
+      trace.push(Math.min(1,maxAmp/(bestValue||1)));
+    }
+    return {ok,reason:ok?'Measured direct chirp':'Chirp not detected above microphone noise',
+      directMs:best>=0?(best-expectedIndex)/sampleRate*1000:null,
+      peakRatio:ratio,coherence,noise,echoes,trace,peak:bestValue};
+  }
+  function syntheticTest(){
+    const sr=24000,c=chirp(sr,2400,8000,.012),x=new Float32Array(sr*.22|0);
+    const start=2000,delay=Math.round(.014*sr);
+    for(let i=0;i<c.length;i++){
+      x[start+i]+=c[i]*.65;
+      x[start+delay+i]+=c[i]*.31;
+    }
+    const r=extract(x,c,sr,start),target=343*.014/2;
+    return {passed:r.ok&&r.echoes.some(e=>Math.abs(e.distance-target)<.25),expectedMetres:target,detectedMetres:r.echoes.map(e=>+e.distance.toFixed(2)),ratio:+r.peakRatio.toFixed(1)};
+  }
+  return {fft,correlate,chirp,extract,syntheticTest};
+})();
+if(typeof module!=='undefined')module.exports=EchoDSP;
+
+</script>
+<script>
+(()=>{'use strict';
+const $=(id)=>document.getElementById(id);
+const S={ctx:null,stream:null,source:null,capture:null,silent:null,chunks:[],lastFrame:0,samples:0,level:-100,raw:new Float32Array(1024),phase:'idle',pings:0,busy:false,auto:null,points:[],history:[],last:null,ref:null,orientation:false,orientationZero:null,heading:0,workletBlob:null,lastError:'',fallback:false};
+const SPEED=343,MAX_POINTS=700;
+function status(msg,error=false){$('statusText').textContent=msg;$('status').classList.toggle('error',error);S.lastError=error?msg:'';}
+function readiness(){const live=location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1';const embedded=window.self!==window.top;const mic=!!navigator.mediaDevices?.getUserMedia;const audio=!!(window.AudioContext||window.webkitAudioContext);const ok=live&&!embedded&&mic&&audio;const msg=ok?'✓ Engine loaded. Secure browser context; speaker and microphone APIs available. Tap Enable microphone.':'✕ Cannot scan here: '+(!live?'Requires an HTTPS web address. ': '')+(embedded?'Open in Safari, not an embedded preview. ':'')+(!mic?'Microphone API missing. ':'')+(!audio?'Web Audio unavailable. ':'');$('boot').textContent=msg;$('boot').classList.toggle('error',!ok);return {ok,live,embedded,mic,audio};}
+function updateEnabled(){const on=!!S.ctx; $('startBtn').disabled=on;$('pingBtn').disabled=!on;$('autoBtn').disabled=!on;$('refBtn').disabled=!on;$('stopBtn').disabled=!on;$('modeBadge').textContent=on?'MIC ACTIVE':'OFFLINE';$('dot').className='dot '+(on?'online':S.lastError?'error':'');$('micState').textContent=on?'live microphone':'mic off';}
+function chunk(frame,samples){
+ if(!S.ctx||!samples?.length)return;
+ S.chunks.push({frame, data:samples}); S.lastFrame=Math.max(S.lastFrame,frame+samples.length);S.samples+=samples.length;
+ const keep=frame-S.ctx.sampleRate*2.2;while(S.chunks.length && S.chunks[0].frame+S.chunks[0].data.length<keep)S.chunks.shift();
+ let rms=0;for(let i=0;i<samples.length;i++)rms+=samples[i]*samples[i];rms=Math.sqrt(rms/samples.length);
+ const dB=20*Math.log10(Math.max(rms,1e-5));S.level=S.level===-100?dB:S.level*.82+dB*.18;
+ S.raw=samples;$('mic').textContent=Math.round(S.level)+' dB';
+}
+async function start(){
+ if(!navigator.mediaDevices?.getUserMedia){status('Microphone unavailable. This file must be hosted on HTTPS, then opened in Safari. A local file or HTTP address may not have microphone access.',true);return;}
+ try{
+  // IMPORTANT for iOS: unlock the AudioContext synchronously in the original tap, BEFORE any await.
+  const AudioCtx=window.AudioContext||window.webkitAudioContext;
+  if(!AudioCtx)throw new Error('This browser does not support Web Audio.');
+  const ctx=new AudioCtx({latencyHint:'interactive'});
+  S.ctx=ctx;
+  const unlocked=ctx.resume();
+  // Safari can route "play-and-record" through the tiny phone receiver; start with automatic routing.
+  try{if(navigator.audioSession && 'type' in navigator.audioSession)navigator.audioSession.type='auto';}catch{}
+  status('Requesting microphone permission…');
+  const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false,channelCount:1},video:false});
+  S.stream=stream;
+  await unlocked;
+  if(ctx.state!=='running')await ctx.resume();
+  if(ctx.state!=='running')throw new Error('Audio playback is suspended. Tap Stop audio then Enable microphone again in Safari.');
+  S.source=ctx.createMediaStreamSource(stream);S.samples=0;S.chunks=[];S.lastFrame=0;
+  S.silent=ctx.createGain();S.silent.gain.value=0;S.silent.connect(ctx.destination);
+  let workletReady=false;
+  if(ctx.audioWorklet){
+   try{const worklet=`class EchoInput extends AudioWorkletProcessor {constructor(){super();this.data=new Float32Array(2048);this.i=0;this.frame=0;}process(inputs){const ch=inputs[0]&&inputs[0][0];if(ch){for(let j=0;j<ch.length;j++){if(this.i===0)this.frame=currentFrame+j;this.data[this.i++]=ch[j];if(this.i===2048){this.port.postMessage({frame:this.frame,buf:this.data},[this.data.buffer]);this.data=new Float32Array(2048);this.i=0;}}}return true;}} registerProcessor('echo-input',EchoInput);`;
+   S.workletBlob=URL.createObjectURL(new Blob([worklet],{type:'text/javascript'}));await ctx.audioWorklet.addModule(S.workletBlob);
+   S.capture=new AudioWorkletNode(ctx,'echo-input');S.capture.port.onmessage=ev=>{const m=ev.data;chunk(m.frame,m.buf);};
+   S.source.connect(S.capture);S.capture.connect(S.silent);S.fallback=false;workletReady=true;
+   }catch(workletError){console.warn('AudioWorklet unavailable, using fallback capture:',workletError);}
+  }
+  if(!workletReady){
+   const proc=ctx.createScriptProcessor(2048,1,1);proc.onaudioprocess=ev=>{
+     const x=ev.inputBuffer.getChannelData(0),samples=new Float32Array(x);
+     chunk(Math.round(ev.playbackTime*ctx.sampleRate),samples);
+   };
+   S.capture=proc;S.source.connect(proc);proc.connect(S.silent);S.fallback=true;
+  }
+  S.phase='active';updateEnabled();
+  stream.getAudioTracks().forEach(tr=>tr.onended=()=>{status('Microphone permission or audio route ended. Tap Stop audio and then Enable microphone.',true);stop();});
+  status('Microphone active. Tap Ping once to transmit a chirp and measure its echoes. Use the phone speaker, not headphones.');
+ }catch(e){status('Cannot start microphone: '+(e?.message||e)+'. Check Safari microphone permission and an HTTPS address.',true);stop(false);}
+}
+function stop(updateMessage=true){
+ if(S.auto){clearInterval(S.auto);S.auto=null;}$('autoBtn').textContent='↻ Auto scan';
+ try{S.source?.disconnect();S.capture?.disconnect();S.silent?.disconnect();}catch{}
+ try{S.stream?.getTracks().forEach(t=>t.stop());}catch{}
+ try{S.ctx?.close();}catch{}
+ if(S.workletBlob)try{URL.revokeObjectURL(S.workletBlob)}catch{}
+ S.ctx=null;S.stream=null;S.source=null;S.capture=null;S.silent=null;S.workletBlob=null;S.chunks=[];S.busy=false;S.phase='idle';S.level=-100;
+ $('mic').textContent='—';updateEnabled();if(updateMessage)status('Audio stopped. Measurements remain visible until you clear the map.');
+}
+function assemble(first,last){
+ const len=Math.max(1,last-first),a=new Float32Array(len);let overlap=0;
+ for(const c of S.chunks){
+  const lo=Math.max(first,c.frame),hi=Math.min(last,c.frame+c.data.length);
+  if(hi>lo){a.set(c.data.subarray(lo-c.frame,hi-c.frame),lo-first);overlap+=hi-lo;}
+ }
+ return {data:a,overlap};
+}
+function waitUntil(frame,limit=2100){
+ return new Promise((resolve,reject)=>{const start=performance.now();function check(){
+  if(!S.ctx)return reject(new Error('Audio stream stopped.'));
+  if(S.lastFrame>=frame)return resolve();
+  if(performance.now()-start>limit)return reject(new Error('Microphone capture stalled; try Stop audio and reopen it.'));
+  setTimeout(check,45);
+ }check();});
+}
+async function ping({reference=false,quiet=false}={}){
+ if(!S.ctx){status('Enable microphone before pinging.',true);return null;}
+ if(S.busy)return null;
+ S.busy=true;$('pingBtn').disabled=true;
+ try{
+  await S.ctx.resume();
+  const ctx=S.ctx,sr=ctx.sampleRate,[low,high]=$('band').value.split(',').map(Number),fHi=Math.min(high,sr*.44);
+  if(fHi<=low)throw new Error('Sample rate cannot generate this frequency band. Select a lower frequency band.');
+  const wave=EchoDSP.chirp(sr,low,fHi,.017),buffer=ctx.createBuffer(1,wave.length,sr),gain=ctx.createGain();
+  buffer.copyToChannel(wave,0);gain.gain.value=Number($('volume').value)/100;
+  const src=ctx.createBufferSource();src.buffer=buffer;src.connect(gain);gain.connect(ctx.destination);
+  const t0=ctx.currentTime+.12,frame=Math.round(t0*sr);
+  src.onended=()=>{try{src.disconnect();gain.disconnect();}catch{}};
+  src.start(t0);
+  if(!quiet)status('Ping transmitted. Capturing and analyzing real microphone samples…');
+  const first=frame-Math.round(sr*.055),last=frame+Math.round(sr*.28);
+  await waitUntil(last);
+  const rec=assemble(first,last);
+  if(rec.overlap<(last-first)*.85)throw new Error('Too few microphone samples were received during ping.');
+  // Signal processing runs on a completed actual microphone recording, not simulation.
+  const result=EchoDSP.extract(rec.data,wave,sr,frame-first);
+  const measuredAt=new Date().toISOString();result.time=measuredAt;result.angle=S.heading;result.band=[low,fHi];
+  S.last=result;S.pings++;$('pings').textContent=S.pings;
+  if(result.ok){
+   if(!reference){
+    S.history.push(result.trace);if(S.history.length>38)S.history.shift();
+    for(const e of result.echoes){S.points.push({r:e.distance,angle:S.heading,power:e.power,at:Date.now()});}
+    if(S.points.length>MAX_POINTS)S.points.splice(0,S.points.length-MAX_POINTS);
+   }
+   const nearest=result.echoes[0];$('dist').textContent=nearest?nearest.distance.toFixed(2)+' m':'—';
+   $('echonum').textContent=result.echoes.length;$('centerHint').style.display=S.points.length?'none':'block';
+   $('traceMeta').textContent='Measured · '+result.peakRatio.toFixed(1)+'× noise';
+   const refCompare=S.ref?` Reference profile exists for comparison.`:'';
+   if(!quiet)status(result.echoes.length?`Measured ${result.echoes.length} candidate reflection(s). Closest is ~${nearest.distance.toFixed(2)} m. Distance is approximate; angle is not measured independently.${refCompare}`:`Direct chirp detected (${result.peakRatio.toFixed(1)}× noise), but no distinct echoes passed the filter. Try pointing toward a large wall.`);
+  }else{
+   if(!quiet)status('Microphone recorded audio, but the transmitted chirp could not be identified reliably. Check speaker routing, increase level slightly, or choose 3–7.5 kHz.',true);
+   $('traceMeta').textContent='No reliable direct chirp';$('dist').textContent='—';$('echonum').textContent='0';
+  }
+  updateResults();return result;
+ }catch(e){status('Ping failed: '+(e?.message||e),true);return null;}
+ finally{S.busy=false;$('pingBtn').disabled=!S.ctx;}
+}
+async function calibrate(){
+ if(!S.ctx)return;const btn=$('refBtn');btn.disabled=true;let captures=[];
+ try{
+  status('Reference capture: keep the phone still for three real pings. This records an acoustic fingerprint, not a geometric calibration.');
+  for(let i=0;i<3;i++){
+   const r=await ping({reference:true,quiet:true});if(r?.ok)captures.push(r.trace);
+   if(i<2)await new Promise(resolve=>setTimeout(resolve,500));
+  }
+  if(!captures.length)throw new Error('Could not detect transmitted chirp in any reference ping.');
+  S.ref=Array.from({length:140},(_,i)=>captures.reduce((a,t)=>a+t[i],0)/captures.length);
+  status(`Captured reference acoustic fingerprint from ${captures.length} real ping(s). Echo profile now includes an amber reference line.`);
+ }catch(e){status('Reference capture failed: '+e.message,true)}
+ finally{btn.disabled=!S.ctx;}
+}
+function clearMap(){S.points=[];S.history=[];S.last=null;S.ref=null;S.pings=0;$('dist').textContent='—';$('echonum').textContent='0';$('pings').textContent='0';$('traceMeta').textContent='Waiting for ping';$('echoList').innerHTML='<span class="tiny">Echo candidates will appear after a successful recorded ping.</span>';$('centerHint').style.display='block';status('Map cleared. Live microphone remains '+(S.ctx?'active.':'off.'));}
+function auto(){
+ if(S.auto){clearInterval(S.auto);S.auto=null;$('autoBtn').textContent='↻ Auto scan';status('Automatic scanning stopped.');return;}
+ if(!S.ctx)return;
+ const ms=Number($('repeat').value);S.auto=setInterval(()=>{if(!S.busy && S.ctx)ping();},ms);
+ $('autoBtn').textContent='■ Stop auto';ping();
+}
+async function speakerTest(){
+ try{
+  let temporary=false,ctx=S.ctx;
+  if(!ctx){ctx=new (window.AudioContext||window.webkitAudioContext)();temporary=true;}
+  await ctx.resume();const o=ctx.createOscillator(),g=ctx.createGain();o.type='sine';o.frequency.value=880;
+  g.gain.setValueAtTime(.0001,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.07,ctx.currentTime+.02);g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+.18);
+  o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+.19);
+  if(temporary)setTimeout(()=>ctx.close(),300);
+  status('Speaker test triggered (880 Hz tone). If you heard nothing, check volume, silent mode, and output routing; Safari may use the earpiece when the microphone is on.');
+ }catch(e){status('Speaker test failed: '+e.message,true)}
+}
+function setAngle(a){S.heading=((Math.round(a)%360)+360)%360;$('bearing').value=S.heading;$('angleText').textContent=S.heading+'°';}
+async function enableOrientation(){
+ if(S.orientation){S.orientation=false;$('orientationBtn').textContent='⌖ Use phone motion';status('Phone motion tracking paused. Manual angle slider is active.');return;}
+ try{
+  if(typeof DeviceOrientationEvent==='undefined')throw new Error('This browser does not expose phone orientation. Use the angle slider.');
+  if(typeof DeviceOrientationEvent.requestPermission==='function'){
+   const permission=await DeviceOrientationEvent.requestPermission();if(permission!=='granted')throw new Error('Motion permission was not granted.');
+  }
+  S.orientationZero=null;S.orientation=true;$('orientationBtn').textContent='■ Stop motion';
+  status('Phone motion enabled. Orient the phone toward a surface and rotate slowly between pings. This is relative phone orientation, not echo arrival direction.');
+ }catch(e){status('Phone motion unavailable: '+e.message,true)}
+}
+window.addEventListener('deviceorientation',event=>{
+ if(!S.orientation)return;
+ const heading=(typeof event.webkitCompassHeading==='number')?event.webkitCompassHeading:(typeof event.alpha==='number'?360-event.alpha:null);
+ if(heading===null)return;
+ if(S.orientationZero===null)S.orientationZero=heading;
+ setAngle(heading-S.orientationZero);
+});
+function exportScan(){
+ const data={app:'Echoform',version:1,note:'Experimental relative echo delays; scan angle is phone orientation, not measured echo direction.',exportedAt:new Date().toISOString(),points:S.points.map(({r,angle,power,at})=>({rangeMeters:+r.toFixed(3),phoneAngleDeg:angle,relativePower:+power.toFixed(4),capturedAt:new Date(at).toISOString()})),recentProfile:S.last?.trace||[],referenceProfile:S.ref||[],pings:S.pings};
+ const u=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=u;a.download='echoform-scan-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);status('Exported locally recorded scan data as JSON. No microphone audio was uploaded.');
+}
+function updateResults(){
+ const r=S.last;
+ if(r?.ok){$('echoList').innerHTML=r.echoes.length?r.echoes.map(e=>`<div class="echo"><span style="min-width:61px;color:var(--cyan)">${e.distance.toFixed(2)} m</span><div class="echobar" style="width:${Math.max(4,Math.min(100,e.power*200))}%"></div><span style="margin-left:auto;color:#9ab7c4">${(e.power*100).toFixed(1)}%</span></div>`).join(''):'<span class="tiny">No distinct reflection peak crossed the detection threshold.</span>';
+ }else if(r){$('echoList').innerHTML='<span class="tiny">Direct chirp not reliably detected. No distances reported.</span>';}
+ $('diagnostics').textContent=`Session: ${S.ctx?(S.fallback?'ScriptProcessor fallback':'AudioWorklet capture'):'inactive'}\nAudio samples received: ${S.samples.toLocaleString()}\nSample rate: ${S.ctx?S.ctx.sampleRate+' Hz':'—'}\nDirect-path offset: ${r?.directMs!==undefined&&r.directMs!==null?r.directMs.toFixed(1)+' ms':'—'}\nDetection ratio: ${r?.peakRatio?r.peakRatio.toFixed(1)+'× median background':'—'}\nWaveform coherence: ${r?.coherence!==undefined?(r.coherence*100).toFixed(0)+'%':'—'}\nMotion: ${S.orientation?'relative orientation':'manual angle'}\nReference: ${S.ref?'saved acoustic fingerprint':'none'}`;
+}
+function fit(canvas){const box=canvas.getBoundingClientRect(),dpr=Math.min(2,window.devicePixelRatio||1),w=Math.max(1,Math.round(box.width*dpr)),h=Math.max(1,Math.round(box.height*dpr));if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}return {ctx:canvas.getContext('2d'),w,h,dpr};}
+function radar(){const {ctx:c,w,h}=fit($('radar'));c.clearRect(0,0,w,h);let cx=w/2,cy=h/2,R=Math.min(w,h)*.445;
+ const grad=c.createRadialGradient(cx,cy,0,cx,cy,R);grad.addColorStop(0,'#14333e');grad.addColorStop(1,'#071922');c.fillStyle=grad;c.beginPath();c.arc(cx,cy,R,0,Math.PI*2);c.fill();
+ for(let i=1;i<=4;i++){const r=R*i/4;c.strokeStyle=i===4?'#3e6977':'#254958';c.lineWidth=i===4?1.6:1;c.beginPath();c.arc(cx,cy,r,0,Math.PI*2);c.stroke();c.fillStyle='#708e9a';c.font=`${Math.max(9,w*.021)}px system-ui`;c.fillText((i*2)+' m',cx+7,cy-r+12);}
+ c.strokeStyle='#2a5661';c.lineWidth=1;for(let i=0;i<12;i++){let a=i*Math.PI/6;c.beginPath();c.moveTo(cx,cy);c.lineTo(cx+R*Math.sin(a),cy-R*Math.cos(a));c.stroke();}
+ const a=S.heading*Math.PI/180;
+ c.strokeStyle='#6cebd5';c.lineWidth=Math.max(1.5,w*.004);c.beginPath();c.moveTo(cx,cy);c.lineTo(cx+R*Math.sin(a),cy-R*Math.cos(a));c.stroke();
+ const now=Date.now();for(const p of S.points){const angle=p.angle*Math.PI/180;const rr=Math.min(R,p.r/8*R);const x=cx+rr*Math.sin(angle),y=cy-rr*Math.cos(angle);
+  const opacity=Math.max(.22,Math.min(.92,p.power*2+.2));c.fillStyle=`rgba(91,232,228,${opacity})`;c.beginPath();c.arc(x,y,Math.max(2.2,w*.005+Math.min(p.power,1)*w*.01),0,Math.PI*2);c.fill();
+ }
+ c.fillStyle='#e8faff';c.beginPath();c.arc(cx,cy,Math.max(3.5,w*.009),0,2*Math.PI);c.fill();
+}
+function plot(){const {ctx:c,w,h}=fit($('profile'));c.clearRect(0,0,w,h);c.strokeStyle='#254856';c.lineWidth=1;
+ for(let i=0;i<=4;i++){const x=i*w/4;c.beginPath();c.moveTo(x,0);c.lineTo(x,h);c.stroke();}
+ for(let i=1;i<4;i++){const y=i*h/4;c.beginPath();c.moveTo(0,y);c.lineTo(w,y);c.stroke();}
+ function line(arr,color,lineWidth){if(!arr)return;c.strokeStyle=color;c.lineWidth=lineWidth;c.beginPath();for(let i=0;i<arr.length;i++){let x=i/(arr.length-1)*w,y=h-8-Math.min(1,arr[i])*h*.84;if(i===0)c.moveTo(x,y);else c.lineTo(x,y);}c.stroke();}
+ line(S.ref,'#ffbd77',1.8);line(S.last?.ok?S.last.trace:null,'#55e7e5',2.1);
+}
+function heat(){const {ctx:c,w,h}=fit($('history'));c.clearRect(0,0,w,h);c.fillStyle='#081822';c.fillRect(0,0,w,h);
+ let lines=38;const cellH=h/lines;
+ for(let row=0;row<S.history.length;row++){const trace=S.history[row],y=h-(S.history.length-row)*cellH;
+  for(let i=0;i<trace.length;i++){const power=Math.min(1,Math.pow(trace[i],.55)*2.1);if(power<.045)continue;
+   c.fillStyle=`rgba(${Math.round(20+power*93)},${Math.round(77+power*157)},${Math.round(91+power*136)},${Math.min(1,power*.95)})`;
+   c.fillRect(i*w/140,y,Math.ceil(w/140)+1,cellH+.3);
+  }
+ }
+ for(let i=1;i<4;i++){c.strokeStyle='#2c435070';c.beginPath();c.moveTo(i*w/4,0);c.lineTo(i*w/4,h);c.stroke();}
+}
+function wave(){const {ctx:c,w,h}=fit($('waveform'));c.clearRect(0,0,w,h);c.strokeStyle='#294955';c.beginPath();c.moveTo(0,h/2);c.lineTo(w,h/2);c.stroke();
+ const x=S.raw;if(!S.ctx||!x.length)return;c.strokeStyle='#5ce8db';c.lineWidth=1.5;c.beginPath();let seen=false;for(let i=0;i<x.length;i+=2){let px=i/(x.length-1)*w,py=h/2-x[i]*h*.45;if(!seen){c.moveTo(px,py);seen=true;}else c.lineTo(px,py);}c.stroke();
+}
+function draw(){radar();plot();heat();wave();}
+$('healthBtn').onclick=()=>{const p=readiness();status(p.ok?'App controls loaded. Next: enable microphone, check live level, then Ping once.':'This viewer cannot run live sonar. Use the HTTPS Safari page.',!p.ok);};
+$('startBtn').onclick=start;$('stopBtn').onclick=()=>stop();$('pingBtn').onclick=()=>ping();$('autoBtn').onclick=auto;$('refBtn').onclick=calibrate;$('clearBtn').onclick=clearMap;$('toneBtn').onclick=speakerTest;$('orientationBtn').onclick=enableOrientation;$('saveBtn').onclick=exportScan;
+$('checkBtn').onclick=()=>{const r=EchoDSP.syntheticTest();status(r.passed?`DSP self-check passed: a synthetic ${r.expectedMetres.toFixed(2)} m echo was recovered. This does NOT test iPhone speaker/microphone hardware.`:'DSP self-check failed; ranging math needs review.',!r.passed);};
+$('bearing').oninput=ev=>{S.orientation=false;$('orientationBtn').textContent='⌖ Use phone motion';setAngle(Number(ev.target.value));};
+$('volume').oninput=ev=>{$('volText').textContent=ev.target.value+'%';};
+$('repeat').onchange=()=>{if(S.auto){clearInterval(S.auto);S.auto=null;auto();}};
+window.addEventListener('pagehide',()=>{if(S.ctx)stop(false);});
+window.addEventListener('resize',draw);setInterval(()=>{if(document.visibilityState==='visible'){updateResults();draw();}},180);
+if(location.protocol!=='https:'&&location.hostname!=='localhost')$('technical').textContent='Local file or HTTP detected: actual microphone capture requires the HTTPS-hosted page in Safari.';
+readiness();updateEnabled();draw();
+if('serviceWorker' in navigator && location.protocol==='https:'){navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>{if(r.scope.includes('/echoform/'))r.unregister();})).catch(()=>{});}
+})();
+</script></body></html>
