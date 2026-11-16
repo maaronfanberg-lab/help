@@ -1,20 +1,31 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/><meta name="theme-color" content="#050d14"/><title>THE MISSING PULSE | Research Instrument v2</title>
+<html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/><meta name="theme-color" content="#050d14"/><title>FRACTURE FIELD | Excitable Lattice Instrument</title>
 <style>
 :root{color-scheme:dark;--bg:#050c13;--panel:#0b1820;--edge:#25424d;--ink:#e6f7f5;--mid:#94b3b7;--mint:#77ead7;--amber:#ffd08e}*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font:13px/1.3 -apple-system,BlinkMacSystemFont,system-ui,Segoe UI,sans-serif}button,input,select{font:inherit}button{cursor:pointer;touch-action:manipulation}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #d9fffa;outline-offset:2px}#app{height:100dvh;display:flex;flex-direction:column;min-height:0}header{flex:none;min-height:51px;border-bottom:1px solid var(--edge);padding:7px 12px;display:flex;justify-content:space-between;align-items:center;gap:8px}h1{font-size:16px;letter-spacing:.1em;line-height:1.1;margin:2px 0}.eyebrow{font-size:9px;letter-spacing:.16em;color:#8caeb7;text-transform:uppercase}.stat{text-align:right;font-size:11px;color:var(--mid);font-variant-numeric:tabular-nums}.stat strong{color:var(--amber);font-size:12px;display:block}#viz{position:relative;flex:1;min-height:64px;overflow:hidden}#scope{width:100%;height:100%;display:block;touch-action:none}#hint{position:absolute;top:9px;left:12px;color:#bcd4d0;font-size:10px;pointer-events:none;opacity:.85;display:none}.toolbar{flex:none;border-top:1px solid var(--edge);background:var(--panel);padding:7px 9px max(7px,env(safe-area-inset-bottom));display:flex;gap:6px;align-items:center;flex-wrap:wrap}button{border:1px solid #375761;background:#10242b;color:var(--ink);border-radius:8px;padding:8px 10px;min-height:35px;font-size:12px;font-weight:600}button.primary{background:#9cecdf;color:#062127;border-color:#b6fff1}button.armed{border-color:#ffd08e;color:#ffd08e}button[disabled]{opacity:.55}.toolbar .grow{flex:1}.readout{font-size:10px;color:#9fc2c2;min-width:58px;text-align:right}#panel{height:0;flex:none;overflow:hidden;transition:height .15s ease;background:#08141c}#panel.open{height:min(55vh,440px);border-top:1px solid var(--edge)}#panelScroll{height:100%;overflow:auto;overscroll-behavior:contain;padding:10px 11px max(25px,env(safe-area-inset-bottom));scrollbar-color:#42636a transparent}.panelHeader{display:flex;align-items:center;justify-content:space-between;gap:8px;position:sticky;top:-10px;z-index:2;background:#08141cf2;padding:6px 2px 8px}.panelHeader strong{font-size:12px;letter-spacing:.1em}.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.group{padding:9px 0 11px;border-top:1px solid #25414c}.groupTitle{display:flex;justify-content:space-between;gap:8px;margin:0 0 9px;color:#a9c9cb;font-size:10px;text-transform:uppercase;letter-spacing:.12em}.sub{font-size:10px;color:#91a9af;text-transform:none;letter-spacing:0}.controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 16px}.control{min-width:0}.control label{font-size:11px;color:#d7f4f0;display:flex;align-items:baseline;justify-content:space-between;gap:4px;margin-bottom:5px}.control small{font-size:10px;color:#89a6a8;letter-spacing:0}.inline{display:flex;gap:5px;align-items:center}.inline input[type=range]{min-width:0;width:100%;accent-color:#7de8d6;height:28px}.inline input[type=number]{width:68px;min-width:58px;border:1px solid #38545a;background:#0c2028;color:#dff9f2;padding:5px 4px;border-radius:6px;font-variant-numeric:tabular-nums;font-size:11px}input[type=number]:invalid{border-color:#ef9f6a}.note{font-size:11px;line-height:1.45;color:#a9c0c0;margin:8px 0}.presets button{font-size:11px;padding:7px 8px}.presets button.active{color:#061d23;background:#eccb9f;border-color:#ffe2b7}.formula{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:10px;line-height:1.5;color:#b6d8d3;overflow-wrap:anywhere}.physicalGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.physicalGrid label{display:block;font-size:10px;color:#b4d1d0}.physicalGrid input{width:100%;margin-top:4px;background:#0c2028;color:#dff9f2;border:1px solid #38545a;padding:6px 5px;border-radius:5px}.banner{font-size:10px;color:#9bbebd;margin-top:7px}.good{color:#89eac8}.warn{color:#ffcb8c}a{color:#9cecdf}#divergence{display:none;position:absolute;inset:auto 10px 12px;z-index:1;background:#3a2417f2;border:1px solid #b98762;color:#ffdbbe;border-radius:8px;padding:10px;font-size:12px}
 @media(max-width:400px){.toolbar{gap:5px}button{padding:7px 9px;font-size:11px}.readout{min-width:45px}.physicalGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-height:420px){header{min-height:42px;padding-block:4px}#panel.open{height:49vh}.toolbar{padding-top:5px;padding-bottom:5px}button{min-height:31px;padding-block:6px}}
+
+#touchGuide{position:absolute;z-index:1;pointer-events:none;top:0;left:0;right:0;display:none}
+#playbar{display:flex;gap:7px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:7px 12px;flex:none;background:#091822;border-top:1px solid #1f4450}
+.perform{display:flex;gap:4px;flex:none}.perform button{min-height:32px;padding:6px 7px;font-size:10px;letter-spacing:.06em}.perform button.selected{background:#eac28c;color:#1f160b;border-color:#ffe8bb}.playmode{display:flex;gap:5px;flex:none}.playmode button{min-width:54px;background:#0b252c;padding:6px 8px;min-height:32px;font-size:10px;letter-spacing:.08em}.playmode button.selected{background:#b1e7dc;color:#082028;border-color:#befff0}
+.actionLevel{display:flex;gap:7px;align-items:center;color:#a7c8cc;letter-spacing:.08em;font-size:10px;flex:1;min-width:120px;max-width:280px}.actionLevel input{flex:1;min-width:55px;accent-color:#e8b677}.actionLevel output{min-width:30px;color:#edc18a;font-size:11px}
+#gestureStatus{font-size:10px;color:#eac28b;min-width:160px;text-align:right}
+#scope{cursor:crosshair;touch-action:none}
+#shock{background:#4d2f22;border-color:#a9774c;color:#ffe7c7}
+@media(max-width:600px){#gestureStatus{display:none}#playbar{gap:4px;padding:5px 8px}.actionLevel{max-width:none}.playmode button{min-width:42px;font-size:9px}.perform button{font-size:9px}.toolbar{gap:5px}#shock{font-size:11px}}
+@media(max-height:430px){header{min-height:36px}#playbar{padding-block:3px}.actionLevel input{height:24px}}
 </style></head><body><div id="app">
-<header><div><div class="eyebrow">Excitable lattice · Equation 8 · Live RK4</div><h1>THE MISSING PULSE <span style="font-size:10px;color:#85a6aa;font-weight:400">/ LAB 02</span></h1></div><div class="stat"><strong id="activity">READY</strong><span id="counts">IN 0 · OUT 0</span></div></header>
-<div id="viz"><canvas id="scope" aria-label="Live simulated displacement and velocities across a one-dimensional excitable mechanical lattice, including a scrolling space-time trace of pulses"></canvas><span id="hint">SOURCE 01 → SELECTED PICKUP</span><div id="divergence" role="alert">The chosen parameters produced unstable values. Press Reset or choose a paper preset.</div></div>
-<div class="toolbar"><button class="primary" id="play">▶ Start sound</button><button id="reset">↻ Reset</button><button id="mute">Sound on</button><button id="params" class="grow" aria-expanded="false">▤ Parameters (9+)</button><span class="readout" id="timestr">τ 0.0</span></div>
+<header><div><div class="eyebrow">Excitable lattice · Live physics · Touch to excite</div><h1>FRACTURE FIELD <span style="font-size:10px;color:#85a6aa;font-weight:400">/ LAB 03</span></h1></div><div class="stat"><strong id="activity">READY</strong><span id="counts">SOURCE 0 · EXIT 0</span></div></header>
+<div id="viz"><div id="touchGuide" aria-hidden="true"><b>TOUCH THE FIELD</b><span>Strike any mass. Drag to send a disturbance through the chain.</span></div><canvas id="scope" aria-label="Live simulated displacement and velocities across a one-dimensional excitable mechanical lattice, including a scrolling space-time trace of pulses"></canvas><span id="hint">SOURCE 01 → SELECTED PICKUP</span><div id="divergence" role="alert">The chosen parameters produced unstable values. Press Reset or choose a paper preset.</div></div>
+<div class="toolbar"><button class="primary" id="play">▶ Start sound</button><button id="shock" type="button" title="Inject a real velocity impulse into the first mass">⚡ Excite</button><button id="reset">↻ Reset</button><button id="mute">Sound on</button><button id="params" class="grow" aria-expanded="false">▤ ALL 29 VARIABLES</button><span class="readout" id="timestr">τ 0.0</span></div>
+<div id="playbar"><div class="perform" role="group" aria-label="Touch behavior"><button data-gesture="0" class="selected">STRIKE</button><button data-gesture="1">MORPH F·Ω</button></div><div class="playmode" role="group" aria-label="Sound character"><button type="button" data-timbre="0">SUB</button><button type="button" data-timbre="1" class="selected">GLASS</button><button type="button" data-timbre="2">METAL</button></div><label class="actionLevel" for="impact">IMPACT <input id="impact" type="range" min="0.2" max="3.2" value="1.5" step="0.05" aria-label="Finger strike velocity strength"><output id="impactOut">1.50</output></label><span id="gestureStatus" aria-live="polite">Physics is waiting for your touch</span></div>
 <section id="panel" aria-label="Research parameters"><div id="panelScroll"><div class="panelHeader"><strong>RESEARCH CONTROLS</strong><button id="closePanel">✕ Close</button></div>
 <div class="group"><div class="groupTitle"><span>Paper experiments · forcing presets</span><span class="sub" id="presetName">4¹ / Lost third spike</span></div><div class="row presets" id="presets"></div><p class="note">Presets reproduce parameters from the paper, not guaranteed identical trajectories or spike counts at every run length. Changes to any physics slider immediately enter the differential equations.</p></div>
 <div class="group"><div class="groupTitle"><span>Research views · computed, not decorative</span></div><div class="row presets" id="viewModes"></div></div>
 <div class="group"><div class="groupTitle"><span>All 9 governing model parameters</span><span class="sub">Eq. (8), Eq. (3)</span></div><div class="controls" id="physicsControls"></div></div>
 <div class="group"><div class="groupTitle"><span>Initial conditions · numerical experiment</span><span class="sub">applied on Reset</span></div><div class="controls" id="initialControls"></div><p class="note">Every unit starts at the calculated unforced equilibrium, with an optional displacement and velocity kick at the chosen unit. The paper's default initial state has no kick.</p></div>
-<div class="group"><div class="groupTitle"><span>Sound mapping · instrument design</span><span class="sub">not paper physics</span></div><div class="controls" id="soundControls"></div><p class="note">The first mass feeds the left voice and the pickup mass feeds the right. Both continuous amplitude and transient attacks derive from calculated velocity, never a prewritten rhythm. Stereo depends on your listening device.</p></div>
+<div class="group"><div class="groupTitle"><span>Sound mapping · instrument design</span><span class="sub">not paper physics</span></div><div class="controls" id="soundControls"></div><p class="note">A spatial voice bank follows multiple actual mass velocities. Strikes and decays follow physical spikes, not a sequenced rhythm. SUB, GLASS and METAL select sonification spectra, not different equations. Stereo spread depends on your device.</p></div>
 <div class="group"><div class="groupTitle"><span>Dimensional physical parameters</span><span class="sub">Eq. (1) → Eq. (8)</span></div><div class="physicalGrid" id="dimensional"></div><div class="row" style="margin-top:10px"><button id="applyPhysical">Apply physical values to model</button><button id="syncPhysical">Match current dimensionless values</button></div><p class="note">Set m, k, k<sub>c</sub>, V<sub>p</sub>, f<sub>e</sub>, ω, f<sub>0</sub>, v<sub>0</sub>. They convert to the five dimensionless mechanical controls; they are <b>not</b> extra independent parameters in Eq. (8).</p><div class="formula" id="derived"></div><div class="banner" id="physicalStatus">Physical values initially match the paper's dimensionless defaults using normalized scales.</div></div>
-<div class="group"><div class="groupTitle">Exact model and source</div><div class="formula">u′ⱼ = vⱼ<br/>γv′ⱼ = −uⱼ + β(uⱼ₊₁ − 2uⱼ + uⱼ₋₁) − Φ(vⱼ − vₚ) + δⱼ₁Fsin(Ωτ + phase)<br/>Φ(w) = a w|w|² − b w|w| + c w<br/>Free ends: boundary neighbors reflect the endpoint.</div><p class="note">The phase parameter and sonic settings are instrument extensions; the paper uses zero phase. The cubic friction coefficients a,b,c are exposed independently. Numerical time step is user-selectable; small steps are more reliable. <a href="https://arxiv.org/html/2611.17535v1" target="_blank" rel="noopener">Read Prabith et al. (2026)</a>.</p><div class="row"><button id="restore">Restore paper defaults</button><button id="export">Export settings</button></div><div class="banner" id="diagnostic" aria-live="polite">Numerical simulation not yet device-verified.</div></div>
+<div class="group"><div class="groupTitle">Exact model and source</div><div class="formula">u′ⱼ = vⱼ<br/>γv′ⱼ = −uⱼ + β(uⱼ₊₁ − 2uⱼ + uⱼ₋₁) − Φ(vⱼ − vₚ) + δⱼ₁Fsin(Ωτ + phase)<br/>Φ(w) = a w|w|² − b w|w| + c w<br/>Free ends: boundary neighbors reflect the endpoint.</div><p class="note">Finger strikes apply local instantaneous velocity perturbations, not additional terms in the published model. The phase parameter and sonic settings are instrument extensions; the paper uses zero phase. The cubic friction coefficients a,b,c are exposed independently. Numerical time step is user-selectable; small steps are more reliable. <a href="https://arxiv.org/html/2611.17535v1" target="_blank" rel="noopener">Read Prabith et al. (2026)</a>.</p><div class="row"><button id="restore">Restore paper defaults</button><button id="export">Export settings</button></div><div class="banner" id="diagnostic" aria-live="polite">Physical equation integrated with RK4; phone speaker output may differ from headphones.</div></div>
 </div></section></div><script>
 'use strict';
 // Physical model: Prabith et al. (2026), arXiv:2611.17535 Eq. (8) and friction Eq. (3).
@@ -27,6 +38,8 @@ const p={};for(const s of [...specs,...initialSpecs,...soundSpecs])p[s[0]]=s[2];
 const presets=[{name:'4¹ · Missing beat',F:.17,omega:1.4,desc:'Close spikes suppress third event'},{name:'2¹ · Sparse',F:.15,omega:1.4,desc:'Two large spikes and one small'},{name:'1¹ · Passing',F:.2,omega:2,desc:'Large pulses travel'},{name:'1² · Filter',F:.1,omega:3,desc:'Small oscillations vanish'},{name:'Aperiodic',F:.12,omega:5,desc:'Irregular excitation'},{name:'Composite',F:.4,omega:4.2,desc:'Interleaved patterns'}];
 const $=id=>document.getElementById(id),clamp=(x,a,b)=>Math.min(b,Math.max(a,x));
 let panelOpen=false,activePreset=0,running=false,muted=false,warming=false,dead=false;
+let timbreMode=1,impact=1.5,selectedUnit=0,pointerLast=-1,pointerY=0,pointerDown=false,gestureMode=0;
+let voiceBank=[], touchMarks=[], queuedKicks=[], allSpikePrev=new Float32Array(0), allEventAt=new Float32Array(0);
 let audio=null,master=null,voices=[],audioReady=false,lastRAF=0,rafId=0;
 let u=new Float64Array(0),v=new Float64Array(0),states=[],rk=[],t=0,stepCounter=0,history=[],historyU=[],events=[[],[]],spikePrev=[0,0],eventAt=[-99,-99];
 let viewMode=0;const viewNames=["Flow · space-time","Phase portrait","Friction law"];
@@ -53,7 +66,7 @@ function setParam(key,value,source='ui') {if(!Number.isFinite(value))return;
 function renderPresets(){const node=$('presets');node.innerHTML='';presets.forEach((q,i)=>{const b=document.createElement('button');b.textContent=q.name;b.title=q.desc;if(i===activePreset)b.classList.add('active');b.addEventListener('click',()=>selectPreset(i));node.appendChild(b);});$('presetName').textContent=activePreset>=0?presets[activePreset].desc:'Custom physics';}
 function selectPreset(i){activePreset=i;const q=presets[i];for(const s of specs){p[s[0]]=s[2];updateControl(s[0]);}p.F=q.F;p.omega=q.omega;updateControl('F');updateControl('omega');p.initUnit=1;p.kickU=0;p.kickV=0;p.phase=0;p.N=20;p.pickup=20;for(const k of ['initUnit','kickU','kickV','phase','N','pickup'])updateControl(k);renderPresets();resetSim();warm();}
 renderPresets();
-$('params').addEventListener('click',()=>setPanel(!panelOpen));$('closePanel').addEventListener('click',()=>setPanel(false));function setPanel(on){panelOpen=on;$('panel').classList.toggle('open',on);$('params').setAttribute('aria-expanded',String(on));$('params').textContent=on?'▤ Hide parameters':'▤ Parameters (9+)';setTimeout(resize,165);}
+$('params').addEventListener('click',()=>setPanel(!panelOpen));$('closePanel').addEventListener('click',()=>setPanel(false));function setPanel(on){panelOpen=on;$('panel').classList.toggle('open',on);$('params').setAttribute('aria-expanded',String(on));$('params').textContent=on?'▤ Hide parameters':'▤ ALL 29 VARIABLES';setTimeout(resize,165);}
 const physical=[['m','Mass m',.15],['k','Beam k',1],['kc','Coupling kᶜ',.2],['Vp','Plate Vₚ',1.05],['fe','Force fₑ',.17],['freq','Frequency ω',1.4],['f0','Scale f₀',1],['v0','Scale v₀',1]];
 for(const [key,label,def] of physical){let d=document.createElement('label');d.textContent=label;d.innerHTML+=`<input id="phys-${key}" type="number" min="0.00001" max="10000" step="any" value="${def}" aria-label="${label}">`;$('dimensional').appendChild(d);}
 function getPhysical(){const vals={};for(const [k]of physical)vals[k]=+$('phys-'+k).value;return vals;}
@@ -64,8 +77,8 @@ $('applyPhysical').addEventListener('click',()=>{const q=getPhysical();if(Object
 if(limited.length){$('physicalStatus').textContent=`Outside slider range: ${limited.join(', ')}. Adjust values; no changes applied.`;return;}for(const [k,val]of Object.entries(d)){p[k]=val;updateControl(k);}activePreset=-1;renderPresets();resetSim();$('physicalStatus').textContent='Physical values applied. Lattice recomputed from derived dimensionless parameters.';});
 $('syncPhysical').addEventListener('click',()=>{const k=1,f0=1,v0=1;let q={m:p.gamma,k,kc:p.beta,Vp:p.vp,fe:p.F,freq:p.omega,f0,v0};for(const [key]of physical)$('phys-'+key).value=q[key];updateDerived();$('physicalStatus').textContent='Normalized physical reference now matches current dimensionless parameters.';});updateDerived();
 function friction(x){const z=Math.abs(x);return x*(p.a*z*z-p.b*z+p.c);}
-function resetSim(){++warmToken;warming=false;dead=false;$('divergence').style.display='none';const n=p.N;u=new Float64Array(n);v=new Float64Array(n);const eq=-friction(-p.vp);u.fill(eq);u[p.initUnit-1]+=p.kickU;v[p.initUnit-1]+=p.kickV;states=Array.from({length:4},()=>new Float64Array(n));rk=Array.from({length:4},()=>[new Float64Array(n),new Float64Array(n)]);t=0;stepCounter=0;events=[[],[]];eventAt=[-99,-99];spikePrev=[0,0];history=[];historyU=[];
- $('counts').textContent='IN 0 · OUT 0';$('activity').textContent='SIMULATING';$('diagnostic').textContent='Live deterministic RK4. Sliders change governing equations.';render();}
+function resetSim(){++warmToken;warming=false;dead=false;$('divergence').style.display='none';const n=p.N;u=new Float64Array(n);v=new Float64Array(n);const eq=-friction(-p.vp);u.fill(eq);u[p.initUnit-1]+=p.kickU;v[p.initUnit-1]+=p.kickV;states=Array.from({length:4},()=>new Float64Array(n));rk=Array.from({length:4},()=>[new Float64Array(n),new Float64Array(n)]);t=0;stepCounter=0;events=[[],[]];eventAt=[-99,-99];spikePrev=[0,0];history=[];historyU=[];queuedKicks=[];allSpikePrev=new Float32Array(n);allEventAt=new Float32Array(n);allEventAt.fill(-100);touchMarks=[];
+ $('counts').textContent='SOURCE 0 · EXIT 0';$('activity').textContent='SIMULATING';$('diagnostic').textContent='Live deterministic RK4. Sliders change governing equations.';render();}
 function deriv(U,V,T,out){const DU=out[0],DV=out[1],n=p.N,beta=p.beta,force=p.F*Math.sin(p.omega*T+p.phase),gamma=p.gamma;
 for(let i=0;i<n;i++){let left=i>0?U[i-1]:U[i],right=i<n-1?U[i+1]:U[i];DU[i]=V[i];DV[i]=(-U[i]+beta*(left+right-2*U[i])-friction(V[i]-p.vp)+(i===0?force:0))/gamma;}}
 // Explicit RK4; all derivatives are recomputed using the same current physical parameters.
@@ -76,23 +89,50 @@ for(let j=0;j<n;j++){u[j]+=h*(k1[0][j]+2*k2[0][j]+2*k3[0][j]+k4[0][j])/6;v[j]+=h
 t+=h;stepCounter++;if(stepCounter%20===0){for(let j=0;j<n;j++)if(!Number.isFinite(u[j])||!Number.isFinite(v[j])||Math.abs(u[j])>100||Math.abs(v[j])>100){dead=true;running=false;$('divergence').style.display='block';$('activity').textContent='UNSTABLE';$('play').textContent='▶ Restart sound';return;}}
 }
 function sample(){history.push(Float32Array.from(v));historyU.push(Float32Array.from(u));if(history.length>180)history.shift();if(historyU.length>180)historyU.shift();}
-function checkEvents(audible){const ids=[0,p.pickup-1];for(let ch=0;ch<2;ch++){const val=v[ids[ch]];if(val>p.threshold&&spikePrev[ch]<=p.threshold&&t-eventAt[ch]>.7){eventAt[ch]=t;events[ch].push(t);if(events[ch].length>60)events[ch].shift();if(audible)hit(ch,val);}spikePrev[ch]=val;}}
+function checkEvents(audible){
+const ids=[0,p.pickup-1];for(let ch=0;ch<2;ch++){const val=v[ids[ch]];if(val>p.threshold&&spikePrev[ch]<=p.threshold&&t-eventAt[ch]>.7){eventAt[ch]=t;events[ch].push(t);if(events[ch].length>80)events[ch].shift();}spikePrev[ch]=val;}
+for(let j=0;j<p.N;j++){const value=v[j];if(value>p.threshold&&allSpikePrev[j]<=p.threshold&&t-allEventAt[j]>.7){allEventAt[j]=t;if(audible&&running&&!warming)burstAt(j,value);}allSpikePrev[j]=value;}
+}
 function advance(amount,audible){let steps=Math.min(2400,Math.max(1,Math.round(amount/p.dt)));for(let k=0;k<steps&&!dead;k++){integrate();if(k%Math.max(1,Math.round(.14/p.dt))===0)sample();checkEvents(audible);}return steps*p.dt;}
 let warmToken=0;
 function warm(){const token=++warmToken;warming=true;const from=t,target=300;
 function part(){if(token!==warmToken)return;let loop=0;while(t<target&&!dead&&loop<900){integrate();if(stepCounter%Math.max(1,Math.round(.14/p.dt))===0)sample();loop++;}
 $('activity').textContent=dead?'UNSTABLE':`PREPARING ${Math.min(100,Math.round(t/target*100))}%`;
-render();if(dead){warming=false;return;}if(t<target)setTimeout(part,0);else{warming=false;events=[[],[]];eventAt=[-99,-99];spikePrev=[v[0],v[p.pickup-1]];$('activity').textContent=running?'LIVE':'READY';lastRAF=0;}}setTimeout(part,0);}
+render();if(dead){warming=false;return;}if(t<target)setTimeout(part,0);else{warming=false;events=[[],[]];eventAt=[-99,-99];spikePrev=[v[0],v[p.pickup-1]];$('activity').textContent=running?'LIVE':'READY';lastRAF=0;for(let j=0;j<p.N;j++)allSpikePrev[j]=v[j];for(const [j,force] of queuedKicks.splice(0))kick(j,force);}}setTimeout(part,0);}
+function kick(j,amount){
+ if(dead)return;
+ const idx=clamp(Math.round(j),0,p.N-1),dv=clamp(amount,-3.5,3.5);
+ if(warming){queuedKicks.push([idx,dv]);return;}
+ v[idx]+=dv;selectedUnit=idx;touchMarks.push({index:idx,amplitude:Math.abs(dv),birth:performance.now()});if(touchMarks.length>36)touchMarks.shift();
+ $('gestureStatus').textContent=`MASS ${String(idx+1).padStart(2,'0')} · Δv ${dv>=0?'+':''}${dv.toFixed(2)}`;
+ // Apply the velocity impulse immediately. Subsequent propagation is entirely from Eq. (8).
+ checkEvents(true);updateAudio();render();
+}
+function beginSound(){if(!audio&&!initAudio())return;audio.resume().then(()=>{audioReady=audio.state==='running';if(master){master.gain.setTargetAtTime((muted||!running)?0:p.gain,audio.currentTime,.025);}}).catch(()=>{$('activity').textContent='VISUAL ONLY'});}
+function wake(){if(!running){running=true;lastRAF=0;$('play').textContent='Ⅱ Pause';$('activity').textContent='LIVE';}beginSound();}
+const tapSpace=(clientX,clientY)=>{const rect=canvas.getBoundingClientRect();const relX=clamp((clientX-rect.left)/Math.max(1,rect.width),0,1);const relY=clamp((clientY-rect.top)/Math.max(1,rect.height),0,1);const j=Math.round(relX*(p.N-1));const dyn=(relY<.35?1.25:relY>.85?.75:1);return {j,dv:impact*dyn};};
+function morph(clientX,clientY){const rect=canvas.getBoundingClientRect();const x=clamp((clientX-rect.left)/Math.max(1,rect.width),0,1);const y=clamp((clientY-rect.top)/Math.max(1,rect.height),0,1);p.omega=Math.round((.4+6.1*x)*100)/100;p.F=Math.round((.055+.5*(1-y))*1000)/1000;updateControl('omega');updateControl('F');activePreset=-1;renderPresets();$('gestureStatus').textContent=`Ω ${p.omega.toFixed(2)} · F ${p.F.toFixed(3)}`;$('counts').textContent=`Ω ${p.omega.toFixed(2)} · F ${p.F.toFixed(3)}`;}
+canvas.addEventListener('pointerdown',e=>{if(e.button!==0&&e.pointerType==='mouse')return;e.preventDefault();canvas.setPointerCapture(e.pointerId);pointerDown=true;pointerLast=-1;wake();if(gestureMode===1){morph(e.clientX,e.clientY);return;}const q=tapSpace(e.clientX,e.clientY);pointerLast=q.j;kick(q.j,q.dv);});
+canvas.addEventListener('pointermove',e=>{if(!pointerDown)return;e.preventDefault();if(gestureMode===1){morph(e.clientX,e.clientY);return;}const q=tapSpace(e.clientX,e.clientY);if(q.j!==pointerLast){const previous=pointerLast,span=q.j-previous;const limit=Math.min(12,Math.abs(span));for(let n=1;n<=limit;n++){const j=Math.round(previous+span*n/limit);kick(j,q.dv*.52);}pointerLast=q.j;}});
+const stopPointer=()=>{pointerDown=false;pointerLast=-1;};canvas.addEventListener('pointerup',stopPointer);canvas.addEventListener('pointercancel',stopPointer);canvas.addEventListener('lostpointercapture',stopPointer);
+$('shock').addEventListener('click',()=>{wake();kick(0,impact*1.25);});
+$('impact').addEventListener('input',()=>{impact=+$('impact').value;$('impactOut').textContent=impact.toFixed(2);});
+document.querySelectorAll('[data-gesture]').forEach(b=>b.addEventListener('click',()=>{gestureMode=+b.dataset.gesture;document.querySelectorAll('[data-gesture]').forEach(el=>el.classList.toggle('selected',el===b));$('gestureStatus').textContent=gestureMode?'DRAG TO SWEEP F AND Ω':'DRAG TO STRIKE MASSES';render();}));
+document.querySelectorAll('[data-timbre]').forEach(b=>b.addEventListener('click',()=>{timbreMode=+b.dataset.timbre;document.querySelectorAll('[data-timbre]').forEach(el=>el.classList.toggle('selected',el===b));updateAudio();}));
 function frame(ms){rafId=requestAnimationFrame(frame);if(!running||warming||dead){lastRAF=ms;return;}const dtms=lastRAF?Math.min(60,ms-lastRAF):16;lastRAF=ms;
 let delta=dtms*.001*p.simSpeed;if(delta>0){advance(delta,true);updateAudio();}render();}
 function resize(){const r=$('viz').getBoundingClientRect();W=Math.max(1,Math.round(r.width));H=Math.max(1,Math.round(r.height));dpr=Math.min(2,window.devicePixelRatio||1);canvas.width=Math.max(1,Math.round(W*dpr));canvas.height=Math.max(1,Math.round(H*dpr));ctx.setTransform(dpr,0,0,dpr,0,0);render();}
 new ResizeObserver(resize).observe($('viz'));
 function txt(s,x,y,clr='#b9d2d0',size=10,align='left'){ctx.textAlign=align;ctx.fillStyle=clr;ctx.font=`${size}px system-ui,-apple-system,sans-serif`;ctx.fillText(s,x,y);}
 function line(x1,y1,x2,y2,c,wid=1){ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.strokeStyle=c;ctx.lineWidth=wid;ctx.stroke();}
-function render(){if(!W||!H)return;ctx.fillStyle='#050d14';ctx.fillRect(0,0,W,H);const L=26,R=W-11,ww=R-L;const compact=H<160;const upper=compact?37:61;const base=compact?23:40;const xx=j=>L+ww*(p.N===1?.5:j/(p.N-1));
+function render(){if(!W||!H)return;ctx.fillStyle='#050d14';ctx.fillRect(0,0,W,H);const L=26,R=W-11,ww=R-L;const compact=H<160;const upper=compact?36:96;const base=compact?21:52;const xx=j=>L+ww*(p.N===1?.5:j/(p.N-1));
 // Calculated displacement only: no decorative particles or invented trajectories.
-line(L,base,R,base,'#28515a',1);const eq=-friction(-p.vp);for(let j=0;j<p.N;j++){const diff=u[j]-eq;const dy=clamp(diff*.23,-15,15);const py=base-dy;const lit=clamp((Math.max(0,v[j])-.05)/.8,0,1);if(p.N<65){line(xx(j),base,xx(j),py,'#336f72',1);ctx.beginPath();ctx.arc(xx(j),py,Math.max(1.3,Math.min(4,ww/(2*p.N)))+lit*2,0,Math.PI*2);ctx.fillStyle=`rgba(125,238,222,${(.2+.8*lit).toFixed(2)})`;ctx.fill();}else{ctx.fillStyle=`rgba(122,234,216,${(.15+.8*lit).toFixed(2)})`;ctx.fillRect(xx(j)-1,py,2,2);}}
-if(!compact){txt(`U₁ ${u[0].toFixed(2)}   V₁ ${v[0].toFixed(2)}`,L,14,'#90b7b3',10);txt(`U${p.pickup} ${u[p.pickup-1].toFixed(2)}   V${p.pickup} ${v[p.pickup-1].toFixed(2)}`,R,14,'#edc28c',10,'right');}
+line(L,base,R,base,'#28515a',1);const eq=-friction(-p.vp);for(let j=0;j<p.N;j++){const diff=u[j]-eq;const dy=clamp(diff*7.4,-22,22);const py=base-dy;const lit=clamp((Math.max(0,v[j])-.025)/.83,0,1);if(p.N<65){line(xx(j),base,xx(j),py,'#336f72',1);ctx.beginPath();ctx.arc(xx(j),py,Math.max(1.3,Math.min(4,ww/(2*p.N)))+lit*2,0,Math.PI*2);ctx.fillStyle=`rgba(125,238,222,${(.2+.8*lit).toFixed(2)})`;ctx.fill();}else{ctx.fillStyle=`rgba(122,234,216,${(.15+.8*lit).toFixed(2)})`;ctx.fillRect(xx(j)-1,py,2,2);}}
+if(!compact){txt(`DRIVE · v₁ ${v[0].toFixed(2)}`,L,16,'#90b7b3',11);txt(`PICKUP ${p.pickup} · v ${v[p.pickup-1].toFixed(2)}`,R,16,'#edc28c',11,'right');
+ txt(gestureMode?'DRAG TO CHANGE Ω AND F':'TOUCH OR DRAG THE MASSES',L,76,'#759ba3',9);if(gestureMode)txt(`Ω ${p.omega.toFixed(2)}   F ${p.F.toFixed(3)}`,R,76,'#ecc28b',10,'right');}
+ for(const mark of touchMarks.slice(-8)){const age=(performance.now()-mark.birth)/1000;if(age>1.3)continue;const mx=xx(mark.index),radius=3+Math.min(20,age*22*Math.min(1.25,mark.amplitude));ctx.beginPath();ctx.arc(mx,base-clamp((u[mark.index]+friction(-p.vp))*7.4,-22,22),radius,0,Math.PI*2);ctx.strokeStyle=`rgba(255,209,137,${(.54*Math.pow(1-age/1.3,1.5)).toFixed(3)})`;ctx.lineWidth=1.5;ctx.stroke();}
+ if(touchMarks.length)touchMarks=touchMarks.filter(mark=>performance.now()-mark.birth<1400);
+
 const ytop=upper,ybot=Math.max(upper+10,H-(compact?18:46)),hh=ybot-ytop;
 if(viewMode===1){
  const index=p.pickup-1;
@@ -115,21 +155,71 @@ if(viewMode===1){
  const current=v[p.pickup-1]-p.vp;ctx.beginPath();ctx.arc(toX(clamp(current,left,right)),toY(friction(current)),4.5,0,Math.PI*2);ctx.fillStyle='#ffd08e';ctx.fill();
  txt('NONMONOTONIC FRICTION · Φ(v − vₚ)',L,ytop-5,'#b6d9d4',10);txt('RELATIVE VELOCITY →',R,ybot+12,'#90b4b6',9,'right');
  }
-if(viewMode!==0){$('counts').textContent=`IN ${events[0].length} · OUT ${events[1].length}`;$('timestr').textContent='τ '+t.toFixed(1);return;}
+if(viewMode!==0){$('counts').textContent=`SOURCE ${events[0].length} · EXIT ${events[1].length}`;$('timestr').textContent='τ '+t.toFixed(1);return;}
 
 // Actual velocity samples arranged as a time vs unit waterfall; clipping emphasizes pulse threshold.
-const rows=history.length,ny=Math.min(rows,170);if(rows){const hrow=hh/ny;for(let row=0;row<ny;row++){const rec=history[Math.floor(row/ny*rows)];const y=ybot-(row+1)*hrow;for(let j=0;j<p.N;j++){const q=rec[j];const mag=clamp((q+.10)/.97,0,1);if(mag<.018)continue;const red=Math.round(26+100*mag),green=Math.round(67+165*mag),blue=Math.round(80+133*mag);const alpha=Math.max(.04,Math.pow(mag,1.5));ctx.fillStyle=`rgba(${red},${green},${blue},${alpha.toFixed(3)})`;const cell=ww/p.N;ctx.fillRect(L+j*cell,y,cell+.55,hrow+.5);}}}
-line(L,ytop,R,ytop,'#416472',.8);txt('SPACETIME / measured velocity',L,ytop-5,'#9cbdc0',10);txt('NOW',R,ytop-5,'#80c8be',10,'right');
+const rows=history.length,ny=Math.min(rows,170);if(rows){const hrow=hh/ny;for(let row=0;row<ny;row++){const rec=history[Math.floor(row/ny*rows)];const y=ybot-(row+1)*hrow;for(let j=0;j<p.N;j++){const q=rec[j];const mag=clamp((Math.abs(q)-.025)/.95,0,1);if(mag<.018)continue;const red=Math.round(25+110*mag),green=Math.round(65+190*mag),blue=Math.round(85+150*mag);const alpha=Math.max(.07,Math.pow(mag,.72));ctx.fillStyle=`rgba(${red},${green},${blue},${alpha.toFixed(3)})`;const cell=ww/p.N;ctx.fillRect(L+j*cell,y,cell+.9,hrow+.9);}}}
+line(L,ytop,R,ytop,'#416472',.8);txt('PULSE TRAJECTORIES · |VELOCITY|',L,ytop-5,'#9cbdc0',10);txt('NOW',R,ytop-5,'#80c8be',10,'right');
 // Mark the selected receiver with a reference line in the actual flow, not an imposed event.
 const pickupX=xx(p.pickup-1);ctx.setLineDash([3,4]);line(pickupX,ytop,pickupX,ybot,'rgba(255,214,150,.55)',1);ctx.setLineDash([]);
 if(!compact){const b1=ybot+12,b2=ybot+29;txt('IN',L-5,b1,'#81ddcd',8,'right');txt('OUT',L-5,b2,'#f5bd83',8,'right');line(L,b1,R,b1,'#24434b',1);line(L,b2,R,b2,'#24434b',1);for(let ch=0;ch<2;ch++){for(const ev of events[ch]){const x=R-(t-ev)*ww/27;if(x>=L&&x<=R)line(x,(ch?b2:b1)-7,x,ch?b2:b1,ch?'#efc08e':'#8be5d2',1.8);}}}
-$('counts').textContent=`IN ${events[0].length} · OUT ${events[1].length}`;$('timestr').textContent='τ '+t.toFixed(1);
+$('counts').textContent=`SOURCE ${events[0].length} · EXIT ${events[1].length}`;$('timestr').textContent='τ '+t.toFixed(1);
 }
-function initAudio(){if(audio)return true;const AC=window.AudioContext||window.webkitAudioContext;if(!AC){$('activity').textContent='NO WEB AUDIO';return false;}audio=new AC();master=audio.createGain();master.gain.value=muted?0:p.gain;master.connect(audio.destination);
-for(let ch=0;ch<2;ch++){const pan=audio.createStereoPanner?audio.createStereoPanner():null;const o=audio.createOscillator(),o2=audio.createOscillator(),sum=audio.createGain(),out=audio.createGain(),lp=audio.createBiquadFilter();o.type='sine';o2.type='sawtooth';o.connect(sum);o2.connect(sum);sum.connect(lp);lp.connect(out);if(pan){pan.pan.value=ch===0?-.65:.65;out.connect(pan);pan.connect(master);}else out.connect(master);o.start();o2.start();lp.type='lowpass';voices.push({o,o2,sum,out,lp,ch});}return true;}
-function updateAudio(){if(!audio||audio.state!=='running')return;const at=audio.currentTime;for(const z of voices){const j=z.ch===0?0:p.pickup-1;const vv=Math.max(0,v[j]);const amp=Math.pow(clamp((vv-.035)/.85,0,1),2.8);const hz=p.pitch*(z.ch===0?1.6:1)*(1+.48*clamp(vv,-.4,1.2));z.o.frequency.setTargetAtTime(hz,at,.035);z.o2.frequency.setTargetAtTime(hz*2.01,at,.03);z.lp.frequency.setTargetAtTime(280+p.harmonics*2800*clamp(vv+.25,.05,1.3),at,.03);z.out.gain.setTargetAtTime(amp*(z.ch===0?.09:.18),at,.025);z.sum.gain.setTargetAtTime(.25+.65*p.harmonics,at,.05);} }
-function hit(ch,velocity){if(!audio||muted||audio.state!=='running')return;const now=audio.currentTime+.012,osc=audio.createOscillator(),gain=audio.createGain(),lp=audio.createBiquadFilter(),pan=audio.createStereoPanner?audio.createStereoPanner():null;osc.type=ch?'triangle':'sawtooth';const hz=p.pitch*(ch?1:2.4)*(1+.15*clamp(velocity,0,1.5));osc.frequency.setValueAtTime(hz*1.8,now);osc.frequency.exponentialRampToValueAtTime(Math.max(30,hz),now+.06);lp.type='lowpass';lp.frequency.value=240+1800*p.harmonics;gain.gain.setValueAtTime(.001,now);gain.gain.exponentialRampToValueAtTime(ch?.26:.13,now+.007);gain.gain.exponentialRampToValueAtTime(.0001,now+p.decay);osc.connect(lp);lp.connect(gain);if(pan){pan.pan.value=ch?.6:-.6;gain.connect(pan);pan.connect(master);}else gain.connect(master);osc.start(now);osc.stop(now+p.decay+.03);osc.onended=()=>{osc.disconnect();gain.disconnect();lp.disconnect();if(pan)pan.disconnect();};}
-$('play').addEventListener('click',async()=>{if(!audio&& !initAudio())return;try{await audio.resume();audioReady=audio.state==='running';}catch(e){audioReady=false;}running=!running;if(master&&audio)master.gain.setTargetAtTime((muted||!running)?0:p.gain,audio.currentTime,.025);$('play').textContent=running?'Ⅱ Pause':'▶ Resume sound';$('activity').textContent=!audioReady?'VISUAL ONLY':running?'LIVE':'PAUSED';lastRAF=0;});
+
+function initAudio(){
+ if(audio)return true;const AC=window.AudioContext||window.webkitAudioContext;
+ if(!AC){$('activity').textContent='NO WEB AUDIO';return false;}
+ audio=new AC();master=audio.createGain();master.gain.value=0;
+ const limiter=audio.createDynamicsCompressor();limiter.threshold.value=-18;limiter.knee.value=10;limiter.ratio.value=6;limiter.attack.value=.005;limiter.release.value=.22;master.connect(limiter);limiter.connect(audio.destination);
+ // Each voice reads a different node of the coupled ODE. No sequencer or prerecorded loops.
+ const total=14;voiceBank=[];
+ for(let n=0;n<total;n++){
+  const pan=audio.createStereoPanner?audio.createStereoPanner():null;
+  const o=audio.createOscillator(),o2=audio.createOscillator(),sum=audio.createGain(),filter=audio.createBiquadFilter(),out=audio.createGain();
+  o.type='sine';o2.type='triangle';sum.gain.value=.5;filter.type='lowpass';filter.Q.value=1.25;out.gain.value=0;
+  o.connect(sum);o2.connect(sum);sum.connect(filter);filter.connect(out);
+  if(pan){pan.pan.value=-.96+1.92*n/(total-1);out.connect(pan);pan.connect(master);}else out.connect(master);
+  o.start();o2.start();voiceBank.push({o,o2,sum,filter,out,pan,n});
+ }
+ return true;
+}
+function voiceMass(n){return Math.round(n*(p.N-1)/Math.max(1,voiceBank.length-1));}
+function updateAudio(){if(!audio||audio.state!=='running')return;
+ const now=audio.currentTime;
+ for(const voice of voiceBank){
+  const j=voiceMass(voice.n),velocity=v[j]||0,displacement=u[j]||0,drive=Math.max(0,velocity);
+  const envelope=Math.pow(clamp((drive-.015)/.9,0,1),1.55);
+  const k=voice.n/Math.max(1,voiceBank.length-1);
+  const hz=p.pitch*(timbreMode===0?.55+k*.9:timbreMode===2?2+k*4.6:1+k*2.3);
+  const bend=clamp(1+.11*velocity+.012*(displacement+friction(-p.vp)),-.1,1.8);
+  const f=clamp(hz*bend,20,2600);
+  const wave=timbreMode===2?'triangle':'sine',harm=timbreMode===2?'sawtooth':'triangle';
+  if(voice.o.type!==wave)voice.o.type=wave;if(voice.o2.type!==harm)voice.o2.type=harm;
+  voice.o.frequency.setTargetAtTime(f,now,.018);
+  voice.o2.frequency.setTargetAtTime(f*(timbreMode===2?2.73:timbreMode===1?1.501:2.003),now,.03);
+  const brightness=timbreMode===0?.14:timbreMode===2?.85:.49;
+  voice.filter.frequency.setTargetAtTime(clamp((timbreMode===2?1650:timbreMode===1?510:245)+(4000*brightness+2200*p.harmonics)*clamp(drive,0,1.2),110,12000),now,.027);
+  voice.filter.Q.setTargetAtTime(timbreMode===2?2.7:1.1,now,.12);
+  voice.sum.gain.setTargetAtTime(timbreMode===0?.36:timbreMode===2?.47:.56,now,.035);
+  voice.out.gain.setTargetAtTime(envelope*(timbreMode===0?.21:timbreMode===2?.135:.165),now,.022);
+ }
+}
+function burstAt(j,velocity){
+ if(!audio||muted||audio.state!=='running')return;
+ const now=audio.currentTime+.006,ratio=j/Math.max(1,p.N-1);
+ const hz=clamp(p.pitch*(timbreMode===0?.65+1.2*ratio:timbreMode===2?3.2+8*ratio:1.35+3.5*ratio),32,2200);
+ const osc=audio.createOscillator(),gain=audio.createGain(),filter=audio.createBiquadFilter(),pan=audio.createStereoPanner?audio.createStereoPanner():null;
+ osc.type=timbreMode===0?'sine':timbreMode===2?'sawtooth':'triangle';
+ const intensity=clamp((velocity-p.threshold)*1.3+.32,.18,1);
+ osc.frequency.setValueAtTime(hz*(timbreMode===0?1.8:1.1),now);
+ osc.frequency.exponentialRampToValueAtTime(hz*(timbreMode===0?.86:1),now+.06);
+ filter.type='lowpass';filter.frequency.value=clamp(300+2500*p.harmonics+(timbreMode===2?5500:0),250,12000);
+ const dur=p.decay*(timbreMode===0?2.0:timbreMode===2?.65:1.9);
+ gain.gain.setValueAtTime(.0001,now);gain.gain.exponentialRampToValueAtTime(intensity*(timbreMode===0?.16:.078),now+.008);gain.gain.exponentialRampToValueAtTime(.0001,now+dur);
+ osc.connect(filter);filter.connect(gain);if(pan){pan.pan.value=-.9+ratio*1.8;gain.connect(pan);pan.connect(master);}else gain.connect(master);
+ osc.start(now);osc.stop(now+dur+.02);osc.onended=()=>{osc.disconnect();filter.disconnect();gain.disconnect();if(pan)pan.disconnect();};
+}
+$('play').addEventListener('click',async()=>{if(!audio&& !initAudio())return;try{await audio.resume();audioReady=audio.state==='running';}catch(e){audioReady=false;}running=!running;if(master&&audio)master.gain.setTargetAtTime((muted||!running)?0:p.gain,audio.currentTime,.025);$('play').textContent=running?'Ⅱ Pause':'▶ Resume sound';$('activity').textContent=!audioReady?'VISUAL ONLY':running?'LIVE':'PAUSED';lastRAF=0;updateAudio();});
 $('reset').addEventListener('click',()=>{++warmToken;resetSim();warm();});
 $('mute').addEventListener('click',()=>{muted=!muted;$('mute').textContent=muted?'Sound off':'Sound on';$('mute').classList.toggle('armed',muted);if(master&&audio)master.gain.setTargetAtTime(muted?0:p.gain,audio.currentTime,.03);});
 $('restore').addEventListener('click',()=>{for(const [k,,d] of [...specs,...initialSpecs,...soundSpecs]){p[k]=d;updateControl(k);}activePreset=0;renderPresets();++warmToken;resetSim();warm();});
