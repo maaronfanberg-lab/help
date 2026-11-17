@@ -13,19 +13,37 @@
 #shock{background:#4d2f22;border-color:#a9774c;color:#ffe7c7}
 @media(max-width:600px){#gestureStatus{display:none}#playbar{gap:4px;padding:5px 8px}.actionLevel{max-width:none}.playmode button{min-width:42px;font-size:9px}.perform button{font-size:9px}.toolbar{gap:5px}#shock{font-size:11px}}
 @media(max-height:430px){header{min-height:36px}#playbar{padding-block:3px}.actionLevel input{height:24px}}
+
+/* Research instrument 04: physics-switching workbench */
+#physicsbar{display:flex;gap:5px;align-items:center;padding:6px 9px;background:#08121c;border-bottom:1px solid #25414c;flex:none;min-height:45px;overflow-x:auto;scrollbar-width:none}
+#physicsbar button{font-size:11px;letter-spacing:.04em;min-height:32px;flex:1;padding:6px 8px;min-width:95px;white-space:nowrap}
+#physicsbar button.active{background:#a9e8d8;color:#08252a;border-color:#bfffea}
+#physicsbar span{font-size:10px;color:#a1bec6;max-width:180px;text-align:right}
+#sideAction{border-color:#e1b577;color:#ffd9a9;background:#30251f}
+#metrics{display:flex;flex:0 0 auto;gap:12px;align-items:center;border-top:1px solid #183742;background:#07121b;padding:4px 12px;min-height:23px;overflow:hidden;white-space:nowrap;font:10px/1.3 ui-monospace,SFMono-Regular,monospace;color:#9fc4c6}
+#metrics strong{color:#f4d29d;font-weight:550}
+.mode-group{display:none}.mode-group.active{display:block}
+#interactionHint{display:none}
+#notePhysics{padding:9px 11px;color:#b9d4d2;font-size:11px;line-height:1.45;border:1px solid #23434c;border-radius:8px}
+@media(max-width:600px){#physicsbar{gap:4px;padding:5px}#physicsbar button{min-width:80px;font-size:10px;padding:6px 4px}#physicsbar span{display:none}#metrics{gap:8px;font-size:9px}#sideAction{font-size:10px;padding-inline:7px}}
+@media(max-height:430px){#physicsbar{min-height:36px;padding-block:3px}#metrics{min-height:18px;padding-block:2px}}
 </style></head><body><div id="app">
-<header><div><div class="eyebrow">Excitable lattice · Live physics · Touch to excite</div><h1>FRACTURE FIELD <span style="font-size:10px;color:#85a6aa;font-weight:400">/ LAB 03</span></h1></div><div class="stat"><strong id="activity">READY</strong><span id="counts">SOURCE 0 · EXIT 0</span></div></header>
-<div id="viz"><div id="touchGuide" aria-hidden="true"><b>TOUCH THE FIELD</b><span>Strike any mass. Drag to send a disturbance through the chain.</span></div><canvas id="scope" aria-label="Live simulated displacement and velocities across a one-dimensional excitable mechanical lattice, including a scrolling space-time trace of pulses"></canvas><span id="hint">SOURCE 01 → SELECTED PICKUP</span><div id="divergence" role="alert">The chosen parameters produced unstable values. Press Reset or choose a paper preset.</div></div>
-<div class="toolbar"><button class="primary" id="play">▶ Start sound</button><button id="shock" type="button" title="Inject a real velocity impulse into the first mass">⚡ Excite</button><button id="reset">↻ Reset</button><button id="mute">Sound on</button><button id="params" class="grow" aria-expanded="false">▤ ALL 29 VARIABLES</button><span class="readout" id="timestr">τ 0.0</span></div>
+<header><div><div class="eyebrow">MULTIPHYSICS · LIVE EQUATIONS · SONIC LAB</div><h1>FRACTURE FIELD <span style="font-size:10px;color:#85a6aa;font-weight:400">/ LAB 04</span></h1></div><div class="stat"><strong id="activity">READY</strong><span id="counts">SOURCE 0 · EXIT 0</span></div></header>
+<div id="physicsbar" role="group" aria-label="Choose simulated physical system"><button class="active" data-engine="0">01 · EXCITABLE</button><button data-engine="1">02 · WAVES</button><button data-engine="2">03 · CHARGES</button><span>Three numerical experiments, not visual filters</span></div>
+<div id="viz"><div id="touchGuide" aria-hidden="true"><b>TOUCH THE FIELD</b><span>Strike any mass. Drag to send a disturbance through the chain.</span></div><canvas id="scope" aria-label="Live simulated displacement and velocities across a one-dimensional excitable mechanical lattice, including a scrolling space-time trace of pulses"></canvas><span id="interactionHint">Tap masses to perturb the equations</span><span id="hint">SOURCE 01 → SELECTED PICKUP</span><div id="divergence" role="alert">The chosen parameters produced unstable values. Press Reset or choose a paper preset.</div></div>
+<div id="metrics" aria-live="off"><span id="metricA">STATE · INITIALIZING</span><span id="metricB"></span><span id="metricC"></span></div><div class="toolbar"><button class="primary" id="play">▶ Start sound</button><button id="shock" type="button" title="Inject a velocity impulse into the simulated particles">⚡ Excite</button><button id="sideAction" type="button">⇄ COUNTERPULSE</button><button id="reset">↻ Reset</button><button id="mute">Sound on</button><button id="params" class="grow" aria-expanded="false">⚙ MODEL CONTROLS</button><span class="readout" id="timestr">τ 0.0</span></div>
 <div id="playbar"><div class="perform" role="group" aria-label="Touch behavior"><button data-gesture="0" class="selected">STRIKE</button><button data-gesture="1">MORPH F·Ω</button></div><div class="playmode" role="group" aria-label="Sound character"><button type="button" data-timbre="0">SUB</button><button type="button" data-timbre="1" class="selected">GLASS</button><button type="button" data-timbre="2">METAL</button></div><label class="actionLevel" for="impact">IMPACT <input id="impact" type="range" min="0.2" max="3.2" value="1.5" step="0.05" aria-label="Finger strike velocity strength"><output id="impactOut">1.50</output></label><span id="gestureStatus" aria-live="polite">Physics is waiting for your touch</span></div>
 <section id="panel" aria-label="Research parameters"><div id="panelScroll"><div class="panelHeader"><strong>RESEARCH CONTROLS</strong><button id="closePanel">✕ Close</button></div>
-<div class="group"><div class="groupTitle"><span>Paper experiments · forcing presets</span><span class="sub" id="presetName">4¹ / Lost third spike</span></div><div class="row presets" id="presets"></div><p class="note">Presets reproduce parameters from the paper, not guaranteed identical trajectories or spike counts at every run length. Changes to any physics slider immediately enter the differential equations.</p></div>
+<div class="group mode-group active" data-group="0"><div class="groupTitle"><span>Paper experiments · forcing presets</span><span class="sub" id="presetName">4¹ / Lost third spike</span></div><div class="row presets" id="presets"></div><p class="note">Presets reproduce parameters from the paper, not guaranteed identical trajectories or spike counts at every run length. Changes to any physics slider immediately enter the differential equations.</p></div>
+<div class="group mode-group" data-group="1"><div class="groupTitle"><span>Fermi–Pasta–Ulam–Tsingou β lattice</span><span class="sub">RK4 · physical impulses</span></div><div class="controls" id="waveControls"></div><p class="note">Neighboring masses interact through nonlinear springs: force = kΔ + β₄Δ³. An optional double-well potential creates switching. Mass defects scatter pulses; the measured energy includes kinetic, bond, and on-site terms. Tap opposite ends to create collisions. This is a general FPUT-β model, not the friction equation of the excitable paper.</p></div>
+<div class="group mode-group" data-group="2"><div class="groupTitle"><span>Charged particles in a magnetic trap</span><span class="sub">2D · classical Lorentz / Coulomb</span></div><div class="controls" id="chargeControls"></div><p class="note">Classical point charges obey electric, softened Coulomb and Lorentz forces with optional confinement and contact impulses. Boris-style magnetic rotation reduces unphysical magnetic-field energy injection. Colored particles mark charge sign, not imagined quantum behavior. This is NOT a CERN collision simulator.</p></div>
+<div class="group"><div id="notePhysics">MODELS: excitable friction lattice (from the 2026 paper), FPUT-β nonlinear wave chain, and a 2D classical charged-particle trap. Each has different equations and audible behavior.</div></div>
 <div class="group"><div class="groupTitle"><span>Research views · computed, not decorative</span></div><div class="row presets" id="viewModes"></div></div>
-<div class="group"><div class="groupTitle"><span>All 9 governing model parameters</span><span class="sub">Eq. (8), Eq. (3)</span></div><div class="controls" id="physicsControls"></div></div>
+<div class="group mode-group active" data-group="0"><div class="groupTitle"><span>All 9 governing model parameters</span><span class="sub">Eq. (8), Eq. (3)</span></div><div class="controls" id="physicsControls"></div></div>
 <div class="group"><div class="groupTitle"><span>Initial conditions · numerical experiment</span><span class="sub">applied on Reset</span></div><div class="controls" id="initialControls"></div><p class="note">Every unit starts at the calculated unforced equilibrium, with an optional displacement and velocity kick at the chosen unit. The paper's default initial state has no kick.</p></div>
 <div class="group"><div class="groupTitle"><span>Sound mapping · instrument design</span><span class="sub">not paper physics</span></div><div class="controls" id="soundControls"></div><p class="note">A spatial voice bank follows multiple actual mass velocities. Strikes and decays follow physical spikes, not a sequenced rhythm. SUB, GLASS and METAL select sonification spectra, not different equations. Stereo spread depends on your device.</p></div>
-<div class="group"><div class="groupTitle"><span>Dimensional physical parameters</span><span class="sub">Eq. (1) → Eq. (8)</span></div><div class="physicalGrid" id="dimensional"></div><div class="row" style="margin-top:10px"><button id="applyPhysical">Apply physical values to model</button><button id="syncPhysical">Match current dimensionless values</button></div><p class="note">Set m, k, k<sub>c</sub>, V<sub>p</sub>, f<sub>e</sub>, ω, f<sub>0</sub>, v<sub>0</sub>. They convert to the five dimensionless mechanical controls; they are <b>not</b> extra independent parameters in Eq. (8).</p><div class="formula" id="derived"></div><div class="banner" id="physicalStatus">Physical values initially match the paper's dimensionless defaults using normalized scales.</div></div>
-<div class="group"><div class="groupTitle">Exact model and source</div><div class="formula">u′ⱼ = vⱼ<br/>γv′ⱼ = −uⱼ + β(uⱼ₊₁ − 2uⱼ + uⱼ₋₁) − Φ(vⱼ − vₚ) + δⱼ₁Fsin(Ωτ + phase)<br/>Φ(w) = a w|w|² − b w|w| + c w<br/>Free ends: boundary neighbors reflect the endpoint.</div><p class="note">Finger strikes apply local instantaneous velocity perturbations, not additional terms in the published model. The phase parameter and sonic settings are instrument extensions; the paper uses zero phase. The cubic friction coefficients a,b,c are exposed independently. Numerical time step is user-selectable; small steps are more reliable. <a href="https://arxiv.org/html/2611.17535v1" target="_blank" rel="noopener">Read Prabith et al. (2026)</a>.</p><div class="row"><button id="restore">Restore paper defaults</button><button id="export">Export settings</button></div><div class="banner" id="diagnostic" aria-live="polite">Physical equation integrated with RK4; phone speaker output may differ from headphones.</div></div>
+<div class="group mode-group active" data-group="0"><div class="groupTitle"><span>Dimensional physical parameters</span><span class="sub">Eq. (1) → Eq. (8)</span></div><div class="physicalGrid" id="dimensional"></div><div class="row" style="margin-top:10px"><button id="applyPhysical">Apply physical values to model</button><button id="syncPhysical">Match current dimensionless values</button></div><p class="note">Set m, k, k<sub>c</sub>, V<sub>p</sub>, f<sub>e</sub>, ω, f<sub>0</sub>, v<sub>0</sub>. They convert to the five dimensionless mechanical controls; they are <b>not</b> extra independent parameters in Eq. (8).</p><div class="formula" id="derived"></div><div class="banner" id="physicalStatus">Physical values initially match the paper's dimensionless defaults using normalized scales.</div></div>
+<div class="group mode-group active" data-group="0"><div class="groupTitle">Exact model and source</div><div class="formula">u′ⱼ = vⱼ<br/>γv′ⱼ = −uⱼ + β(uⱼ₊₁ − 2uⱼ + uⱼ₋₁) − Φ(vⱼ − vₚ) + δⱼ₁Fsin(Ωτ + phase)<br/>Φ(w) = a w|w|² − b w|w| + c w<br/>Free ends: boundary neighbors reflect the endpoint.</div><p class="note">Finger strikes apply local instantaneous velocity perturbations, not additional terms in the published model. The phase parameter and sonic settings are instrument extensions; the paper uses zero phase. The cubic friction coefficients a,b,c are exposed independently. Numerical time step is user-selectable; small steps are more reliable. <a href="https://arxiv.org/html/2611.17535v1" target="_blank" rel="noopener">Read Prabith et al. (2026)</a>.</p><div class="row"><button id="restore">Restore paper defaults</button><button id="export">Export settings</button></div><div class="banner" id="diagnostic" aria-live="polite">Physical equation integrated with RK4; phone speaker output may differ from headphones.</div></div>
 </div></section></div><script>
 'use strict';
 // Physical model: Prabith et al. (2026), arXiv:2611.17535 Eq. (8) and friction Eq. (3).
@@ -34,7 +52,40 @@ const specs=[
 ];
 const initialSpecs=[['initUnit','Kick at mass',1,1,160,1,'Initial perturbation unit'],['kickU','Displacement Δu',0,-2,2,.01,'Initial displacement'],['kickV','Velocity Δv',0,-2,2,.01,'Initial speed'],['phase','Force phase',0,0,6.283,.01,'Paper sets 0'],['dt','Solver step Δτ',.01,.005,.025,.005,'RK4 step'],['simSpeed','Time ×',4,.5,18,.5,'Dimensionless / sec']];
 const soundSpecs=[['pickup','Pickup mass',20,1,160,1,'Audible receiver'],['threshold','Spike threshold',.48,.15,1.1,.01,'Detector, not dynamics'],['pitch','Bass Hz',70,40,220,1,'Base pitch'],['harmonics','Harmonics',.38,0,1,.02,'Timbre brightness'],['decay','Hit decay',.35,.08,1.3,.01,'Seconds'],['gain','Volume',.42,0,.9,.01,'Master gain']];
-const p={};for(const s of [...specs,...initialSpecs,...soundSpecs])p[s[0]]=s[2];
+const waveSpecs=[
+ ['waveN','Mass count',64,12,128,1,'Number of coupled masses'],
+ ['waveK','Spring stiffness k',9,.2,30,.1,'Linear bond stiffness'],
+ ['waveBeta','Quartic β₄',15,0,70,.5,'Nonlinear bond stiffness'],
+ ['waveDamp','Viscous loss',.009,0,.2,.001,'Velocity damping'],
+ ['wavePin','Onsite pinning',.025,0,2,.005,'Linear restoring strength'],
+ ['waveBistable','Bistable strength',0,0,6,.05,'Double-well coupling'],
+ ['waveWell','Well displacement',.7,.1,2,.05,'Well separation'],
+ ['waveDefect','Defect mass ×',3,1,12,.1,'Scattering center'],
+ ['waveDefectAt','Defect position %',50,10,90,1,'Mass impurity location'],
+ ['waveDrive','Boundary drive',0,0,3,.02,'Sinusoidal forcing'],
+ ['waveFreq','Drive Ω',1.8,.2,8,.05,'Boundary drive frequency'],
+ ['waveDisorder','Mass disorder',0,0,.8,.02,'Deterministic inhomogeneity'],
+ ['waveHard','Boundary mode',0,0,1,1,'0 free, 1 fixed spring endpoints']
+];
+const chargeSpecs=[
+ ['chargeN','Particle count',48,8,80,1,'Number of interacting charges'],
+ ['coulomb','Electric interaction',.028,0,.18,.002,'Softened Coulomb strength'],
+ ['magnetic','Magnetic field B',2.4,-10,10,.1,'Lorentz bending'],
+ ['electricX','Electric field Eₓ',0,-2,2,.02,'External horizontal field'],
+ ['electricY','Electric field Eᵧ',0,-2,2,.02,'External vertical field'],
+ ['chargeTrap','Confinement k',.9,0,5,.05,'Harmonic trap potential'],
+ ['chargeDrag','Viscous loss',.015,0,.4,.005,'Fluid-like damping'],
+ ['chargeGravity','Gravity g',0,-2,2,.05,'Vertical acceleration'],
+ ['chargeRadius','Contact radius',.031,.012,.07,.001,'Finite-size collision contact'],
+ ['chargeRestitution','Restitution e',.94,0,1,.01,'1 = elastic contact'],
+ ['chargeSoft','Softening ε',.052,.015,.15,.001,'Prevents Coulomb singularity'],
+ ['chargeSpeed','Initial speed',.28,0,2,.02,'Initial tangential motion'],
+ ['chargeRatio','Mass imbalance',1.8,1,8,.1,'Heavy/light particle mass'],
+ ['chargePos','Positive fraction',.5,0,1,.05,'Proportion of positive charges'],
+ ['chargeWall','Boundary mode',1,0,1,1,'1 reflecting walls, 0 open trap'],
+ ['chargeAudio','Collision emphasis',.8,0,1,.05,'Sonic weight of real contacts']
+];
+const p={};for(const s of [...specs,...initialSpecs,...soundSpecs,...waveSpecs,...chargeSpecs])p[s[0]]=s[2];
 const presets=[{name:'4¹ · Missing beat',F:.17,omega:1.4,desc:'Close spikes suppress third event'},{name:'2¹ · Sparse',F:.15,omega:1.4,desc:'Two large spikes and one small'},{name:'1¹ · Passing',F:.2,omega:2,desc:'Large pulses travel'},{name:'1² · Filter',F:.1,omega:3,desc:'Small oscillations vanish'},{name:'Aperiodic',F:.12,omega:5,desc:'Irregular excitation'},{name:'Composite',F:.4,omega:4.2,desc:'Interleaved patterns'}];
 const $=id=>document.getElementById(id),clamp=(x,a,b)=>Math.min(b,Math.max(a,x));
 let panelOpen=false,activePreset=0,running=false,muted=false,warming=false,dead=false;
@@ -50,7 +101,7 @@ const knobs=new Map();
 function valueFormat(s,v){return s[0]==='N'||s[0]==='pickup'||s[0]==='initUnit'?String(Math.round(v)):Math.abs(v)>=1?v.toFixed((s[4].toString().split('.')[1]||'').length):v.toFixed(Math.min(3,(s[4].toString().split('.')[1]||'').length+1));}
 function putControls(target,items){for(const spec of items){const [key,label,def,min,max,step,help]=spec;const wrap=document.createElement('div');wrap.className='control';wrap.innerHTML=`<label for="s-${key}">${label}<small>${key}</small></label><div class="inline"><input id="s-${key}" type="range" min="${min}" max="${max}" step="${step}" value="${def}" aria-label="${label}"><input id="n-${key}" type="number" min="${min}" max="${max}" step="${step}" value="${def}" aria-label="${label}, numeric value"></div>`;$(target).appendChild(wrap);const slider=wrap.querySelector('[type=range]'),number=wrap.querySelector('[type=number]');knobs.set(key,{spec,slider,number});
 slider.addEventListener('input',()=>{setParam(key,+slider.value,'slider')});number.addEventListener('change',()=>{const v=+number.value;if(Number.isFinite(v))setParam(key,clamp(v,min,max),'number');else number.value=String(p[key]);});}}
-putControls('physicsControls',specs);putControls('initialControls',initialSpecs);putControls('soundControls',soundSpecs);
+putControls('physicsControls',specs);putControls('initialControls',initialSpecs);putControls('soundControls',soundSpecs);putControls('waveControls',waveSpecs);putControls('chargeControls',chargeSpecs);
 function updateControl(k){const o=knobs.get(k);if(!o)return;o.slider.value=p[k];o.number.value=p[k];}
 function setParam(key,value,source='ui') {if(!Number.isFinite(value))return;
  const old=p[key];p[key]=(['N','pickup','initUnit'].includes(key)?Math.round(value):value);updateControl(key);
@@ -66,7 +117,7 @@ function setParam(key,value,source='ui') {if(!Number.isFinite(value))return;
 function renderPresets(){const node=$('presets');node.innerHTML='';presets.forEach((q,i)=>{const b=document.createElement('button');b.textContent=q.name;b.title=q.desc;if(i===activePreset)b.classList.add('active');b.addEventListener('click',()=>selectPreset(i));node.appendChild(b);});$('presetName').textContent=activePreset>=0?presets[activePreset].desc:'Custom physics';}
 function selectPreset(i){activePreset=i;const q=presets[i];for(const s of specs){p[s[0]]=s[2];updateControl(s[0]);}p.F=q.F;p.omega=q.omega;updateControl('F');updateControl('omega');p.initUnit=1;p.kickU=0;p.kickV=0;p.phase=0;p.N=20;p.pickup=20;for(const k of ['initUnit','kickU','kickV','phase','N','pickup'])updateControl(k);renderPresets();resetSim();warm();}
 renderPresets();
-$('params').addEventListener('click',()=>setPanel(!panelOpen));$('closePanel').addEventListener('click',()=>setPanel(false));function setPanel(on){panelOpen=on;$('panel').classList.toggle('open',on);$('params').setAttribute('aria-expanded',String(on));$('params').textContent=on?'▤ Hide parameters':'▤ ALL 29 VARIABLES';setTimeout(resize,165);}
+$('params').addEventListener('click',()=>setPanel(!panelOpen));$('closePanel').addEventListener('click',()=>setPanel(false));function setPanel(on){panelOpen=on;$('panel').classList.toggle('open',on);$('params').setAttribute('aria-expanded',String(on));$('params').textContent=on?'▤ Hide parameters':'⚙ MODEL CONTROLS';setTimeout(resize,165);}
 const physical=[['m','Mass m',.15],['k','Beam k',1],['kc','Coupling kᶜ',.2],['Vp','Plate Vₚ',1.05],['fe','Force fₑ',.17],['freq','Frequency ω',1.4],['f0','Scale f₀',1],['v0','Scale v₀',1]];
 for(const [key,label,def] of physical){let d=document.createElement('label');d.textContent=label;d.innerHTML+=`<input id="phys-${key}" type="number" min="0.00001" max="10000" step="any" value="${def}" aria-label="${label}">`;$('dimensional').appendChild(d);}
 function getPhysical(){const vals={};for(const [k]of physical)vals[k]=+$('phys-'+k).value;return vals;}
@@ -223,8 +274,279 @@ $('play').addEventListener('click',async()=>{if(!audio&& !initAudio())return;try
 $('reset').addEventListener('click',()=>{++warmToken;resetSim();warm();});
 $('mute').addEventListener('click',()=>{muted=!muted;$('mute').textContent=muted?'Sound off':'Sound on';$('mute').classList.toggle('armed',muted);if(master&&audio)master.gain.setTargetAtTime(muted?0:p.gain,audio.currentTime,.03);});
 $('restore').addEventListener('click',()=>{for(const [k,,d] of [...specs,...initialSpecs,...soundSpecs]){p[k]=d;updateControl(k);}activePreset=0;renderPresets();++warmToken;resetSim();warm();});
-$('export').addEventListener('click',()=>{const s=JSON.stringify({reference:'arxiv:2611.17535v1 Eq.8',params:p},null,2);const blob=new Blob([s],{type:'application/json'}),url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download='missing-pulse-parameters.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),2000);});
+$('export').addEventListener('click',()=>{const s=JSON.stringify({reference:'arxiv:2611.17535v1 Eq.8; FPUT-β; classical charged particles',engine:engineMode,params:p},null,2);const blob=new Blob([s],{type:'application/json'}),url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download='missing-pulse-parameters.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),2000);});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&running){running=false;$('play').textContent='▶ Resume sound';$('activity').textContent='PAUSED';if(master&&audio)master.gain.setTargetAtTime(0,audio.currentTime,.04);}});
 $('hint').textContent=`SOURCE 01 → PICKUP ${p.pickup}`;
+// LAB 04 MULTIPHYSICS EXTENSION
+// Each engine integrates different ODEs. New models are classical analogs,
+// not claimed as exact implementations of the paper's experimental geometry.
+let engineMode=0, paperN=p.N, chargeSeed=3, waveInitialEnergy=0, contactCount=0;
+let pxs=new Float64Array(0), pys=new Float64Array(0), vxs=new Float64Array(0), vys=new Float64Array(0), qs=new Float64Array(0), masses=new Float64Array(0);
+let particleTracks=[], contactMarks=[], lastContacts=new Float64Array(0), lastPlasmaTouch=0;
+const savedReset=resetSim, savedIntegrate=integrate, savedRender=render, savedWarm=warm, savedKick=kick, savedParam=setParam, savedSample=sample, savedEvents=checkEvents;
+const modeNames=['EXCITABLE LATTICE','FPUT-β WAVE CHAIN','CLASSICAL CHARGED MATTER'];
+function pseudo(n){let x=Math.sin(n*127.1+chargeSeed*74.7)*43758.5453;return x-Math.floor(x);}
+function waveMass(i){let defect=Math.round((p.N-1)*p.waveDefectAt/100);
+ return (i===defect?p.waveDefect:1)*(1+p.waveDisorder*Math.sin(i*7.13+2.17));}
+function waveForce(U,V,T,DU,DV){let n=p.N,k=p.waveK,b=p.waveBeta;
+ for(let i=0;i<n;i++){DU[i]=V[i];DV[i]=-(p.waveDamp*V[i]+p.wavePin*U[i]+p.waveBistable*U[i]*(U[i]*U[i]-p.waveWell*p.waveWell));}
+ for(let i=0;i<n-1;i++){const s=U[i+1]-U[i],f=k*s+b*s*s*s;DV[i]+=f;DV[i+1]-=f;}
+ if(p.waveHard){DV[0]-=k*U[0]+b*U[0]**3;DV[n-1]-=k*U[n-1]+b*U[n-1]**3;}
+ DV[0]+=p.waveDrive*Math.sin(p.waveFreq*T);DV[n-1]+=p.waveDrive*Math.sin(p.waveFreq*T+Math.PI);
+ for(let i=0;i<n;i++)DV[i]/=waveMass(i);
+}
+function integrateWave(){const h=p.dt,n=p.N,k1=rk[0],k2=rk[1],k3=rk[2],k4=rk[3],U=states[0],V=states[1];
+ waveForce(u,v,t,k1[0],k1[1]);
+ for(let i=0;i<n;i++){U[i]=u[i]+h*.5*k1[0][i];V[i]=v[i]+h*.5*k1[1][i];}
+ waveForce(U,V,t+h*.5,k2[0],k2[1]);
+ for(let i=0;i<n;i++){U[i]=u[i]+h*.5*k2[0][i];V[i]=v[i]+h*.5*k2[1][i];}
+ waveForce(U,V,t+h*.5,k3[0],k3[1]);
+ for(let i=0;i<n;i++){U[i]=u[i]+h*k3[0][i];V[i]=v[i]+h*k3[1][i];}
+ waveForce(U,V,t+h,k4[0],k4[1]);
+ for(let i=0;i<n;i++){u[i]+=h*(k1[0][i]+2*k2[0][i]+2*k3[0][i]+k4[0][i])/6;v[i]+=h*(k1[1][i]+2*k2[1][i]+2*k3[1][i]+k4[1][i])/6;}
+ t+=h;stepCounter++;
+ if(stepCounter%24===0){for(let i=0;i<n;i++)if(!Number.isFinite(u[i])||!Number.isFinite(v[i])||Math.abs(u[i])>50||Math.abs(v[i])>100){failure('UNSTABLE · reduce kick, nonlinearity or solver step');break;}}
+}
+function waveEnergy(){let E=0,n=p.N,K=p.waveK,B=p.waveBeta,bi=p.waveBistable,w=p.waveWell;
+ for(let i=0;i<n;i++){E+=.5*waveMass(i)*v[i]*v[i]+.5*p.wavePin*u[i]*u[i]+.25*bi*(u[i]*u[i]-w*w)**2;}
+ for(let i=0;i<n-1;i++){let d=u[i+1]-u[i];E+=.5*K*d*d+.25*B*d**4;}
+ if(p.waveHard){for(const d of [u[0],u[n-1]])E+=.5*K*d*d+.25*B*d**4;}
+ return E;
+}
+function chargeInit(){const n=p.N;pxs=new Float64Array(n);pys=new Float64Array(n);vxs=new Float64Array(n);vys=new Float64Array(n);qs=new Float64Array(n);masses=new Float64Array(n);
+ particleTracks=[];lastContacts=new Float64Array(n*n);lastContacts.fill(-100);contactMarks=[];contactCount=0;
+ const phi=(Math.sqrt(5)-1)/2;
+ for(let i=0;i<n;i++){
+  const a=2*Math.PI*((i*phi)%1);const rad=.18+.55*Math.sqrt((i+.5)/n);
+  pxs[i]=rad*Math.cos(a);pys[i]=rad*Math.sin(a);
+  qs[i]=pseudo(i+77)<p.chargePos?1:-1;
+  masses[i]=qs[i]>0?1:p.chargeRatio;
+  const thermal=p.chargeSpeed*(.67+.6*pseudo(i+101));
+  vxs[i]=-Math.sin(a)*thermal+(.5-pseudo(i+501))*.08;
+  vys[i]= Math.cos(a)*thermal+(.5-pseudo(i+601))*.08;
+ }
+ updateChargeProxy();
+}
+function updateChargeProxy(){for(let i=0;i<p.N;i++){u[i]=Math.hypot(pxs[i],pys[i]);v[i]=Math.hypot(vxs[i],vys[i]);}}
+function chargeForces(X,Y,AX,AY){const n=p.N,c=p.coulomb,eps2=p.chargeSoft*p.chargeSoft;
+ for(let i=0;i<n;i++){AX[i]=(qs[i]*p.electricX-p.chargeTrap*X[i])/masses[i];AY[i]=(qs[i]*p.electricY-p.chargeTrap*Y[i])/masses[i]+p.chargeGravity;}
+ for(let i=0;i<n;i++)for(let j=i+1;j<n;j++){
+  const dx=X[i]-X[j],dy=Y[i]-Y[j],r2=dx*dx+dy*dy+eps2;
+  const f=c*qs[i]*qs[j]/(r2*Math.sqrt(r2));
+  AX[i]+=f*dx/masses[i];AY[i]+=f*dy/masses[i];AX[j]-=f*dx/masses[j];AY[j]-=f*dy/masses[j];
+ }
+}
+const chargeAX=new Float64Array(160),chargeAY=new Float64Array(160);
+function integrateCharge(){let n=p.N,h=Math.min(p.dt,.018);
+ chargeForces(pxs,pys,chargeAX,chargeAY);
+ for(let i=0;i<n;i++){
+   let x=vxs[i]+.5*h*chargeAX[i],y=vys[i]+.5*h*chargeAY[i];
+   // Exact velocity rotation for a uniform magnetic field; Lorentz work is zero.
+   const theta=-qs[i]*p.magnetic*h/masses[i],C=Math.cos(theta),S=Math.sin(theta);
+   const vx=x*C-y*S,vy=x*S+y*C;
+   vxs[i]=vx;vys[i]=vy;
+   pxs[i]+=h*vx;pys[i]+=h*vy;
+ }
+ chargeForces(pxs,pys,chargeAX,chargeAY);
+ const damp=Math.exp(-h*p.chargeDrag);
+ for(let i=0;i<n;i++){
+  vxs[i]=(vxs[i]+.5*h*chargeAX[i])*damp;vys[i]=(vys[i]+.5*h*chargeAY[i])*damp;
+  if(p.chargeWall){const lim=.95-p.chargeRadius;
+   if(pxs[i]>lim){pxs[i]=lim;vxs[i]=-Math.abs(vxs[i])*p.chargeRestitution;}
+   if(pxs[i]<-lim){pxs[i]=-lim;vxs[i]=Math.abs(vxs[i])*p.chargeRestitution;}
+   if(pys[i]>lim){pys[i]=lim;vys[i]=-Math.abs(vys[i])*p.chargeRestitution;}
+   if(pys[i]<-lim){pys[i]=-lim;vys[i]=Math.abs(vys[i])*p.chargeRestitution;}
+  }
+ }
+ // Pairwise contact impulses conserve linear momentum and apply restitution.
+ const diam=p.chargeRadius*2,diam2=diam*diam;
+ for(let i=0;i<n;i++)for(let j=i+1;j<n;j++){
+  let dx=pxs[i]-pxs[j],dy=pys[i]-pys[j],r2=dx*dx+dy*dy;
+  if(r2>=diam2)continue;
+  let r=Math.sqrt(Math.max(r2,1e-10));if(r2<1e-10){dx=diam;dy=0;r=diam;}
+  const nx=dx/r,ny=dy/r,invI=1/masses[i],invJ=1/masses[j];
+  const overlap=diam-r,shift=overlap/(invI+invJ);
+  pxs[i]+=nx*shift*invI;pys[i]+=ny*shift*invI;pxs[j]-=nx*shift*invJ;pys[j]-=ny*shift*invJ;
+  const relative=(vxs[i]-vxs[j])*nx+(vys[i]-vys[j])*ny;
+  if(relative<0){const impulse=-(1+p.chargeRestitution)*relative/(invI+invJ);
+   vxs[i]+=impulse*nx*invI;vys[i]+=impulse*ny*invI;vxs[j]-=impulse*nx*invJ;vys[j]-=impulse*ny*invJ;
+   const key=i*n+j;if(t-lastContacts[key]>.25){lastContacts[key]=t;contactCount++;
+     contactMarks.push({x:(pxs[i]+pxs[j])*.5,y:(pys[i]+pys[j])*.5,time:t,impulse});
+     if(contactMarks.length>40)contactMarks.shift();
+     if(running&&audioReady&&contactCount%3===0&&pseudo(contactCount) < p.chargeAudio)burstAt(i,Math.max(p.threshold+.1,Math.min(2,impulse+.48)));
+   }
+  }
+ }
+ t+=h;stepCounter++;updateChargeProxy();
+ if(stepCounter%24===0){for(let i=0;i<n;i++)if(!Number.isFinite(vxs[i])||!Number.isFinite(pxs[i])||Math.abs(vxs[i])>40||Math.abs(pxs[i])>40||Math.abs(vys[i])>40||Math.abs(pys[i])>40){failure('DIVERGED · reduce Coulomb, charge, or solver step');break;}}
+}
+function chargeEnergy(){let E=0,n=p.N;
+ for(let i=0;i<n;i++){E+=.5*masses[i]*(vxs[i]**2+vys[i]**2)+.5*p.chargeTrap*(pxs[i]**2+pys[i]**2)-qs[i]*(p.electricX*pxs[i]+p.electricY*pys[i])-masses[i]*p.chargeGravity*pys[i];}
+ for(let i=0;i<n;i++)for(let j=i+1;j<n;j++)E+=p.coulomb*qs[i]*qs[j]/Math.hypot(pxs[i]-pxs[j],pys[i]-pys[j],p.chargeSoft);
+ return E;
+}
+function failure(message){dead=true;running=false;warming=false;$('divergence').style.display='block';$('divergence').textContent=message;$('activity').textContent='NUMERICAL STOP';$('play').textContent='▶ Restart sound';if(master&&audio)master.gain.setTargetAtTime(0,audio.currentTime,.05);}
+resetSim=function(){savedReset();if(engineMode===1){u.fill(0);v.fill(0);const n=p.N;
+ // Two counterpropagating Gaussian velocity packets; all subsequent motion is integrated.
+ for(let i=0;i<n;i++){
+  const left=Math.exp(-.5*((i-7)/2.4)**2),right=Math.exp(-.5*((i-(n-8))/2.4)**2);
+  v[i]=.72*left-.72*right;u[i]=.19*left+.19*right;
+ }
+ waveInitialEnergy=waveEnergy();$('activity').textContent='WAVES READY';}
+ else if(engineMode===2){chargeInit();$('activity').textContent='PARTICLES READY';}
+ if(engineMode!==0){warming=false;events=[[],[]];history=[];historyU=[];sample();render();}
+};
+integrate=function(){if(engineMode===0)savedIntegrate();else if(engineMode===1)integrateWave();else integrateCharge();};
+warm=function(){if(engineMode===0)savedWarm();else {warming=false;$('activity').textContent='READY';}};
+sample=function(){savedSample();if(engineMode===2){particleTracks.push({x:Float32Array.from(pxs),y:Float32Array.from(pys)});if(particleTracks.length>52)particleTracks.shift();}};
+checkEvents=function(audible){if(engineMode===0){savedEvents(audible);return;}
+ const n=p.N,ids=[0,p.pickup-1];
+ for(let ch=0;ch<2;ch++){const a=Math.abs(v[ids[ch]]);if(a>p.threshold&&spikePrev[ch]<=p.threshold&&t-eventAt[ch]>.5){eventAt[ch]=t;events[ch].push(t);if(events[ch].length>100)events[ch].shift();}spikePrev[ch]=a;}
+ for(let i=0;i<n;i++){
+ const a=Math.abs(v[i]);if(a>p.threshold&&allSpikePrev[i]<=p.threshold&&t-allEventAt[i]>.42){allEventAt[i]=t;
+  if(audible&&running&&!warming&&(engineMode===1?i%3===0:i%5===0))burstAt(i,a);
+ }allSpikePrev[i]=a;}
+};
+kick=function(j,amount){if(engineMode!==2){savedKick(j,amount);return;}
+ if(dead)return;
+ const i=clamp(Math.round(j),0,p.N-1),a=clamp(amount,-3.5,3.5);
+ const x=pxs[i],y=pys[i],r=Math.max(.01,Math.hypot(x,y));
+ vxs[i]+=a*(-y/r);vys[i]+=a*(x/r);
+ updateChargeProxy();checkEvents(true);burstAt(i,Math.max(p.threshold+.15,Math.abs(a)));
+ selectedUnit=i;$('gestureStatus').textContent=`CHARGE ${i+1} · tangential Δv ${a.toFixed(2)}`;render();
+};
+const waveformColor=(z)=>z>=0?`rgba(88,237,215,${Math.min(.94,Math.max(.05,Math.abs(z)*.8)).toFixed(2)})`:`rgba(255,176,98,${Math.min(.94,Math.max(.05,Math.abs(z)*.8)).toFixed(2)})`;
+function renderWave(){if(!W||!H)return;
+ ctx.fillStyle='#040d15';ctx.fillRect(0,0,W,H);
+ const L=29,R=W-14,ww=R-L,n=p.N,top=Math.min(H*.25,110),h1=Math.min(80,Math.max(30,H*.22)),base=top*.53;
+ const sx=i=>L+ww*i/(n-1);
+ line(L,base,R,base,'#426c72',1);
+ const shift=Math.min(31,h1*.47);
+ for(let i=0;i<n-1;i++){
+  const x=sx(i),y=base-clamp(u[i]*shift,-shift,shift),x1=sx(i+1),y1=base-clamp(u[i+1]*shift,-shift,shift);
+  const strain=u[i+1]-u[i];line(x,y,x1,y1,waveformColor(strain*2),1.7);
+ }
+ for(let i=0;i<n;i++){
+  const d=Math.abs(v[i]),x=sx(i),y=base-clamp(u[i]*shift,-shift,shift);
+  ctx.beginPath();ctx.arc(x,y,Math.max(1.4,Math.min(4,ww/n*.37))+clamp(d*1.5,0,2),0,Math.PI*2);ctx.fillStyle=d>.35?'#abf2df':'#5e8990';ctx.fill();
+ }
+ const idx=Math.round((n-1)*p.waveDefectAt/100),dx=sx(idx);
+ ctx.beginPath();ctx.arc(dx,base-clamp(u[idx]*shift,-shift,shift),7,0,Math.PI*2);ctx.strokeStyle='#ffd19a';ctx.lineWidth=1.8;ctx.stroke();
+ txt('COUNTERPROPAGATING NONLINEAR WAVES',L,14,'#afd7d5',10);
+ txt(`MASS DEFECT ×${p.waveDefect.toFixed(1)}`,R,14,'#f4cb94',10,'right');
+ const ytop=Math.max(55,top+3),ybot=H-25,hh=ybot-ytop;
+ const rows=history.length;
+ if(hh>5&&rows){const cell=ww/n,rowH=hh/rows;
+  for(let k=0;k<rows;k++){const A=history[k],yy=ybot-(k+1)*rowH;
+   for(let i=0;i<n;i++){
+    const mag=Math.abs(A[i]);if(mag<.028)continue;
+    ctx.fillStyle=waveformColor(A[i]*1.15);
+    ctx.fillRect(L+i*cell,yy,cell+1,rowH+.8);
+   }
+  }
+ }
+ ctx.setLineDash([3,4]);line(dx,ytop,dx,ybot,'#b99264',1);ctx.setLineDash([]);
+ line(L,ytop,R,ytop,'#33515c',1);txt('MEASURED VELOCITY · SPACE / TIME',L,ytop-5,'#9dc7c9',9);txt('NOW ↓',R,ytop-5,'#8cddca',9,'right');
+ $('counts').textContent=`IN ${events[0].length} · OUT ${events[1].length}`;$('timestr').textContent='τ '+t.toFixed(1);
+}
+function renderCharge(){if(!W||!H||!pxs.length)return;
+ ctx.fillStyle='#050d15';ctx.fillRect(0,0,W,H);
+ let size=Math.max(1,Math.min(W-25,H-27)),scale=size*.48,centerX=W*.5,centerY=H*.5;
+ const sx=x=>centerX+x*scale,sy=y=>centerY-y*scale;
+ // Uniform trap/wall geometry; dots and trails are simulated positions only.
+ ctx.beginPath();ctx.arc(centerX,centerY,scale*.95,0,Math.PI*2);ctx.strokeStyle='#244751';ctx.lineWidth=1.2;ctx.stroke();
+ line(centerX-scale,centerY,centerX+scale,centerY,'#17313c',.8);line(centerX,centerY-scale,centerX,centerY+scale,'#17313c',.8);
+ for(let i=0;i<p.N;i++){
+  ctx.beginPath();let start=false;
+  for(let k=0;k<particleTracks.length;k++){
+   const rec=particleTracks[k];if(!rec)continue;
+   const x=sx(rec.x[i]),y=sy(rec.y[i]);if(!Number.isFinite(x)||!Number.isFinite(y))continue;
+   if(!start){ctx.moveTo(x,y);start=true;}else ctx.lineTo(x,y);
+  }
+  if(start){ctx.lineTo(sx(pxs[i]),sy(pys[i]));ctx.strokeStyle=qs[i]>0?'rgba(111,233,220,.28)':'rgba(255,168,111,.28)';ctx.lineWidth=1;ctx.stroke();}
+  const x=sx(pxs[i]),y=sy(pys[i]);if(!Number.isFinite(x)||!Number.isFinite(y))continue;
+  const sp=Math.hypot(vxs[i],vys[i]);
+  ctx.beginPath();ctx.arc(x,y,Math.min(6,2.1+sp*.6+p.chargeRadius*scale*.3),0,Math.PI*2);
+  ctx.fillStyle=qs[i]>0?'#88f8e2':'#ffc28b';ctx.fill();
+ }
+ for(const e of contactMarks){const age=t-e.time;if(age<0||age>1.7)continue;
+  const x=sx(e.x),y=sy(e.y);ctx.beginPath();ctx.arc(x,y,2+8*age,0,2*Math.PI);
+  ctx.strokeStyle=`rgba(255,243,190,${(.8*(1-age/1.7)).toFixed(2)})`;ctx.lineWidth=1.3;ctx.stroke();
+ }
+ if(contactMarks.length)contactMarks=contactMarks.filter(e=>t-e.time<2);
+ txt('CLASSICAL CHARGES · LORENTZ / COULOMB',11,15,'#b9dad5',10);
+ txt(`B ${p.magnetic.toFixed(1)} · CONTACTS ${contactCount}`,W-11,15,'#fad5a0',10,'right');
+ txt('CYAN + · AMBER − · REAL TRAJECTORIES',11,H-10,'#82a9b0',9);
+ $('counts').textContent=`${p.N} CHARGES · ${contactCount} CONTACTS`;$('timestr').textContent='τ '+t.toFixed(1);
+}
+render=function(){if(engineMode===0)savedRender();else if(engineMode===1)renderWave();else renderCharge();};
+const savedFrameUpdateAudio=updateAudio;
+updateAudio=function(){if(engineMode===2){ // Map speed to pre-existing synthesizer's 14 mass pickups.
+  // Source velocities are measured magnitudes, not generated oscillators.
+  savedFrameUpdateAudio();return;
+ }savedFrameUpdateAudio();};
+function impulseField(x,y,direction=1){let nearest=0,nearestD=1e8,affected=0;
+ for(let i=0;i<p.N;i++){
+  const dx=pxs[i]-x,dy=pys[i]-y,r2=dx*dx+dy*dy;
+  if(r2<nearestD){nearestD=r2;nearest=i;}
+  const factor=Math.exp(-r2/(2*.20*.20))*impact;
+  if(factor<.015)continue;
+  const r=Math.max(.02,Math.sqrt(r2));
+  vxs[i]+=direction*factor*dx/r/masses[i];vys[i]+=direction*factor*dy/r/masses[i];affected++;
+ }
+ updateChargeProxy();if(affected){burstAt(nearest,Math.max(p.threshold+.2,impact));$('gestureStatus').textContent=`IMPULSE ${affected} CHARGES · Δv ${impact.toFixed(2)}`;}
+ render();
+}
+function setEngine(next){if(next===engineMode)return;paperN=engineMode===0?p.N:paperN;engineMode=next;
+ p.N=engineMode===0?paperN:engineMode===1?p.waveN:p.chargeN;
+ p.pickup=engineMode===0?p.N:Math.max(1,p.N-1);p.initUnit=1;
+ for(const k of ['N','pickup','initUnit'])updateControl(k);
+ document.querySelectorAll('[data-engine]').forEach(b=>b.classList.toggle('active',+b.dataset.engine===engineMode));
+ document.querySelectorAll('.mode-group').forEach(g=>g.classList.toggle('active',+g.dataset.group===engineMode));
+ // The common initial-condition section is always visible, but those inputs affect only reset.
+ $('sideAction').textContent=engineMode===0?'⇄ COUNTERPULSE':engineMode===1?'⇄ COLLIDE WAVES':'◎ IMPLODE';
+ $('interactionHint').textContent=engineMode===0?'Tap masses to perturb the excitable system':engineMode===1?'Strike a mass · launch counterpulses to collide':'Touch the field to send a physical radial shock';
+ $('notePhysics').textContent=[
+ 'Original excitable-friction model. Its 9 governing parameters and dimensional reference values remain independently editable.',
+ 'FPUT-β chain with quartic springs, configurable impurity and optional bistability. Two measured wavepackets travel toward one another. Energy and lost-energy readouts distinguish dissipation from purely visual effects.',
+ 'Classical 2D interacting charges with Lorentz rotation, softened Coulomb forces, a trap, and real contact impulses. No quantum scattering, detectors, or CERN-specific claims.'
+ ][engineMode];
+ setPanel(false);gestureMode=0;document.querySelectorAll('[data-gesture]').forEach(b=>b.classList.toggle('selected',+b.dataset.gesture===0));
+ document.querySelector('[data-gesture="1"]').disabled=engineMode!==0;document.querySelector('[data-gesture="1"]').style.display=engineMode===0?'':'none';
+ $('divergence').style.display='none';resetSim();if(engineMode===0)warm();resize();
+ $('activity').textContent=running?'LIVE':engineMode===0?'PREPARING':'READY';updateMetrics();
+}
+document.querySelectorAll('[data-engine]').forEach(b=>b.addEventListener('click',()=>setEngine(+b.dataset.engine)));
+const savedSetParam=setParam;
+setParam=function(key,value,src='ui'){
+ savedSetParam(key,value,src);
+ if(key==='N'&&engineMode===0)paperN=p.N;
+ if(key==='waveN'&&engineMode===1){p.N=Math.round(p.waveN);p.pickup=p.N;updateControl('N');updateControl('pickup');resetSim();}
+ if(key==='chargeN'&&engineMode===2){p.N=Math.round(p.chargeN);p.pickup=p.N;updateControl('N');updateControl('pickup');resetSim();}
+ if(engineMode===2&&['chargeRatio','chargePos','chargeSpeed','chargeRadius'].includes(key))resetSim();
+ if(key==='waveDefectAt'&&engineMode===1)render();
+};
+$('sideAction').addEventListener('click',()=>{
+ wake();if(engineMode===0){kick(0,impact);kick(p.N-1,-impact);}
+ else if(engineMode===1){kick(0,impact);kick(p.N-1,-impact);}
+ else {for(let i=0;i<p.N;i++){vxs[i]-=pxs[i]*impact*1.15/masses[i];vys[i]-=pys[i]*impact*1.15/masses[i];}updateChargeProxy();render();}
+});
+// Capture-mode pointer handler for true 2D interaction; existing 1D handlers
+// remain intact and active in the two chain modes.
+function plasmaPoint(e){const r=canvas.getBoundingClientRect();const sc=Math.min(r.width-25,r.height-27)*.48;
+ return {x:clamp((e.clientX-r.left-r.width*.5)/Math.max(1,sc),-.96,.96),y:clamp((r.top+r.height*.5-e.clientY)/Math.max(1,sc),-.96,.96)};}
+canvas.addEventListener('pointerdown',e=>{if(engineMode!==2)return;e.stopImmediatePropagation();e.preventDefault();canvas.setPointerCapture(e.pointerId);pointerDown=true;wake();const q=plasmaPoint(e);impulseField(q.x,q.y,1);lastPlasmaTouch=performance.now();},true);
+canvas.addEventListener('pointermove',e=>{if(engineMode!==2||!pointerDown)return;e.stopImmediatePropagation();e.preventDefault();if(performance.now()-lastPlasmaTouch>64){const q=plasmaPoint(e);impulseField(q.x,q.y,.55);lastPlasmaTouch=performance.now();}},true);
+canvas.addEventListener('pointerup',e=>{if(engineMode===2){e.stopImmediatePropagation();pointerDown=false;}},true);
+canvas.addEventListener('pointercancel',e=>{if(engineMode===2){e.stopImmediatePropagation();pointerDown=false;}},true);
+function updateMetrics(){if(engineMode===0){$('metricA').textContent=`MODEL · FRICTION / ${p.N} MASS`; $('metricB').textContent=`F ${p.F.toFixed(3)} · Ω ${p.omega.toFixed(2)}`;$('metricC').textContent=`SOURCE ${events[0].length} · EXIT ${events[1].length}`;return;}
+ if(engineMode===1){let E=waveEnergy(),fraction=(waveInitialEnergy>0?(E-waveInitialEnergy)/waveInitialEnergy*100:0);
+ $('metricA').textContent=`E ${E.toFixed(2)}`;$('metricB').textContent=`ΔE ${fraction>=0?'+':''}${fraction.toFixed(1)}%`;$('metricC').textContent=`DEFECT ${Math.round(p.waveDefectAt)}% · β₄ ${p.waveBeta.toFixed(1)}`;return;}
+ let E=chargeEnergy(),n=p.N,plus=qs.reduce((a,q)=>a+(q>0?1:0),0);
+ $('metricA').textContent=`E ${E.toFixed(2)}`;$('metricB').textContent=`CONTACTS ${contactCount}`;$('metricC').textContent=`${plus}⁺ ${n-plus}⁻ · B ${p.magnetic.toFixed(1)}`;
+}
+setInterval(updateMetrics,210);
+// Audio and temporal rendering remain tied to actual integrated state.
+
 resetSim();resize();warm();rafId=requestAnimationFrame(frame);
 </script></body></html>
