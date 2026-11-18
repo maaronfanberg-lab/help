@@ -28,7 +28,7 @@
 @media(max-width:600px){#physicsbar{gap:4px;padding:5px}#physicsbar button{min-width:80px;font-size:10px;padding:6px 4px}#physicsbar span{display:none}#metrics{gap:8px;font-size:9px}#sideAction{font-size:10px;padding-inline:7px}}
 @media(max-height:430px){#physicsbar{min-height:36px;padding-block:3px}#metrics{min-height:18px;padding-block:2px}}
 </style></head><body><div id="app">
-<header><div><div class="eyebrow">MULTIPHYSICS · LIVE EQUATIONS · SONIC LAB</div><h1>FRACTURE FIELD <span style="font-size:10px;color:#85a6aa;font-weight:400">/ LAB 04</span></h1></div><div class="stat"><strong id="activity">READY</strong><span id="counts">SOURCE 0 · EXIT 0</span></div></header>
+<header><div><div class="eyebrow">MULTIPHYSICS · LIVE EQUATIONS · SONIC LAB</div><h1>FRACTURE FIELD <span style="font-size:10px;color:#85a6aa;font-weight:400">/ LAB 05 · TUNED AUDIO</span></h1></div><div class="stat"><strong id="activity">READY</strong><span id="counts">SOURCE 0 · EXIT 0</span></div></header>
 <div id="physicsbar" role="group" aria-label="Choose simulated physical system"><button class="active" data-engine="0">01 · EXCITABLE</button><button data-engine="1">02 · WAVES</button><button data-engine="2">03 · CHARGES</button><span>Three numerical experiments, not visual filters</span></div>
 <div id="viz"><div id="touchGuide" aria-hidden="true"><b>TOUCH THE FIELD</b><span>Strike any mass. Drag to send a disturbance through the chain.</span></div><canvas id="scope" aria-label="Live simulated displacement and velocities across a one-dimensional excitable mechanical lattice, including a scrolling space-time trace of pulses"></canvas><span id="interactionHint">Tap masses to perturb the equations</span><span id="hint">SOURCE 01 → SELECTED PICKUP</span><div id="divergence" role="alert">The chosen parameters produced unstable values. Press Reset or choose a paper preset.</div></div>
 <div id="metrics" aria-live="off"><span id="metricA">STATE · INITIALIZING</span><span id="metricB"></span><span id="metricC"></span></div><div class="toolbar"><button class="primary" id="play">▶ Start sound</button><button id="shock" type="button" title="Inject a velocity impulse into the simulated particles">⚡ Excite</button><button id="sideAction" type="button">⇄ COUNTERPULSE</button><button id="reset">↻ Reset</button><button id="mute">Sound on</button><button id="params" class="grow" aria-expanded="false">⚙ MODEL CONTROLS</button><span class="readout" id="timestr">τ 0.0</span></div>
@@ -41,7 +41,7 @@
 <div class="group"><div class="groupTitle"><span>Research views · computed, not decorative</span></div><div class="row presets" id="viewModes"></div></div>
 <div class="group mode-group active" data-group="0"><div class="groupTitle"><span>All 9 governing model parameters</span><span class="sub">Eq. (8), Eq. (3)</span></div><div class="controls" id="physicsControls"></div></div>
 <div class="group"><div class="groupTitle"><span>Initial conditions · numerical experiment</span><span class="sub">applied on Reset</span></div><div class="controls" id="initialControls"></div><p class="note">Every unit starts at the calculated unforced equilibrium, with an optional displacement and velocity kick at the chosen unit. The paper's default initial state has no kick.</p></div>
-<div class="group"><div class="groupTitle"><span>Sound mapping · instrument design</span><span class="sub">not paper physics</span></div><div class="controls" id="soundControls"></div><p class="note">A spatial voice bank follows multiple actual mass velocities. Strikes and decays follow physical spikes, not a sequenced rhythm. SUB, GLASS and METAL select sonification spectra, not different equations. Stereo spread depends on your device.</p></div>
+<div class="group"><div class="groupTitle"><span>Sound mapping · instrument design</span><span class="sub">not paper physics</span></div><div class="controls" id="soundControls"></div><p class="note">Fourteen physical pickups drive an energy-normalized harmonic field. Tuning stays coherent by default; set Pitch coherence to 0 to hear the previous raw spectrum. Transients control how often real detected impacts become audible; the underlying physics and event counts do not change.</p></div>
 <div class="group mode-group active" data-group="0"><div class="groupTitle"><span>Dimensional physical parameters</span><span class="sub">Eq. (1) → Eq. (8)</span></div><div class="physicalGrid" id="dimensional"></div><div class="row" style="margin-top:10px"><button id="applyPhysical">Apply physical values to model</button><button id="syncPhysical">Match current dimensionless values</button></div><p class="note">Set m, k, k<sub>c</sub>, V<sub>p</sub>, f<sub>e</sub>, ω, f<sub>0</sub>, v<sub>0</sub>. They convert to the five dimensionless mechanical controls; they are <b>not</b> extra independent parameters in Eq. (8).</p><div class="formula" id="derived"></div><div class="banner" id="physicalStatus">Physical values initially match the paper's dimensionless defaults using normalized scales.</div></div>
 <div class="group mode-group active" data-group="0"><div class="groupTitle">Exact model and source</div><div class="formula">u′ⱼ = vⱼ<br/>γv′ⱼ = −uⱼ + β(uⱼ₊₁ − 2uⱼ + uⱼ₋₁) − Φ(vⱼ − vₚ) + δⱼ₁Fsin(Ωτ + phase)<br/>Φ(w) = a w|w|² − b w|w| + c w<br/>Free ends: boundary neighbors reflect the endpoint.</div><p class="note">Finger strikes apply local instantaneous velocity perturbations, not additional terms in the published model. The phase parameter and sonic settings are instrument extensions; the paper uses zero phase. The cubic friction coefficients a,b,c are exposed independently. Numerical time step is user-selectable; small steps are more reliable. <a href="https://arxiv.org/html/2611.17535v1" target="_blank" rel="noopener">Read Prabith et al. (2026)</a>.</p><div class="row"><button id="restore">Restore paper defaults</button><button id="export">Export settings</button></div><div class="banner" id="diagnostic" aria-live="polite">Physical equation integrated with RK4; phone speaker output may differ from headphones.</div></div>
 </div></section></div><script>
@@ -51,7 +51,7 @@ const specs=[
  ['F','Forcing F',.17,0,4,.01,'Boundary amplitude'],['omega','Frequency Ω',1.4,.2,8,.02,'Angular frequency'],['beta','Coupling β',.2,0,1,.005,'Between masses'],['gamma','Inertia γ',.15,.04,.8,.005,'Fast–slow ratio'],['vp','Plate speed vₚ',1.05,.65,1.5,.005,'Normalized speed'],['a','Friction a',4.8,1,10,.05,'Cubic coefficient'],['b','Friction b',10.1,2,18,.05,'Quadratic coefficient'],['c','Friction c',5.8,1,10,.05,'Linear coefficient'],['N','Mass count N',20,1,160,1,'Lattice length']
 ];
 const initialSpecs=[['initUnit','Kick at mass',1,1,160,1,'Initial perturbation unit'],['kickU','Displacement Δu',0,-2,2,.01,'Initial displacement'],['kickV','Velocity Δv',0,-2,2,.01,'Initial speed'],['phase','Force phase',0,0,6.283,.01,'Paper sets 0'],['dt','Solver step Δτ',.01,.005,.025,.005,'RK4 step'],['simSpeed','Time ×',4,.5,18,.5,'Dimensionless / sec']];
-const soundSpecs=[['pickup','Pickup mass',20,1,160,1,'Audible receiver'],['threshold','Spike threshold',.48,.15,1.1,.01,'Detector, not dynamics'],['pitch','Bass Hz',70,40,220,1,'Base pitch'],['harmonics','Harmonics',.38,0,1,.02,'Timbre brightness'],['decay','Hit decay',.35,.08,1.3,.01,'Seconds'],['gain','Volume',.42,0,.9,.01,'Master gain']];
+const soundSpecs=[['pickup','Pickup mass',20,1,160,1,'Audible receiver'],['threshold','Spike threshold',.48,.15,1.1,.01,'Detector, not dynamics'],['pitch','Bass Hz',70,40,220,1,'Base pitch'],['harmonics','Harmonics',.38,0,1,.02,'Timbre brightness'],['decay','Hit decay',.35,.08,1.3,.01,'Seconds'],['gain','Volume',.42,0,.9,.01,'Master gain'],['coherence','Pitch coherence',1,0,1,.05,'1 harmonic relationships; 0 original raw tuning'],['transients','Transient activity',.55,.10,1,.05,'Density and level of audible impacts']];
 const waveSpecs=[
  ['waveN','Mass count',64,12,128,1,'Number of coupled masses'],
  ['waveK','Spring stiffness k',9,.2,30,.1,'Linear bond stiffness'],
@@ -217,59 +217,94 @@ if(!compact){const b1=ybot+12,b2=ybot+29;txt('IN',L-5,b1,'#81ddcd',8,'right');tx
 $('counts').textContent=`SOURCE ${events[0].length} · EXIT ${events[1].length}`;$('timestr').textContent='τ '+t.toFixed(1);
 }
 
+// Fracture Field 05: energy-normalized, event-limited physical sonification.
+// The dynamics never depend on this audio layer; no metronome, backing track or fake collision events.
+let lastBurstTime=-10,burstEndTimes=[],audibleBursts=0,suppressedBursts=0;
+const harmonicNodes=[.5,1,1.5,2,1,3,2,1.5,1,2,3,1.5,2,1];
 function initAudio(){
  if(audio)return true;const AC=window.AudioContext||window.webkitAudioContext;
  if(!AC){$('activity').textContent='NO WEB AUDIO';return false;}
  audio=new AC();master=audio.createGain();master.gain.value=0;
- const limiter=audio.createDynamicsCompressor();limiter.threshold.value=-18;limiter.knee.value=10;limiter.ratio.value=6;limiter.attack.value=.005;limiter.release.value=.22;master.connect(limiter);limiter.connect(audio.destination);
- // Each voice reads a different node of the coupled ODE. No sequencer or prerecorded loops.
- const total=14;voiceBank=[];
- for(let n=0;n<total;n++){
+ // Gentle peak protection, not an aggressive pumping compressor.
+ const limiter=audio.createDynamicsCompressor();limiter.threshold.value=-12;limiter.knee.value=18;limiter.ratio.value=3;limiter.attack.value=.01;limiter.release.value=.18;
+ master.connect(limiter);limiter.connect(audio.destination);
+ voiceBank=[];
+ for(let n=0;n<14;n++){
   const pan=audio.createStereoPanner?audio.createStereoPanner():null;
-  const o=audio.createOscillator(),o2=audio.createOscillator(),sum=audio.createGain(),filter=audio.createBiquadFilter(),out=audio.createGain();
-  o.type='sine';o2.type='triangle';sum.gain.value=.5;filter.type='lowpass';filter.Q.value=1.25;out.gain.value=0;
-  o.connect(sum);o2.connect(sum);sum.connect(filter);filter.connect(out);
-  if(pan){pan.pan.value=-.96+1.92*n/(total-1);out.connect(pan);pan.connect(master);}else out.connect(master);
-  o.start();o2.start();voiceBank.push({o,o2,sum,filter,out,pan,n});
+  const o=audio.createOscillator(),o2=audio.createOscillator();
+  const partial=audio.createGain(),sum=audio.createGain(),filter=audio.createBiquadFilter(),out=audio.createGain();
+  o.type='sine';o2.type='sine';partial.gain.value=.14;sum.gain.value=.65;
+  filter.type='lowpass';filter.Q.value=.7;out.gain.value=0;
+  o.connect(sum);o2.connect(partial);partial.connect(sum);sum.connect(filter);filter.connect(out);
+  if(pan){pan.pan.value=(-.85+1.7*n/13)*.6;out.connect(pan);pan.connect(master);}else out.connect(master);
+  o.start();o2.start();voiceBank.push({o,o2,partial,sum,filter,out,pan,n});
  }
  return true;
 }
 function voiceMass(n){return Math.round(n*(p.N-1)/Math.max(1,voiceBank.length-1));}
-function updateAudio(){if(!audio||audio.state!=='running')return;
- const now=audio.currentTime;
+function audioSignal(j){
+ if(engineMode===2)return Math.hypot(vxs[j]||0,vys[j]||0);
+ return engineMode===0?Math.max(0,v[j]||0):Math.abs(v[j]||0);
+}
+function updateAudio(){
+ if(!audio||audio.state!=='running')return;
+ const now=audio.currentTime,amp=[];
+ let energy=0;
  for(const voice of voiceBank){
-  const j=voiceMass(voice.n),velocity=v[j]||0,displacement=u[j]||0,drive=Math.max(0,velocity);
-  const envelope=Math.pow(clamp((drive-.015)/.9,0,1),1.55);
-  const k=voice.n/Math.max(1,voiceBank.length-1);
-  const hz=p.pitch*(timbreMode===0?.55+k*.9:timbreMode===2?2+k*4.6:1+k*2.3);
-  const bend=clamp(1+.11*velocity+.012*(displacement+friction(-p.vp)),-.1,1.8);
-  const f=clamp(hz*bend,20,2600);
-  const wave=timbreMode===2?'triangle':'sine',harm=timbreMode===2?'sawtooth':'triangle';
-  if(voice.o.type!==wave)voice.o.type=wave;if(voice.o2.type!==harm)voice.o2.type=harm;
-  voice.o.frequency.setTargetAtTime(f,now,.018);
-  voice.o2.frequency.setTargetAtTime(f*(timbreMode===2?2.73:timbreMode===1?1.501:2.003),now,.03);
-  const brightness=timbreMode===0?.14:timbreMode===2?.85:.49;
-  voice.filter.frequency.setTargetAtTime(clamp((timbreMode===2?1650:timbreMode===1?510:245)+(4000*brightness+2200*p.harmonics)*clamp(drive,0,1.2),110,12000),now,.027);
-  voice.filter.Q.setTargetAtTime(timbreMode===2?2.7:1.1,now,.12);
-  voice.sum.gain.setTargetAtTime(timbreMode===0?.36:timbreMode===2?.47:.56,now,.035);
-  voice.out.gain.setTargetAtTime(envelope*(timbreMode===0?.21:timbreMode===2?.135:.165),now,.022);
+  const j=voiceMass(voice.n),speed=audioSignal(j);
+  const threshold=engineMode===2?.10:engineMode===1?.045:.07;
+  const range=engineMode===2?.85:engineMode===1?.75:.8;
+  const a=Math.pow(clamp((speed-threshold)/range,0,1),1.35);
+  amp.push(a);energy+=a*a;
+ }
+ const norm=1/Math.sqrt(Math.max(1,energy));
+ for(let i=0;i<voiceBank.length;i++){
+  const voice=voiceBank[i],j=voiceMass(voice.n),velocity=v[j]||0,displacement=u[j]||0;
+  const k=i/13,raw=timbreMode===0?.55+k*.9:timbreMode===2?2+k*4.6:1+k*2.3;
+  const tuned=harmonicNodes[i]*(timbreMode===1?1.45:timbreMode===2?2:1);
+  const ratio=tuned*p.coherence+raw*(1-p.coherence);
+  const bend=clamp(1+.028*clamp(velocity,-2,2)+.006*clamp(displacement,-3,3),.93,1.07);
+  const hz=clamp(p.pitch*ratio*bend,30,2200);
+  voice.o.frequency.setTargetAtTime(hz,now,.065);
+  voice.o2.frequency.setTargetAtTime(hz*(timbreMode===1?3:timbreMode===2?2.48:2),now,.075);
+  const kind=timbreMode;
+  const overtone=(kind===0?.06:kind===1?.10:.17)+p.harmonics*(kind===2?.25:.13);
+  voice.partial.gain.setTargetAtTime(overtone,now,.09);
+  const bright=kind===0?380:kind===1?1500:3000;
+  voice.filter.frequency.setTargetAtTime(clamp(bright+bright*.7*p.harmonics*amp[i],180,5000),now,.09);
+  // Lower, velocity-proportional gain; normalize across active masses to prevent pileups.
+  const level=kind===0?.145:kind===1?.116:.095;
+  voice.out.gain.setTargetAtTime(amp[i]*norm*level,now,.085);
  }
 }
 function burstAt(j,velocity){
  if(!audio||muted||audio.state!=='running')return;
- const now=audio.currentTime+.006,ratio=j/Math.max(1,p.N-1);
- const hz=clamp(p.pitch*(timbreMode===0?.65+1.2*ratio:timbreMode===2?3.2+8*ratio:1.35+3.5*ratio),32,2200);
+ const now=audio.currentTime+.008;
+ burstEndTimes=burstEndTimes.filter(end=>end>now);
+ const minGap=.11-.055*p.transients;
+ if(now-lastBurstTime<minGap||burstEndTimes.length>=4){suppressedBursts++;return;}
+ const ratio=clamp(j/Math.max(1,p.N-1),0,1);
+ // Original inharmonic tuning remains available using the Coherence slider.
+ const n=Math.round(ratio*13),raw=timbreMode===0?.65+1.2*ratio:timbreMode===2?3.2+8*ratio:1.35+3.5*ratio;
+ const root=harmonicNodes[n]*(timbreMode===1?1.45:timbreMode===2?2:1);
+ const hz=clamp(p.pitch*(p.coherence*root+(1-p.coherence)*raw),35,2200);
+ const intensity=clamp((velocity-p.threshold)*.8+.32,.14,.85);
  const osc=audio.createOscillator(),gain=audio.createGain(),filter=audio.createBiquadFilter(),pan=audio.createStereoPanner?audio.createStereoPanner():null;
- osc.type=timbreMode===0?'sine':timbreMode===2?'sawtooth':'triangle';
- const intensity=clamp((velocity-p.threshold)*1.3+.32,.18,1);
- osc.frequency.setValueAtTime(hz*(timbreMode===0?1.8:1.1),now);
- osc.frequency.exponentialRampToValueAtTime(hz*(timbreMode===0?.86:1),now+.06);
- filter.type='lowpass';filter.frequency.value=clamp(300+2500*p.harmonics+(timbreMode===2?5500:0),250,12000);
- const dur=p.decay*(timbreMode===0?2.0:timbreMode===2?.65:1.9);
- gain.gain.setValueAtTime(.0001,now);gain.gain.exponentialRampToValueAtTime(intensity*(timbreMode===0?.16:.078),now+.008);gain.gain.exponentialRampToValueAtTime(.0001,now+dur);
- osc.connect(filter);filter.connect(gain);if(pan){pan.pan.value=-.9+ratio*1.8;gain.connect(pan);pan.connect(master);}else gain.connect(master);
- osc.start(now);osc.stop(now+dur+.02);osc.onended=()=>{osc.disconnect();filter.disconnect();gain.disconnect();if(pan)pan.disconnect();};
+ osc.type='sine';osc.frequency.setValueAtTime(hz*(timbreMode===0?1.06:1.025),now);
+ osc.frequency.exponentialRampToValueAtTime(hz,now+.09);
+ filter.type='lowpass';filter.Q.value=.6;filter.frequency.value=clamp((timbreMode===0?420:timbreMode===1?1700:2900)+1600*p.harmonics,260,4800);
+ const dur=clamp(p.decay*(timbreMode===0?2.0:timbreMode===1?1.5:.85),.12,2.6);
+ const level=(timbreMode===0?.12:timbreMode===1?.075:.055)*p.transients;
+ gain.gain.setValueAtTime(.0001,now);
+ gain.gain.linearRampToValueAtTime(intensity*level,now+.016);
+ gain.gain.exponentialRampToValueAtTime(.0001,now+dur);
+ osc.connect(filter);filter.connect(gain);
+ if(pan){pan.pan.value=(-.8+ratio*1.6)*.6;gain.connect(pan);pan.connect(master);}else gain.connect(master);
+ osc.start(now);osc.stop(now+dur+.025);
+ osc.onended=()=>{osc.disconnect();filter.disconnect();gain.disconnect();if(pan)pan.disconnect();};
+ lastBurstTime=now;burstEndTimes.push(now+dur);audibleBursts++;
 }
+
 $('play').addEventListener('click',async()=>{if(!audio&& !initAudio())return;try{await audio.resume();audioReady=audio.state==='running';}catch(e){audioReady=false;}running=!running;if(master&&audio)master.gain.setTargetAtTime((muted||!running)?0:p.gain,audio.currentTime,.025);$('play').textContent=running?'Ⅱ Pause':'▶ Resume sound';$('activity').textContent=!audioReady?'VISUAL ONLY':running?'LIVE':'PAUSED';lastRAF=0;updateAudio();});
 $('reset').addEventListener('click',()=>{++warmToken;resetSim();warm();});
 $('mute').addEventListener('click',()=>{muted=!muted;$('mute').textContent=muted?'Sound off':'Sound on';$('mute').classList.toggle('armed',muted);if(master&&audio)master.gain.setTargetAtTime(muted?0:p.gain,audio.currentTime,.03);});
@@ -404,7 +439,7 @@ checkEvents=function(audible){if(engineMode===0){savedEvents(audible);return;}
  for(let ch=0;ch<2;ch++){const a=Math.abs(v[ids[ch]]);if(a>p.threshold&&spikePrev[ch]<=p.threshold&&t-eventAt[ch]>.5){eventAt[ch]=t;events[ch].push(t);if(events[ch].length>100)events[ch].shift();}spikePrev[ch]=a;}
  for(let i=0;i<n;i++){
  const a=Math.abs(v[i]);if(a>p.threshold&&allSpikePrev[i]<=p.threshold&&t-allEventAt[i]>.42){allEventAt[i]=t;
-  if(audible&&running&&!warming&&(engineMode===1?i%3===0:i%5===0))burstAt(i,a);
+  if(audible&&running&&!warming&&engineMode===1&&i%4===0)burstAt(i,a);
  }allSpikePrev[i]=a;}
 };
 kick=function(j,amount){if(engineMode!==2){savedKick(j,amount);return;}
@@ -546,7 +581,7 @@ function updateMetrics(){if(engineMode===0){$('metricA').textContent=`MODEL · F
  $('metricA').textContent=`E ${E.toFixed(2)}`;$('metricB').textContent=`CONTACTS ${contactCount}`;$('metricC').textContent=`${plus}⁺ ${n-plus}⁻ · B ${p.magnetic.toFixed(1)}`;
 }
 setInterval(updateMetrics,210);
-// Audio and temporal rendering remain tied to actual integrated state.
+// Audio and temporal rendering remain tied to actual integrated state. Audio voices are normalized and collision transients are rate-limited.
 
 resetSim();resize();warm();rafId=requestAnimationFrame(frame);
 </script></body></html>
