@@ -36,7 +36,7 @@
 <button class="restore" id="restore">Controls</button>
 <div class="foot" id="delta">STILL • Δ 0.0000</div>
 <div id="nojs" class="notice">Static preview. Interactive controls require opening the hosted webpage in Safari; iPhone document previews may show only this still image.</div>
-<div class="controls" id="panel"><div class="panelhead"><b>OMEF-2X · Mathematical lab</b><div><button id="reset">Reset</button> <button id="close">Close</button></div></div><div class="sub">Move a coefficient or exponent while the sculpture remains still. Type exact values below sliders.</div><details class="eqbox"><summary>Live governing equation · tap to inspect</summary><pre id="equationText"></pre><small>Each control enters the numerical force calculation. The equation shown is abbreviated; no physical validity is implied.</small></details><div id="sliders" class="scroll"></div><div class="brief"><strong>Mathematics:</strong> a two-dimensional array of coupled nonlinear wave strings, integrated with fixed steps. Filaments show its displacement field. This is a reduced visualization study, not the complete OMEF-2X model.</div></div>
+<div class="controls" id="panel"><div class="panelhead"><b>OMEF-2X · Mathematical lab</b><div><button id="reset">Reset</button> <button id="close">Close</button></div></div><div class="sub">Still: compare equation changes at a fixed horizon. Run: sustained wave excitation and regulated kinetic feedback (both separately adjustable). Type exact values below sliders.</div><details class="eqbox"><summary>Live governing equation · tap to inspect</summary><pre id="equationText"></pre><small>Each control enters the numerical force calculation. The equation shown is abbreviated; no physical validity is implied.</small></details><div id="sliders" class="scroll"></div><div class="brief"><strong>Mathematics:</strong> a two-dimensional array of coupled nonlinear wave strings. Sustained activity comes from time-dependent forcing and a saturating energy pump, not a visual loop. To observe natural decay, set Time-varying drive, Kinetic energy feedback and Active gain to zero, and raise Damping. This is a reduced exploratory model, not the complete OMEF-2X system.</div></div>
 </div>
 <script>
 window.addEventListener('error',function(e){let el=document.getElementById('nojs'); if(el){el.style.display='block';el.textContent='Renderer error: '+(e.message||'JavaScript error')+'. Try Safari directly.'}});
@@ -64,6 +64,12 @@ const fields=[
 ['velDiff','Velocity diffusion X',0,2,.3,'Velocity & energy'],
 ['velCross','Velocity diffusion Y',0,2,.45,'Velocity & energy'],
 ['drive','Excitation strength',0,3,.75,'Driving & coupling'],
+['sustain','Time-varying drive',0,2,1.25,'Driving & coupling'],
+['tempo','Drive time frequency',.1,4,1.25,'Driving & coupling'],
+['beat','Incommensurate beat',0,1.8,.65,'Driving & coupling'],
+['phaseResponse','Local phase feedback',-2,2,.28,'Driving & coupling'],
+['energyPump','Kinetic energy feedback',0,2,1.1,'Velocity & energy'],
+['energyTarget','Target velocity RMS',.1,2,.72,'Velocity & energy'],
 ['frequency','Drive wavenumber',.35,3,1,'Driving & coupling'],
 ['forcingPhase','Drive phase',-3.14,3.14,0,'Driving & coupling'],
 ['forcingMix','Harmonic drive ratio',0,2,.65,'Driving & coupling'],
@@ -81,7 +87,7 @@ const fields=[
 ['speed','Run speed',.1,3,1,'Appearance']];
 const initial=Object.fromEntries(fields.map(a=>[a[0],a[4]])),P={...initial};
 const wave=new Float32Array(L),vel=new Float32Array(L),next=new Float32Array(L),nextV=new Float32Array(L),seedW=new Float32Array(L),seedV=new Float32Array(L),baseline=new Float32Array(L),referenceV=new Float32Array(L);
-let running=false,controlsOpen=false,frameId=0,steps=0,referenceStep=0,measure=0,W=400,H=800,dpr=1,seed=73,dragging=null,liveReady=false,lastT=0;
+let running=false,controlsOpen=false,frameId=0,steps=0,referenceStep=0,anchorStep=0,measure=0,velocityRMS=0,W=400,H=800,dpr=1,seed=73,dragging=null,liveReady=false,lastT=0;
 const byId=x=>document.getElementById(x);let pending=false;
 function hash(i){let x=(i*1664525+seed*1013904223)>>>0;x=(Math.imul(x^(x>>>16),2246822519))>>>0;return ((x^(x>>>13))>>>0)/4294967296}
 function initialize(){for(let j=0;j<K;j++)for(let i=0;i<N;i++){
@@ -96,11 +102,21 @@ const rip=.13*Math.sin(13*s+10*a)+.045*(hash(j*N+i)-.5);
 seedW[j*N+i]=envelope*(mode1+mode2+mode3)+packet+rip;
 seedV[j*N+i]=.11*Math.sin(3.2*s-5*a)+.08*Math.sin(9*s+3*a)
 }
-wave.set(seedW);vel.set(seedV);steps=0;referenceStep=0}
-function finiteCheck(){for(let i=0;i<L;i+=41)if(!Number.isFinite(wave[i])||Math.abs(wave[i])>60)return false;return true}
+wave.set(seedW);vel.set(seedV);steps=0;referenceStep=0;anchorStep=0;velocityRMS=0}
+function finiteCheck(){for(let i=0;i<L;i++)if(!Number.isFinite(wave[i])||Math.abs(wave[i])>60)return false;return true}
 function step(){
  const dt=.052,tx=25*P.tension,cy=16*P.cross,bi=3.4*P.dispersion,
- mu=.44*P.restoring,nl=.25*P.nonlinear,drag=.14+P.damping*.38,
+ // Autonomous pump and non-commensurate temporal excitation are part of the
+ // equation of motion, not renderer animation. The pump is saturating and
+ // reacts to a global measured kinetic velocity norm. Switch both to zero
+ // to recover the previous dissipative, static-drive model.
+ clock=steps*dt*P.tempo;
+ let kinetic=0;
+ for(let k=0;k<L;k+=4)kinetic+=vel[k]*vel[k];
+ velocityRMS=Math.sqrt(kinetic/(L/4));
+ const deviation=P.energyTarget*P.energyTarget-velocityRMS*velocityRMS;
+ const energyFeedback=P.energyPump*.34*Math.max(-1.2,Math.min(1.2,deviation));
+ const mu=.44*P.restoring,nl=.25*P.nonlinear,drag=.14+P.damping*.38,
  force=.22*P.drive,gain=P.gain*.11,tr=P.transport*.25,tw=P.twist*.15,
  soft=P.soften,pow=P.power,quintic=P.quintic,gr=P.gradient,
  fourY=P.bendY,mix=P.mixed,inh=P.inhom,detune=P.detune,
@@ -123,26 +139,40 @@ function step(){
    const powerForce=pow===3?q*q2:q*Math.pow(Math.abs(q),pow-1);
    const nonlinForce=-nl*powerForce/(1+soft*q2)-.018*quintic*q2*q2*q-.05*gr*q*adv*adv;
    const potential=-mu*q-(.15*detune*(a-.5)+.10*P.anharm*Math.cos(2*Math.PI*(omega*x+a)+phase))*q;
-   const drive=force*(Math.sin(x*18.4*omega+a*10.2+phase)+P.forcingMix*Math.sin(x*41*omega-a*13-2*phase));
+   // The old drive was static in space: once damping removed transients,
+   // the wave often approached a steady forced equilibrium. The new drive
+   // travels in time, with incommensurate component + optional local phase
+   // feedback from the evolving displacement. A zero sustain value restores
+   // the exact static-drive forcing term.
+   const base1=x*18.4*omega+a*10.2+phase;
+   const base2=x*41*omega-a*13-2*phase;
+   const stationary=Math.sin(base1)+P.forcingMix*Math.sin(base2);
+   const activePhase=clock+P.phaseResponse*Math.tanh(q);
+   const traveling=Math.sin(base1-activePhase)+P.forcingMix*Math.sin(base2-(1.61803398875+P.beat*.25)*clock+P.phaseResponse*Math.tanh(local));
+   const sustain=P.sustain;
+   const drive=force*((1-Math.min(1,sustain))*stationary+sustain*traveling);
    const coupling=tr*((local-q)*10+.96*adv)+tw*(2*adv)*(wave[dn+i]-wave[up+i])*38+.13*P.feedback*(local-q)*q2+.14*P.shear*(a-.5)*(2*adv);
-   const friction=-(drag+P.dragNon*.16*v*v)*v+gain*(1-P.pumpSat*v*v)*v+.20*vdx*dv+.20*vdy*dcross;
+   // Regulated Rayleigh-style pump replenishes energy when velocity RMS is
+   // below target, removes it when above target. The v³ limiter controls
+   // energetic high-velocity regions. Spatial diffusion stays unchanged.
+   const friction=-(drag+P.dragNon*.16*v*v)*v+(gain+energyFeedback)*(1-P.pumpSat*v*v)*v+.20*vdx*dv+.20*vdy*dcross;
    const f=waveForce+nonlinForce+potential+drive+coupling+friction;
    nextV[id]=v+dt*f;next[id]=q+dt*nextV[id];
   }
  }
  wave.set(next);vel.set(nextV);steps++;
 }
-function computeBaseline(){wave.set(seedW);vel.set(seedV);for(let i=0;i<68;i++)step();baseline.set(wave);referenceV.set(vel);referenceStep=steps;measure=0}
-function inspect(){if(running)return;wave.set(seedW);vel.set(seedV);for(let i=0;i<68;i++)step();if(!finiteCheck()){byId('ind').textContent='SOLVER ERROR';return}let sum=0;for(let j=0;j<L;j++){const e=wave[j]-baseline[j];sum+=e*e}measure=Math.sqrt(sum/L);draw()}
-function setReference(){seedW.set(wave);seedV.set(vel);computeBaseline();draw()}
-function updateSliderValue(k,v){P[k]=v;let sl=document.querySelector('input[data-k="'+k+'"]');if(sl){sl.value=v;sl.closest('.control').querySelector('output').textContent=k==='density'?String(Math.round(v)):Number(v).toFixed(2)}}
+function computeBaseline(){wave.set(seedW);vel.set(seedV);steps=anchorStep;for(let i=0;i<68;i++)step();baseline.set(wave);referenceV.set(vel);referenceStep=steps;measure=0}
+function inspect(){if(running)return;wave.set(seedW);vel.set(seedV);steps=anchorStep;for(let i=0;i<68;i++)step();if(!finiteCheck()){byId('ind').textContent='SOLVER ERROR';return}let sum=0;for(let j=0;j<L;j++){const e=wave[j]-baseline[j];sum+=e*e}measure=Math.sqrt(sum/L);draw()}
+function setReference(){seedW.set(wave);seedV.set(vel);anchorStep=steps;computeBaseline();draw()}
+function updateSliderValue(k,v){P[k]=v;let sl=document.querySelector('input[data-k="'+k+'"]');if(sl){sl.value=v;sl.closest('.control').querySelector('output').textContent=k==='density'?String(Math.round(v)):Number(v).toFixed(2);const exact=sl.closest('.control').querySelector('.precise');if(exact)exact.value=Number(v).toFixed(k==='density'?0:3)}}
 function resetAll(){running=false;byId('run').textContent='Run';Object.keys(initial).forEach(k=>updateSliderValue(k,initial[k]));initialize();computeBaseline();draw()}
 function setupSliders(){
  const groups=new Map();
  const wrap=byId('sliders');wrap.innerHTML='';
  for(const [k,title,min,max,val,group] of fields){
   let sub=groups.get(group);
-  if(!sub){const d=document.createElement('details');d.className='mathgroup';d.open=(groups.size<2);d.innerHTML='<summary>'+group+'</summary><div class="groupgrid"></div>';wrap.appendChild(d);sub=d.querySelector('.groupgrid');groups.set(group,sub)}
+  if(!sub){const d=document.createElement('details');d.className='mathgroup';d.open=(groups.size<2||group==='Velocity & energy'||group==='Driving & coupling');d.innerHTML='<summary>'+group+'</summary><div class="groupgrid"></div>';wrap.appendChild(d);sub=d.querySelector('.groupgrid');groups.set(group,sub)}
   const d=document.createElement('label');d.className='control';
   d.innerHTML='<header><span>'+title+'</span><output>'+Number(val).toFixed(2)+'</output></header><input data-k="'+k+'" type="range" min="'+min+'" max="'+max+'" step="'+(k==='density'?'1':'.01')+'" value="'+val+'"><input class="precise" type="number" data-num="'+k+'" min="'+min+'" max="'+max+'" step="0.01" value="'+val+'" aria-label="Exact value for '+title+'">';
   sub.appendChild(d);
@@ -156,7 +186,10 @@ function updateEquation(){
  const f=k=>Number(P[k]).toFixed(2),e=byId('equationText');if(!e)return;
  e.textContent='w_tt = '+(25*P.tension).toFixed(2)+' h(x,r) Δx w + '+(16*P.cross).toFixed(2)+' Δr w − '+(3.4*P.dispersion).toFixed(2)+' Δx² w − '+(1.4*P.bendY).toFixed(2)+' Δr² w + '+(.85*P.mixed).toFixed(2)+' ∂xr w\n'
  +'− '+(.44*P.restoring).toFixed(2)+' w − '+(.25*P.nonlinear).toFixed(2)+' w|w|^('+(P.power-1).toFixed(2)+')/(1+'+f('soften')+'w²) − '+(.018*P.quintic).toFixed(3)+'w⁵\n'
- +'+ F_drive(x,r) + F_coupling(w,∇w) + F_velocity(w_t)';
+ +'+ '+(.22*P.drive).toFixed(2)+'[(1−min(1,s))f₀(x,r)+s fₜ(x,r,t,w)] with s='+f('sustain')+'\n'
+ +'t-drive frequency='+f('tempo')+'; incommensurate beat='+f('beat')+'; local phase feedback='+f('phaseResponse')+'\n'
+ +' + ( '+f('energyPump')+'·0.34·clip('+f('energyTarget')+'²−RMS(wₜ)²,−1.2,1.2) )·(1−'+f('pumpSat')+'wₜ²)wₜ\n'
+ +' + F_coupling(w,∇w) + remaining velocity and spatial terms';
 }
 function resize(){const rect=stage.getBoundingClientRect();W=rect.width;H=rect.height;dpr=Math.min(window.devicePixelRatio||1,1.6);canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);draw()}
 function yPosition(a,x,field,band){
@@ -191,7 +224,7 @@ for(let i=0;i<N;i+=sample){
 ctx.stroke();
 }
 ctx.globalAlpha=1;
-byId('delta').textContent=(running?'RUN':'STILL')+' • '+steps+' steps • Δ '+measure.toFixed(4);
+byId('delta').textContent=(running?'RUN':'STILL')+' • '+steps+' steps • speed '+velocityRMS.toFixed(3)+' • Δ '+measure.toFixed(4);
 byId('ind').textContent=running?'RUNNING':'STILL';
 }
 function animate(t){if(running){const n=(P.speed>2.15?4:P.speed>1.1?2:1);for(let k=0;k<n;k++)step();if(!finiteCheck()){running=false;byId('run').textContent='Run';byId('ind').textContent='SOLVER ERROR'}else draw()}frameId=requestAnimationFrame(animate)}
