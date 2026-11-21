@@ -1,0 +1,709 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"><meta name="theme-color" content="#000000"><meta name="apple-mobile-web-app-capable" content="yes"><title>OMEF Studio 15 · 747-state native solver</title><style>:root{--bg:#03070c;--panel:#0b121a;--tile:#111d28;--line:#263747;--text:#eef6fa;--muted:#93a8b8;--aqua:#95f3eb;color-scheme:dark}*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:#000;color:var(--text);font:13px -apple-system,BlinkMacSystemFont,system-ui,sans-serif}button,input{font:inherit}button{touch-action:manipulation;cursor:pointer}
+#app{position:fixed;inset:0;display:flex;flex-direction:column;overflow:hidden;background:#000;isolation:isolate}
+#stage{position:relative;flex:0 0 42dvh;min-height:230px;max-height:47dvh;background:#000;border-bottom:1px solid #162532;overflow:hidden}
+#art{display:block;width:100%;height:100%;touch-action:none;background:#000}
+.toolbar{position:absolute;inset:10px 10px auto 10px;display:flex;align-items:center;gap:5px;z-index:5;pointer-events:none}
+.toolbar>*{pointer-events:auto}
+.brand{color:#ecf8fc;font-size:12px;font-weight:800;letter-spacing:.14em;padding:8px 6px 8px 0;margin-right:auto;text-shadow:0 1px 5px #000}
+.btn{background:#0d1b26d9;border:1px solid #29465b;color:#effcff;border-radius:9px;padding:9px 10px;font-size:11px;white-space:nowrap;backdrop-filter:blur(11px)}
+.btn.active{background:#96f5ea;color:#091923;border-color:#acefe7}
+#status{position:absolute;left:12px;bottom:12px;font:10px ui-monospace,SFMono-Regular,monospace;color:#89efe7;background:#061720cf;padding:5px 8px;border:1px solid #203a43;border-radius:6px;pointer-events:none}
+#boot{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#000;color:#9ca7ba;font:12px monospace;z-index:10}
+#boot[hidden]{display:none}
+#error{position:absolute;left:10px;right:10px;bottom:40px;color:#ffbeb7;background:#320d16;border:1px solid #903b3a;font:11px monospace;padding:9px;border-radius:6px;white-space:pre-wrap;z-index:11}
+#error[hidden]{display:none}
+#panel{background:var(--panel);flex:1;min-height:0;display:flex;flex-direction:column;position:relative;overflow:hidden}
+#panelhead{padding:13px 14px 8px;display:flex;gap:5px;align-items:center}
+#panelhead .identity{flex:1}
+#panelhead strong{display:block;font-size:14px;letter-spacing:.01em}
+#panelhead small{display:block;color:var(--muted);font-size:10px;margin-top:3px}
+#viewrow{display:flex;gap:7px;padding:6px 12px 9px;overflow-x:auto;flex:none;scrollbar-width:none}
+#viewrow::-webkit-scrollbar,#tabs::-webkit-scrollbar{display:none}
+.chip{background:transparent;border:1px solid #345063;color:#b5ceda;padding:8px 11px;border-radius:30px;font-size:11px;white-space:nowrap}
+.chip.active{background:#1c3e4c;color:#bffdf5;border-color:#7adbd8}
+#readouts{padding:3px 14px 7px;color:#8199a8;font-size:10px;line-height:1.35}
+#substatus{font-size:10px;color:#9bcfca;font-variant-numeric:tabular-nums;text-align:center;background:#091720;border-block:1px solid #1d313d;padding:7px 8px}
+#tabs{display:flex;gap:6px;padding:8px 10px 7px;overflow-x:auto;flex:none;scrollbar-width:none;border-bottom:1px solid #203342}
+.tab{background:#0d1a25;color:#a9c3cd;border:1px solid #263f50;border-radius:8px;padding:8px 12px;white-space:nowrap;font-size:11px}
+.tab.active{background:#a4ece7;color:#08242e;border-color:#a4ece7}
+#sliders{overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:10px 12px 35px;min-height:0}
+.control{border:1px solid #243d4e;border-radius:10px;padding:10px;background:#0e1c29;min-width:0;min-height:91px;display:flex;flex-direction:column}
+.clabel{display:flex;align-items:center;gap:4px;justify-content:space-between;font-size:11px}
+.clabel span{flex:1;min-width:0;line-height:1.2}.clabel strong{color:#93efe8;font:11px ui-monospace,monospace;white-space:nowrap}
+.control input{accent-color:#9cf5ea;width:100%;margin:9px 0 3px;min-height:14px}
+.control small{color:#7f9da9;font-size:9px;line-height:1.2}
+#calc{margin-left:7px;font:10px ui-monospace,monospace;color:#91aab7}
+#app.full #stage{position:absolute;inset:0;min-height:0;max-height:none;z-index:10;border:0}
+#app.full #panel{display:none}
+#app.full #stage .toolbar{top:max(env(safe-area-inset-top),10px)}
+#stretch,#resetView{display:none}#app.full #stretch,#app.full #resetView{display:block}
+@media(max-width:395px){.toolbar{gap:4px;left:6px;right:6px}.brand{font-size:11px;letter-spacing:.1em}.btn{padding:9px 8px;font-size:10px}.control{min-height:94px}}
+@media(max-height:640px){#stage{flex-basis:38dvh;min-height:155px}#panelhead{padding-top:6px}.control{min-height:74px}}
+</style></head><body>
+<div id="app">
+  <section id="stage" aria-label="OMEF mathematically driven visual sculpture">
+    <canvas id="art"></canvas>
+    <div id="boot">Initializing native 747-coordinate solver…</div>
+    <div id="error" hidden role="alert"></div>
+    <nav class="toolbar">
+      <div class="brand">OMEF 15</div>
+      <button id="play" class="btn">Play</button>
+      <button id="ref" class="btn">Set ref</button>
+      <button id="reset" class="btn">Reset</button>
+      <button id="stretch" class="btn">Stretch</button>
+      <button id="resetView" class="btn">Fit</button>
+      <button id="expand" class="btn">Expand</button>
+    </nav>
+    <div id="status">SOURCE ENGINE · STARTING</div>
+  </section>
+  <section id="panel">
+    <header id="panelhead"><div class="identity"><strong>Native OMEF · Interaction Studio</strong><small>String · bulk · 2 qubits · 100 levels · 62 ports</small></div></header>
+    <nav id="viewrow" aria-label="Visual measurements"></nav>
+    <div id="readouts">Verified mathematical sources</div>
+    <div id="substatus"></div>
+    <nav id="tabs" aria-label="Mathematical controls"></nav>
+    <div id="sliders"></div>
+    <div id="calc">Source 747-state solver</div>
+  </section>
+</div>
+<noscript><div style="position:fixed;inset:10%;z-index:100;background:#000;color:#fff;text-align:center;padding:15px">JavaScript is disabled in this document viewer. Please open the hosted webpage in Safari rather than the file preview.</div></noscript>
+<script id="seed747" type="application/json">[-0.13026581141523305,-0.29195456543707354,0.013905038539338506,-0.13308241120967157,-0.25029507893495134,0.004317139718698481,-0.12696097032038456,-0.18434104941289292,0.005198966544541405,-0.07732947619312293,-0.12927289235443967,-0.017775124602244525,0.01611457877244931,-0.08565659831861837,-0.07426307204748712,0.11255671729192027,-0.022823632839143855,-0.12394443685363271,0.17160146837387152,0.07402658721390229,-0.12146654112830578,0.18966384837605701,0.1759604603521067,-0.07408836210350178,0.1895993446599243,0.23804994898355727,-0.03213456854138847,0.18678692150919468,0.24442289359552494,-0.02431241750403098,0.17909662405118615,0.21432298320774154,-0.02647798373055545,0.1640932996982801,0.17146913687705348,-0.0040730442798911255,0.1468522333650891,0.12558738908670816,0.035221628484951154,0.12482456716886016,0.08562623974920028,0.0530528591388653,0.08050849616581951,0.07046677442389895,0.036173797039462156,0.004196871797950106,0.08917235524714194,0.014753947371665238,-0.08170084741811239,0.11756801473617985,0.01921489129458047,-0.1374598157048537,0.11322301996939524,0.040487690399118245,-0.1482162283822995,0.058171674188261184,0.04927430373764475,-0.13888696985257548,-0.024879051170747506,0.04094707019218715,-0.14059949796411725,-0.10359418905075336,0.03805608227000543,-0.15362597905544986,-0.1701534415400252,0.050399165100981656,-0.15602938988819312,-0.23264696962091092,0.05729745753721295,-0.1417375738265888,-0.28245000895111466,0.040235513421785156,-0.10846955567729977,0.0480123554379394,0.15266106306357302,-0.02001027947015737,-0.03324157479628285,0.014781624464461915,-0.03118307817659193,0.007001044091188146,-0.09689757404585564,0.037251881772680115,0.033369248843261305,-0.2070104803892359,-0.00936920535252546,0.013847844502447122,0.047704104622359036,-0.0693676292973746,-0.11288291246231213,-0.0808123968432784,0.04658348195622882,-0.07240601826431182,-0.0649522239795042,0.09722007410453887,-0.06682339510572458,-0.07638377276406257,-0.007755192898636542,0.016881893894575728,0.08819852098705615,-0.07474285290123639,-0.13329314052700014,-0.010412215383073653,0.05470912933700072,-0.1259297561762001,-0.04141735634169924,0.026026641988780803,0.019637065501881025,0.007085514227978319,-0.021835608977091955,-0.06794444893607758,-0.07889173008170179,0.09828228991312667,-0.09496282576526607,0.10438000837399151,-0.11177996704855286,0.246804451892692,-0.14773942895508832,0.13636331545359665,-0.07625113341216737,-0.009827315843068755,-0.005571968527753714,-0.05543892653152416,0.1894133739599028,0.00806780442345355,-0.11229126815460506,0.054957626175860017,0.06055414846211628,-0.09753605825742001,0.04552710856788689,0.005861241973945775,0.06972853112278872,0.060536615102538785,-0.0007176045592059268,-0.03470404378232942,0.07738167806746114,0.026621932342210206,-0.12658857671628984,-0.04631387976944681,-0.04108155388171886,-0.022283133002849894,0.19416482548621228,-0.032069420903704765,0.040573616561215914,0.14070333504041366,0.009065763602749237,0.007773796303279814,0.02336325674274626,0.0035515924161887576,0.003347682855959467,0.012397293788858366,0.007417383949434375,-0.01224643546141734,-0.020986035037107192,-0.002040704922798042,0.025164216600939104,-0.004075483607979509,0.020671730854467243,0.0074267767641663235,-0.00556014654068893,-0.04740110841904192,0.003998405807267273,-0.0049850125409497265,-0.028809346622230832,0.009261086370231316,-0.00045760531778863463,0.006750955274789708,-0.01087948612585438,0.003636406100469883,-0.008518174848645267,0.019169040115677133,0.0022378619965846853,-0.02524543707138941,0.0038576888499074263,0.0012175400752236947,-0.003661999183337879,-0.02429392043906875,0.01907168004229499,-0.013168744559218662,0.028487437955054897,-0.011878991679259352,0.0005845834683752603,-0.0008066325679588242,0.002721139696794899,0.04758147018075563,-0.008969180480470849,0.03725023237103214,0.011222248035148265,-0.012510135738878863,0.022600088295931124,0.015134839314069995,0.017179863335913342,-0.02401171923464402,0.009050608891843462,-0.00724528613643491,-0.0025589807866868283,-0.0023662491026037813,0.0007320302526682206,0.028627983696183523,0.0068119234496509485,-0.03320569867415772,0.022443618847177382,0.001577575912403417,0.002367492885645147,-0.03287988059131248,0.0071955598113929405,-0.008981378421477844,0.017201159249885106,0.008212107852184201,0.01489894700798496,-0.0067149325957750255,-0.03292827696946351,0.017438268476871844,0.007566298825084552,-0.005951156296356796,-0.010027159473026646,-0.015941004163534372,-0.031725658857024525,-0.02118966616427436,-0.0012620204299603197,0.028970352131276453,0.008156972534473119,0.028886018027426,-0.018176817200802452,0.022620269765612475,-0.00749039668231223,0.026393925939956677,0.022111113076687804,0.0006365304848989126,0.002420945939991526,0.02191382581772113,-0.014323758918982823,-0.038932395961245876,0.014704733931979385,0.03922419038669533,-0.03413130364138628,0.003773565125342603,-0.021278777873766707,-0.005220361231167102,-0.01800043453304371,0.015748579913026205,-0.009813312291153222,-0.003471257433599802,-0.019507859316557734,0.013192066760115993,-0.009177726767624872,-0.006810741054187665,-0.0013607688462631152,-0.026131730183389056,-0.000375165947095068,-0.02901412340720507,-0.003925857726517357,-0.003955574612184355,-0.007206555396922156,-0.003596932827566438,-0.012139642479837743,0.009193740509622593,-6.150214107585015e-05,-0.008487040985943304,-0.004126074751389479,-0.012187093383211056,-0.0022950844184756293,-0.005640628313966284,-0.03242940219488644,0.029655790549217007,-0.008009673541778528,-0.01208588854817082,0.0054077715194241986,-0.03760648489861365,-0.007161097963745036,0.005514000603267177,-0.004764999690192342,0.0011484352140766784,-0.008000757482133464,-0.006634345819245671,-0.0007355777320359074,0.00272797547891661,-0.019714994683151785,0.0050194444225547,0.005351605706166729,-0.011139579995126726,-0.010314559056859324,0.0021027851824265958,0.020930897386529104,0.019573688216967835,-0.014979595739869995,-0.009756764955673574,-0.01012620334379683,0.006847781164035629,-0.002908363041112589,0.005708018486504803,0.022374961359214598,0.0037704893885052966,0.00706481764959197,0.005974719275349072,-0.014093105891693995,-0.003185868290928239,-0.004685709587368391,-0.0097135273028114,0.02662445279158802,0.009503249332383152,-0.04902313166322964,-0.015387820083621866,-0.0024858451562565454,-0.0008069006312304446,-0.01559729863501561,-0.006678720388763084,-0.007867083106249357,-0.009257662884880325,0.01057491253981681,-0.0017088584461590157,-0.011005913669655209,-0.006090420704607939,-0.0008460703945473288,-0.020565887695366377,-0.010668562186169139,0.010147794782335176,0.017235268141997127,-0.04303049725246187,0.043562775803925015,-0.011705994851152084,0.014135866835211525,-0.02480403520866971,0.012436006586344932,0.0004607587407880375,-0.0014416984281305986,-0.005401825635269781,-0.004552233556652971,0.013261657999272836,-0.013584616680790253,-0.004590410001747566,-0.0071069725250144595,-0.02943522741709405,0.0016834232966915076,-0.0007002427509865148,-0.008659545123266374,-0.024623568071759683,-0.006290407546177663,-0.0029363308164708306,-0.0001836290818970289,0.0009261236616607651,-0.021595322775941887,0.018394981990827005,0.014279637205689972,0.01421525161715091,0.008411539305710604,0.023713336109904178,0.01317972922938046,0.020314232962172826,0.005890517965149172,0.0026280588270235447,0.011416535915156437,-0.012642744619594463,-0.004067673885220933,0.003736742873204187,-0.01058491860023264,-0.04400887726936783,-0.010506093888068502,-0.01337140124978653,0.015484821038440068,-0.034353187794326064,-0.007701187787970525,0.015907296143546933,-0.023668022282306574,-0.002768291529543013,-0.006473647091070105,-0.01723043329168079,9.138179660268218e-06,-0.00893576414386454,-0.027128996561786797,-0.006177052445789465,-0.013580076584977346,0.01070989234844979,4.066286868374917e-05,-0.011174064522241615,0.001938997174850802,0.01895946176525527,-0.013006847488714992,-0.010197238125799061,-0.0011523996269018964,0.0003449530409004204,0.0015315444674347653,-0.015213578941115158,0.0009028219956010953,-0.011879605670662189,-0.007971932609632047,0.008918504623990457,-0.0074634918764444344,0.0057899169524150505,-0.0035237730248503726,0.001423675239957398,0.0013130081709505712,0.006171860429725078,0.007108292870280342,-0.007590239374157056,0.01638923345721482,0.005864888257307292,0.00938317738295862,0.009797776854338065,-0.004837293007299179,-0.000699275012267144,0.0007712155970742692,0.0028026404973439272,0.016931448972464763,0.018525132332956513,0.03454638376146276,0.01836438989246917,0.016878735945000674,-0.0006433763819605283,-0.008311781841512331,0.0002564754086225399,-0.002744070746915663,-0.01000340395870071,-0.002356341159295596,0.004401979030078171,0.0005740518320292587,0.009108039360435421,0.006271004839309523,0.004425117829605293,0.012754004046235815,-0.000944531404741345,0.000907504272313891,0.014748387306970269,0.00974751670066012,-0.014882743548319078,0.0014021626985889807,0.015594043601837467,0.004988020342438297,0.012492284128921359,-0.014870404743423105,0.004726766478848072,-0.019848406537946218,0.007406110051447348,-0.011881482789828444,0.014472517463740706,-0.006468294244697201,0.0016044083545189332,0.0031411877427508983,0.00021568702034596775,-0.015014752328521213,0.00762985952158187,-0.004626556263886344,0.024867835149861017,-0.002266955182572081,0.002588516248788832,-0.002906008604123171,0.017635981051193232,0.015402148263948019,0.006544760231607418,0.010815592820841203,-0.008411536319784764,-0.009094827214879211,0.013376961479700125,-0.008226082580160313,-0.0026563530226908134,-0.015165391812380238,-0.0035445276455243354,0.004474948379878912,-0.00047480264860052883,-0.014932805336569264,0.00825279102801428,0.0019819268670638952,-0.025262416830391855,-0.010744565219517261,-0.003292552013951681,-0.005190133720498468,0.0017481362493606883,0.01091185544554144,-0.000686315942586931,-0.0008056388848113828,0.013691643594286897,0.016155253765989985,-0.003013074052265844,0.016310469967288965,-0.017450374146317917,0.015767575709975407,0.004914526116182018,-0.008366334965498354,-0.0049188436158513,0.0014018636080987857,0.013421476894981079,0.00881037429646507,0.003061032226314199,-0.003762041521835979,0.0010031502819666215,-0.01204565183776874,-0.004007482218980328,-0.008540200518701267,-0.0036138826514101703,0.0044020720241428404,-0.0032921792717213435,-0.017816236129520057,0.010735528216387293,-0.00028293510006058644,0.0041188336088579264,-0.007259706183571944,-0.0027448907690286106,-0.003141723787219934,0.014005480430290578,-0.01255790733966923,0.008570350810913672,-0.0011186674477433383,0.006725757396090602,-0.006501891840355731,-0.016936484700285963,0.008798737939487641,-0.004135173024147403,0.00437660560579427,0.00664617594381952,-0.017727650747345027,-0.005414279781236374,-0.0024104003932080486,0.00534762629395936,0.005671711942476706,0.007473989985654268,-0.0025030726859001464,0.013253724127836194,0.00014216348392814333,-0.0008403080560101235,-0.005068209236416282,-0.011470559160808849,-0.00034609262793743024,0.0024827995332412913,0.002641370838883569,0.02163423256495787,0.0029220934495145425,0.003616483935220172,-0.01311573868123247,-0.00262883974701677,0.00017545268483707188,0.004623390695485494,-0.002142565184146154,0.0033030470297474145,-0.010041943360042896,0.011145994426940538,0.010124289494100396,-0.011544294231444515,-0.015254282215017128,-0.006918083413001891,0.0013486027262680496,-0.009079824028092789,0.0013566269198487643,0.007225608162735906,0.009445456416559611,0.010798552462962305,-0.014939899926427365,-0.020205082599103644,0.004616221424919328,-0.00807110151215549,-0.008000057522342603,-0.011210898608841864,-0.0068804879109374715,0.004904581258148721,-0.015079544536154352,-0.014203639232256211,0.00942620077248649,0.00557865602555463,-0.017671608002457935,-0.019262397176153113,0.0026738414213759477,0.007396389444178775,0.019406548501314763,0.00545296571569525,0.005255515134948557,-0.0037370392457570494,-0.0006873572847202507,-0.005477381312508796,0.010371642278724693,0.0024482007834312055,0.009271412431183429,0.0017614138436426088,-0.010695956451078313,-0.0015751969313153918,0.009333482792549828,0.0023229217453124337,-0.018631068666942724,0.009185047480162219,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.4369834611201394,0.4074668567473395,0.5914894168858145,0.6070978948896089,0.5385180887136972,0.5337911879488262,0.4394119462508901,0.13913185909304657,0.19854590205072645,-0.10136287246000618,-0.15036695780445797,-0.29207594290803474,-0.5884696869013799,-0.47095054713819406,-0.6544282905426339,-0.598705015718762,-0.7953314440293845,-0.5454842384509246,-0.7062564821800321,-0.20051025873806427,-0.05640707981685043,0.01654645050325261,0.2765574222331422,0.24849080995011194,0.3854251567761595,0.3561382749933942,0.44932992684411305,0.2273047436842327,0.2998233328005213,0.21899598598801273,0.1516603668567169,-0.15597611266086073,-0.17349495560518988,-0.14454042049820448,-0.2304359686475469,-0.041268237825143717,-0.3858690616182332,0.13036128179550044,0.09944701423551999,0.10689212194138227,0.40106283106517726,0.4599568783274657,0.44348579032992647,0.5765743228361684,0.43858567865628934,0.5362020078343219,0.4003010536555932,0.10078257863152676,-0.08424862625279302,-0.02686102014283941,-0.34578580929935837,-0.3366943626540111,-0.4810930970486392,-0.702958013045135,-0.8700920992764583,-0.6672361319496071,-0.5984639979230271,-0.47449449315710135,-0.4269949358726132,-0.3329389813088936,-0.060192808917731724,0.10992163259919557,0.2633525500747564,0.35990486680619876,0.49156100478825415,0.642237472005226,0.5874091797141776,0.5305746388896275,0.3309800817055658,0.20873287707446062,0.23599954734464718,0.2663758980240125,-0.16174720545027563,-0.24366013544930898,-0.14736811909783765,-0.3163812796908196,-0.22119847056759928,-0.1992814856377373,-0.1548582254535795,-0.056895188215949244,0.012479841692618732,0.10509625832299663,0.2984452470912128,0.26525902459922746,0.3637411049251504,0.2030800237115832,0.35842574303383024,0.22507482550159547,0.025475147720116165,-0.18125503342852547,-0.18152685636147453,-0.18659670649169982,-0.4009323137671088,-0.540768990240323,-0.7773521051230996,-0.6207214855563012,-0.8941825032795225,-0.6653239598130153,-0.513339398763116,-0.23256429105203688,-0.062282050824793767,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]</script>
+<script>/* OMEF-2X Stage-62/RPC100 browser port — finite 747-real state. 
+   Mathematical source: uploaded omef_core_reference.py, omef_piqh_port.py, 
+   omef_full_rpc100.py and omef62_bridge.py. No original calibrated T0.
+   Here all numerical controls act inside RHS; view controls never do. */
+(function(root){ 'use strict';
+const NS=24, NB=216, NR=62, NL=101, D=747, DS=2*Math.PI/NS, H=.8, DV=H**3;
+const Q=0,P=72,PHI=144,PI=360,PR=576,PII=580,TH=584,PORT=685;
+const TPI=Math.PI*2;
+const defaults={tension:.35,quartic_s:.16,wave_speed:.68,mass_b_sq:.60,quartic_b:.12,kappa:.45,alpha:.40,ell:.8,eta:.24,xi:.45,g:.55, damping_s:0,damping_b:0,pump:0,p0:1,
+  rpcGamma:.17,mix:.35,xi_string:.6,zeta:.25,omega0:.3,a_log:.15,b_arg:.12,mu:.25,log_scale:3,
+  gate:.25,interaction:.32,relaxation:.47,source_gain:.18,multiscale_drive:.28,network_gain:.025,mobility:.19,
+  quantumHarmonic:0,harmonicFloor:.03,visGain:1,visPort:1,visPhase:1,visBulk:1};
+const coords=new Float64Array(NB*3), left=new Float64Array(NB), right=new Float64Array(NB), lapNeighbors=Array.from({length:NB},()=>[]);
+for(let x=0;x<6;x++)for(let y=0;y<6;y++)for(let z=0;z<6;z++){
+  const i=(x*6+y)*6+z;
+  coords[3*i]=(x-2.5)*H;coords[3*i+1]=(y-2.5)*H;coords[3*i+2]=(z-2.5)*H;
+  if(x===0)left[i]=1/36;if(x===5)right[i]=1/36;
+  for(const [a,dx,dy,dz] of [[0,1,0,0],[0,-1,0,0],[1,0,1,0],[1,0,-1,0],[2,0,0,1],[2,0,0,-1]]){
+    const nx=x+dx,ny=y+dy,nz=z+dz;
+    if(nx>=0&&nx<6&&ny>=0&&ny<6&&nz>=0&&nz<6)lapNeighbors[i].push((nx*6+ny)*6+nz);
+  }
+}
+const bModes=new Float64Array(NR*NB),sModes=new Float64Array(NR*NS*3), phasesW=new Float64Array(NL), branchIdx=new Int16Array(NR);
+for(let j=0;j<NR;j++){
+  const n=j+1, fx=Math.floor(n/36),fy=Math.floor(n/6)%6,fz=n%6;
+  let norm=0;
+  for(let x=0;x<6;x++)for(let y=0;y<6;y++)for(let z=0;z<6;z++){
+    let node=(x*6+y)*6+z;
+    let v=Math.cos(Math.PI*(x+.5)*fx/6)*Math.cos(Math.PI*(y+.5)*fy/6)*Math.cos(Math.PI*(z+.5)*fz/6);
+    bModes[j*NB+node]=v;norm+=v*v;
+  }
+  norm=Math.sqrt(norm);
+  for(let a=0;a<NB;a++)bModes[j*NB+a]/=norm;
+  const axis=j%3, band=Math.floor(j/6)%10+1;
+  for(let i=0;i<NS;i++){
+    const sig=TPI*i/NS;
+    const wave=j>=60 ? 1:Math.floor(j/3)%2===0 ? Math.cos(band*sig):Math.sin(band*sig);
+    sModes[j*(NS*3)+3*i+axis]=wave/NS;
+  }
+  branchIdx[j]=(j*37+3)%100;
+}
+for(let i=0;i<100;i++)phasesW[i]=Math.pow(.5,i+1);
+phasesW[100]=Math.pow(.5,100);
+// 15 unique Hermitian nonidentity two-qubit Pauli operators.
+const I=[[1,0],[0,0],[0,0],[1,0]], X=[[0,0],[1,0],[1,0],[0,0]], Y=[[0,0],[0,-1],[0,1],[0,0]], Z=[[1,0],[0,0],[0,0],[-1,0]];
+function kron(A,B){const mr=new Float64Array(16),mi=new Float64Array(16);for(let a=0;a<2;a++)for(let b=0;b<2;b++)for(let c=0;c<2;c++)for(let d=0;d<2;d++){
+ let i=(2*a+c)*4+2*b+d,ii=2*a+b,jj=2*c+d;
+ const ar=A[ii][0],ai=A[ii][1],br=B[jj][0],bi=B[jj][1];mr[i]=ar*br-ai*bi;mi[i]=ar*bi+ai*br;
+}return {r:mr,i:mi};}
+const pauli2=[I,X,Y,Z],ops=[];
+for(let a=0;a<4;a++)for(let b=0;b<4;b++)if(a+b>0)ops.push(kron(pauli2[a],pauli2[b]));
+const ZA=ops[11], ZB=ops[2], XX=ops[4], ZZ=ops[14];
+function matExpectation(state,m){
+  let real=0,imag=0;
+  for(let a=0;a<4;a++){
+    const ur=state[PR+a],ui=state[PII+a];
+    for(let b=0;b<4;b++){
+      const mr=m.r[a*4+b],mi=m.i[a*4+b],vr=state[PR+b],vi=state[PII+b];
+      const rr=mr*vr-mi*vi,ii=mr*vi+mi*vr;
+      real+=ur*rr+ui*ii;imag+=ur*ii-ui*rr;
+    }
+  }
+  return real;
+}
+function matAddMatrix(Hr,Hi,m,s){for(let i=0;i<16;i++){Hr[i]+=s*m.r[i];Hi[i]+=s*m.i[i];}}
+function matPsiRhs(state,Hr,Hi,d){
+ for(let a=0;a<4;a++){
+   let real=0,imag=0;
+   for(let b=0;b<4;b++){
+     const i=4*a+b,br=state[PR+b],bi=state[PII+b];
+     real+=Hr[i]*br-Hi[i]*bi;imag+=Hr[i]*bi+Hi[i]*br;
+   }
+   d[PR+a]+=imag;d[PII+a]-=real;
+ }
+}
+function lin3min(matrix){
+  // min eigenvalue of symmetric 3x3 covariance, Jacobi iterations
+  const A=matrix.slice();
+  for(let t=0;t<12;t++){
+    let p=0,q=1,max=Math.abs(A[1]);
+    for(const [u,v] of [[0,2],[1,2]]){const f=Math.abs(A[u*3+v]);if(f>max){p=u;q=v;max=f;}}
+    if(max<1e-14)break;
+    const app=A[p*3+p],aqq=A[q*3+q],apq=A[p*3+q];
+    const angle=.5*Math.atan2(2*apq,aqq-app),co=Math.cos(angle),si=Math.sin(angle);
+    // rotation R where R[p,p]=c,R[p,q]=s,R[q,p]=-s,R[q,q]=c; choose sign only eigenvalues relevant
+    const old=A.slice();
+    for(let k=0;k<3;k++){
+      const akp=old[k*3+p],akq=old[k*3+q];
+      A[k*3+p]=co*akp-si*akq;A[k*3+q]=si*akp+co*akq;
+    }
+    const temp=A.slice();
+    for(let k=0;k<3;k++){
+      const apk=temp[p*3+k],aqk=temp[q*3+k];
+      A[p*3+k]=co*apk-si*aqk;A[q*3+k]=si*apk+co*aqk;
+    }
+  }
+  return Math.min(A[0],A[4],A[8]);
+}
+function proxyReadouts(s,bulkLap,aa,bb,expZa,expZb){
+  // Faithful proxies for EXPANDED_STATUS from uploaded omef62_bridge.py;
+  // no original E15-H block-specific state equations are invented.
+  let qSq=0,pSq=0,phiSq=0,piSq=0,gradSq=0,qz=0,psum=0;
+  let mean=[0,0,0],pmean=[0,0,0];
+  for(let a=0;a<NS;a++)for(let k=0;k<3;k++){
+    const ix=3*a+k,q=s[Q+ix],p=s[P+ix];qSq+=q*q;pSq+=p*p;mean[k]+=q;
+    const diff=s[Q+3*((a+1)%NS)+k]-q;gradSq+=diff*diff;
+  }
+  mean=mean.map(x=>x/NS);
+  for(let a=0;a<NB;a++){phiSq+=s[PHI+a]**2;piSq+=s[PI+a]**2;}
+  const qNorm=Math.sqrt(qSq/(NS*3)),pNorm=Math.sqrt(pSq/(NS*3)),phiNorm=Math.sqrt(phiSq/NB),piNorm=Math.sqrt(piSq/NB);
+  const qcent = new Float64Array(NS*3), G=new Float64Array(9),B=new Float64Array(9);
+  for(let a=0;a<NS;a++)for(let j=0;j<3;j++){
+    qcent[3*a+j]=s[Q+3*a+j]-mean[j];
+  }
+  for(let j=0;j<3;j++)for(let k=0;k<3;k++){
+    let sum=0,b=0;
+    for(let a=0;a<NS;a++){
+      sum+=qcent[3*a+j]*qcent[3*a+k];
+      b+=qcent[3*a+j]*s[P+3*a+k]-s[P+3*a+j]*qcent[3*a+k];
+    }
+    G[j*3+k]=sum/NS+(j===k?1e-3:0);B[j*3+k]=b;
+  }
+  const normarr=(a)=>Math.sqrt(a.reduce((sum,x)=>sum+x*x,0)/a.length);
+  const Bnorm=normarr(Array.from(B));
+  let fourQ=[], fourP=[];
+  for(let k=0;k<=NS/2;k++){
+    const qr=[],pr=[];
+    for(let c=0;c<3;c++){
+      let x=0,y=0,vx=0,vy=0;
+      for(let a=0;a<NS;a++){
+        const ang=TPI*k*a/NS,co=Math.cos(ang),si=-Math.sin(ang);
+        const q=s[Q+3*a+c],p=s[P+3*a+c];
+        x+=q*co;y+=q*si;vx+=p*co;vy+=p*si;
+      }
+      qr.push(x,y);pr.push(vx,vy);
+    }
+    fourQ.push(qr);fourP.push(pr);
+  }
+  const fftnorm=(min,max,subtract=false)=>{
+    let sum=0,num=0;
+    for(let k=min;k<max;k++)for(let j=0;j<6;j+=2){
+      const ar=fourQ[k][j]-(subtract?fourP[k][j]:0),ai=fourQ[k][j+1]-(subtract?fourP[k][j+1]:0);
+      sum+=ar*ar+ai*ai;num++;
+    }
+    return Math.sqrt(sum/num);
+  };
+  let nablaPhi=0;for(let a=0;a<NB;a++)nablaPhi+=bulkLap[a]*bulkLap[a];nablaPhi=Math.sqrt(nablaPhi/NB);
+  let sumMetric=0;for(let a=0;a<NB;a++)sumMetric+=s[PHI+a]*s[PHI+a];sumMetric/=NB;
+  const flux=(()=>{let f=0;for(let a=0;a<NB;a++)f+=(left[a]-right[a])*bulkLap[a];return f;})();
+  const purity=(()=>{let norm=0;for(let j=0;j<4;j++)norm+=s[PR+j]**2+s[PII+j]**2;return norm*norm;})();
+  const ent=qubitEntropy(s);
+  const mNorm=Math.sqrt(mean.reduce((x,y)=>x+y*y,0)/3);
+  const evenSample=[];for(let a=0;a<NS;a+=Math.max(1,Math.floor(NS/4)))for(let j=0;j<3;j++)evenSample.push(s[Q+a*3+j]);
+  const pSample=[];for(let a=0;a<NS;a+=Math.max(1,Math.floor(NS/4)))for(let j=0;j<3;j++)pSample.push(s[P+a*3+j]);
+  const raw=[
+    qNorm,pNorm,Math.exp(.3*qNorm),.35,fftnorm(1,13),fftnorm(1,13,true),Math.exp(.1*phiNorm),0,0,
+    mNorm,(aa+bb)*.5 /* override mean phi below */,Bnorm,lin3min(G),normarr(evenSample),normarr(pSample),
+    Math.sqrt(gradSq/(NS*3)) + Math.abs(.5-.5),
+    phiNorm,1+phiNorm,sumMetric,nablaPhi,Math.hypot(aa,bb),expZa,aa*aa+bb*bb,purity,ent,
+    nablaPhi,2*ent,Math.abs(aa-bb),Math.abs(flux),fftnorm(1,4),piNorm*.01
+  ];
+  let phiMean=0;for(let a=0;a<NB;a++)phiMean+=s[PHI+a];raw[10]=phiMean/NB;
+  return Float64Array.from(raw,x=>Math.tanh(x));
+}
+function qubitEntropy(s){
+  // For pure two-qubit state: eigenvalues of rho_A from |det(Psi)|² / ||psi||⁴.
+  let n=0;for(let a=0;a<4;a++)n+=s[PR+a]**2+s[PII+a]**2;
+  let ar=s[PR],ai=s[PII],br=s[PR+1],bi=s[PII+1],cr=s[PR+2],ci=s[PII+2],dr=s[PR+3],di=s[PII+3];
+  let rr=ar*dr-ai*di-br*cr+bi*ci,ii=ar*di+ai*dr-br*ci-bi*cr;
+  const det=(rr*rr+ii*ii)/Math.max(1e-30,n*n),disc=Math.sqrt(Math.max(0,1-4*det)),la=(1+disc)/2,lb=(1-disc)/2;
+  return -(la>1e-15?la*Math.log(la):0)-(lb>1e-15?lb*Math.log(lb):0);
+}
+function diagnostics(s,params=defaults){
+  let q2=0,p2=0,b2=0,port2=0,qubit2=0,bulkMean=0;
+  for(let j=0;j<72;j++){q2+=s[Q+j]*s[Q+j];p2+=s[P+j]*s[P+j];}
+  for(let j=0;j<NB;j++){b2+=s[PHI+j]*s[PHI+j];bulkMean+=s[PHI+j];}
+  for(let j=0;j<NR;j++)port2+=s[PORT+j]*s[PORT+j];
+  for(let j=0;j<4;j++)qubit2+=s[PR+j]**2+s[PII+j]**2;
+  const rpc=port100(s,params);
+  return {stringRMS:Math.sqrt(q2/72),velocityRMS:Math.sqrt(p2/72),bulkRMS:Math.sqrt(b2/NB),bulkMean:bulkMean/NB,portRMS:Math.sqrt(port2/NR),qubitNorm:qubit2,qubitEntropy:qubitEntropy(s),conditionalCoherence:rpc.C,globalCoherence:rpc.globalC,complexLogReal:rpc.realLog,complexLogImag:rpc.imagLog,phaseLevels:rpc.localC};
+}
+function port100(s,cfg){
+  const Aa=new Float64Array(NL),Ab=new Float64Array(NL),localC=new Float64Array(100),dC=new Float64Array(NL);
+  Aa[100]=Math.cos(s[TH+100]);Ab[100]=Math.sin(s[TH+100]);
+  for(let j=99;j>=0;j--){
+    Aa[j]=.5*(Math.cos(s[TH+j])+Aa[j+1]);
+    Ab[j]=.5*(Math.sin(s[TH+j])+Ab[j+1]);
+    localC[j]=Aa[j]**2+Ab[j]**2;
+  }
+  let mean=0;for(let j=0;j<100;j++)mean+=localC[j];mean/=100;
+  const globalC=Aa[0]**2+Ab[0]**2,C=(1-cfg.mix)*globalC+cfg.mix*mean;
+  let carryR=0,carryI=0;
+  for(let j=0;j<100;j++){
+    const w=cfg.mix/100+(j===0?1-cfg.mix:0);
+    carryR=.5*(carryR+w*Aa[j]);carryI=.5*(carryI-w*Ab[j]);
+    const th=s[TH+j],expR=Math.cos(th),expI=Math.sin(th);
+    dC[j]=-2*(expR*carryI+expI*carryR);
+  }
+  {const th=s[TH+100];dC[100]=-2*(Math.cos(th)*carryI+Math.sin(th)*carryR);}
+  let wa=0,wb=0,z=0;
+  for(let a=0;a<NB;a++){wa+=left[a]*s[PHI+a];wb+=right[a]*s[PHI+a];}
+  for(let i=0;i<NS;i++)z+=s[Q+3*i+2];z/=NS;
+  const zz=matExpectation(s,ZZ);
+  const S=wa-wb+cfg.xi_string*z+cfg.eta*cfg.zeta*zz;
+  const zr=1+wa/cfg.log_scale,zi=wb/cfg.log_scale;
+  const realLog=.5*Math.log(zr*zr+zi*zi+1e-18),imagLog=Math.atan2(zi,zr);
+  const denom=new Float64Array(NL),dPhase=new Float64Array(NL);
+  for(let j=0;j<NL;j++){
+    const level=j+1;
+    denom[j]=(1-cfg.mix)*phasesW[j]+cfg.mix/200;
+    const omega=cfg.omega0*Math.sqrt(level);
+    const aa=cfg.a_log*(level/101-.5),bb=cfg.b_arg*((level%3)-1);
+    const grad=-cfg.rpcGamma*S*dC[j];
+    dPhase[j]=omega+aa*realLog+bb*imagLog-cfg.mu*grad/denom[j];
+  }
+  return {C,globalC,localC,dC,S,realLog,imagLog,dPhase,denom,wa,wb};
+}
+function rhs(s,cfg={}){
+  const p={...defaults,...cfg};const d=new Float64Array(D);
+  // Phase0 forward bulk canonical Neumann graph operator
+  const lg=new Float64Array(NB),weights=new Float64Array(NS*NB),delta=new Float64Array(NS),grad=new Float64Array(NS*3),bulkSource=new Float64Array(NB);
+  for(let a=0;a<NB;a++){
+    let lap=0;const v=s[PHI+a];for(const b of lapNeighbors[a])lap+=(v-s[PHI+b])/(H*H);lg[a]=lap;
+  }
+  let wa=0,wb=0;
+  for(let a=0;a<NB;a++){wa+=left[a]*s[PHI+a];wb+=right[a]*s[PHI+a];}
+  for(let i=0;i<NS;i++){
+    // Normalized moving Gaussian interpolation includes derivative of normalization.
+    let max=-1e300;
+    const x=s[Q+3*i],y=s[Q+3*i+1],z=s[Q+3*i+2];
+    for(let a=0;a<NB;a++){
+      const dx=coords[3*a]-x,dy=coords[3*a+1]-y,dz=coords[3*a+2]-z;
+      const e=-(dx*dx+dy*dy+dz*dz)/(2*p.ell*p.ell);
+      weights[i*NB+a]=e;if(e>max)max=e;
+    }
+    let sum=0;for(let a=0;a<NB;a++){let w=Math.exp(weights[i*NB+a]-max);weights[i*NB+a]=w;sum+=w;}
+    let obs=0;for(let a=0;a<NB;a++){const w=weights[i*NB+a]/sum;weights[i*NB+a]=w;obs+=w*s[PHI+a];}
+    delta[i]=obs-p.alpha*z;
+    for(let a=0;a<NB;a++){
+      const w=weights[i*NB+a];bulkSource[a]+=w*delta[i];
+      const coeff=w*(s[PHI+a]-obs)/(p.ell*p.ell);
+      for(let k=0;k<3;k++)grad[3*i+k]+=coeff*coords[3*a+k];
+    }
+  }
+  for(let i=0;i<NS;i++){
+    const prev=3*((i+NS-1)%NS),next=3*((i+1)%NS),now=3*i;
+    const r2=s[Q+now]**2+s[Q+now+1]**2+s[Q+now+2]**2;
+    const v2=s[P+now]**2+s[P+now+1]**2+s[P+now+2]**2;
+    for(let k=0;k<3;k++){
+      const v=s[P+now+k];
+      d[Q+now+k]=v;
+      d[P+now+k]=p.tension*(s[Q+prev+k]+s[Q+next+k]-2*s[Q+now+k])/(DS*DS)
+        -p.quartic_s*r2*s[Q+now+k]-p.kappa*delta[i]*(grad[now+k]-(k===2?p.alpha:0))
+        +(-p.damping_s+p.pump*(1-v2/(p.p0*p.p0)))*v;
+    }
+  }
+  const za=matExpectation(s,ZA),zb=matExpectation(s,ZB);
+  for(let a=0;a<NB;a++){
+    const v=s[PHI+a];
+    d[PHI+a]=s[PI+a];
+    d[PI+a]=-p.wave_speed*p.wave_speed*lg[a]-p.mass_b_sq*v-p.quartic_b*v*v*v
+      -p.kappa*(DS/DV)*bulkSource[a]-(p.eta*p.xi/DV)*(left[a]*za+right[a]*zb)-p.damping_b*s[PI+a];
+  }
+  const Hr=new Float64Array(16),Hi=new Float64Array(16);
+  matAddMatrix(Hr,Hi,ZA,p.xi*wa);matAddMatrix(Hr,Hi,ZB,p.xi*wb);matAddMatrix(Hr,Hi,XX,p.g);
+  const rpc=port100(s,p);
+  for(let i=0;i<NS;i++)d[P+3*i+2]+=p.rpcGamma*rpc.C*p.xi_string/(NS*DS);
+  for(let a=0;a<NB;a++)d[PI+a]+=p.rpcGamma*rpc.C*(left[a]-right[a])/DV;
+  matAddMatrix(Hr,Hi,ZZ,-p.rpcGamma*p.zeta*rpc.C);
+  for(let j=0;j<NL;j++)d[TH+j]=rpc.dPhase[j];
+  if(p.gate!==0){
+    const cX=p.gate*p.interaction,portsMean=(()=>{let ss=0;for(let i=0;i<NR;i++)ss+=Math.tanh(s[PORT+i]);return ss/NR;})();
+    const signals=new Float64Array(NR),weighted=new Float64Array(NR),quantExp=new Float64Array(15);
+    for(let j=0;j<15;j++)quantExp[j]=matExpectation(s,ops[j]);
+    let sumSignal=0;
+    for(let i=0;i<NR;i++){
+      let spatial=0,string=0;
+      for(let a=0;a<NB;a++)spatial+=bModes[i*NB+a]*s[PHI+a];
+      for(let j=0;j<NS*3;j++)string+=sModes[i*(NS*3)+j]*s[Q+j];
+      signals[i]=spatial+p.xi_string*string+p.eta*p.zeta*quantExp[i%15];
+      weighted[i]=Math.tanh(s[PORT+i])/NR;
+      sumSignal+=weighted[i]*signals[i];
+    }
+    for(let a=0;a<NB;a++){
+      let total=0;for(let i=0;i<NR;i++)total+=weighted[i]*bModes[i*NB+a];
+      d[PI+a]+=cX*rpc.C*total/DV;
+    }
+    for(let j=0;j<NS*3;j++){
+      let total=0;for(let i=0;i<NR;i++)total+=weighted[i]*sModes[i*(NS*3)+j];
+      d[P+j]+=cX*rpc.C*p.xi_string*total/DS;
+    }
+    for(let i=0;i<NR;i++)matAddMatrix(Hr,Hi,ops[i%15],-cX*rpc.C*p.zeta*weighted[i]);
+    for(let j=0;j<NL;j++){
+      const dgrad=-cX*sumSignal*rpc.dC[j];
+      d[TH+j]-=p.mobility*dgrad/rpc.denom[j];
+      d[TH+j]+=p.gate*.03*portsMean*Math.sin(s[TH+j]+j*.13);
+    }
+    const signalsExpanded=proxyReadouts(s,lg,wa,wb,za,zb);
+    for(let i=0;i<NR;i++){
+      const curr=s[PORT+i],prev=s[PORT+(i+NR-1)%NR],next=s[PORT+(i+1)%NR];
+      const drive=2*rpc.localC[branchIdx[i]]-1;
+      const ia=(2*i)%NL,ib=(2*i+1)%NL;
+      const phaseDrive=Math.sin(s[TH+ia]-s[TH+ib]);
+      const src=i<31?0:signalsExpanded[i-31]; // no legacy source snapshot
+      const gradH=-cX*rpc.C*(1-Math.tanh(curr)**2)*signals[i]/NR;
+      d[PORT+i]=p.gate*(-p.relaxation*curr+p.source_gain*src+p.multiscale_drive*drive+.07*phaseDrive+p.network_gain*(prev+next-2*curr))-p.mobility*gradH;
+    }
+  }
+  // Separately labeled earlier user-designed extension, disabled by default.
+  // The extended source does not contain this actuator.
+  if(p.quantumHarmonic!==0){
+    const xerr=(1-matExpectation(s,XX))*.5,zerr=(1-matExpectation(s,ZZ))*.5;
+    let qp=0,vp=0;for(let j=0;j<72;j++){qp+=s[Q+j]**2;vp+=s[P+j]**2;}
+    qp/=72;vp/=72;
+    const h=(2*qp*vp/(qp+vp+1e-12))+p.harmonicFloor;
+    const qterm=(xerr*xerr+zerr*zerr)/h;
+    const g=.06*p.quantumHarmonic*Math.tanh(.18*qterm);
+    for(let i=0;i<NS;i++)d[P+3*i+2]+=g*Math.sin(TPI*i/NS)*(xerr-zerr+.15);
+  }
+  matPsiRhs(s,Hr,Hi,d);
+  return d;
+}
+function rk4(s,h,cfg){
+  const a=rhs(s,cfg),v=new Float64Array(D),b=new Float64Array(D),c=new Float64Array(D);
+  for(let i=0;i<D;i++)v[i]=s[i]+h/2*a[i];
+  b.set(rhs(v,cfg));for(let i=0;i<D;i++)v[i]=s[i]+h/2*b[i];
+  c.set(rhs(v,cfg));for(let i=0;i<D;i++)v[i]=s[i]+h*c[i];
+  const d=rhs(v,cfg),ret=new Float64Array(D);
+  for(let i=0;i<D;i++)ret[i]=s[i]+h*(a[i]+2*b[i]+2*c[i]+d[i])/6;
+  return ret;
+}
+function finite(s){for(let i=0;i<s.length;i++)if(!Number.isFinite(s[i]))return false;return true;}
+const lib={rhs,rk4,diagnostics,qubitEntropy,defaults,layout:{Q,P,PHI,PI,PR,PII,TH,PORT,D,NS,NB,NR,NL},helpers:{phasesW,bModes,sModes,coords,ops,left,right,port100},finite};
+if(typeof module!=='undefined'&&module.exports)module.exports=lib;
+if(root)root.OMEFEngine=lib;
+})(typeof window!=='undefined'?window:null);
+</script>
+<script>/* OMEF Studio 15 — one solver clock; every graphics channel is a readout of solved state.
+   Silk is a camera/measurement embedding, not the dynamical state equations.
+   The observable gain is display-only and explicitly labeled. */
+(function(){'use strict';
+const E=window.OMEFEngine;
+const el=id=>document.getElementById(id);
+if(!E)throw new Error('Native OMEF solver failed to load');
+const l=E.layout, {Q,P,PHI,PI,PR,PII,TH,PORT,NS,NB,NR,NL}=l;const TPI=Math.PI*2;
+const canvas=el('art'),ctx=canvas.getContext('2d',{alpha:false});
+const stage=el('stage'),panel=el('panel'),status=el('status'),sub=el('substatus'),tabstrip=el('tabs'),sliders=el('sliders');
+const startSeed=Float64Array.from(JSON.parse(el('seed747').textContent));
+let S=new Float64Array(startSeed),base=new Float64Array(startSeed),fixed=new Float64Array(startSeed),baseline=new Float64Array(startSeed);
+let refParams={...E.defaults},params={...E.defaults},playing=false,expanded=false,view='Silk',tab='Core',currentDelta=0,stepCount=0,needRender=true;
+let W=390,H=350,DPR=1,touchPts=new Map(),touchStart=null,dragStart=null;
+let camera={zoom:1,stretchX:1,stretchY:1,dx:0,dy:0,yaw:0.15,tilt:0.0},isStretch=false;
+let visual={fiberCount:94,thickness:.60,glow:.55,visualGain:6,portGain:26,phaseGain:1.35,bulkGain:16,quantumGain:2.2,seedFrame:0};
+let horizon=32,runSpeed=1,lag=0,renderMode='original',future=null,recomputeTicket=0;
+const configs={
+ Core:[
+ ['tension','String tension',0.05,1.25,.01,'Closed-string Laplacian'],
+ ['quartic_s','String quartic',0,1.3,.01,'Confining nonlinear potential'],
+ ['wave_speed','Bulk wave speed',.1,1.45,.01,'Bulk graph propagation'],
+ ['mass_b_sq','Bulk mass²',0,1.8,.01,'Bulk restoring force'],
+ ['quartic_b','Bulk quartic',0,1.25,.01,'Nonlinear bulk response'],
+ ['kappa','String ↔ bulk',0,1.5,.01,'Reciprocal Gaussian coupling'],
+ ['ell','Sampling length',.25,1.8,.01,'Moving 3-D interpolation kernel'],
+ ['alpha','Embedding contrast',-1,1,.01,'String-to-bulk displacement reference'],
+ ['eta','Quantum backreaction',0,1.8,.01,'Quantum force on bulk'],
+ ['xi','Qubit boundary read',0,1.5,.01,'Distinct boundary-face coupling'],
+ ['g','Entangling XX',0,2.5,.01,'Two-qubit Hamiltonian'],
+ ['pump','String activity pump',0,0.8,.01,'Optional native pump actuator'],
+ ['damping_s','String damping',0,.4,.005,'Native dissipation'],
+ ['damping_b','Bulk damping',0,.4,.005,'Native dissipation']
+ ],
+ Phases:[
+ ['rpcGamma','RPC ↔ core strength',0,1.3,.01,'Coherence Hamiltonian coupling'],
+ ['mix','Local/global mix',0,1,.01,'Weights all 100 conditional scales'],
+ ['omega0','Phase clock',.01,1.0,.01,'Dyadic phase frequency'],
+ ['mu','Phase mobility',0,1.3,.01,'Gradient-driven phase response'],
+ ['a_log','Real log term',-2,2,.01,'Re log boundary signal'],
+ ['b_arg','Imaginary log term',-3,3,.01,'Arg boundary complex log'],
+ ['log_scale','Complex-log scale',.4,8,.05,'Complex boundary normalization'],
+ ['xi_string','String ↔ phases',0,2.0,.01,'Worldsheet mean response'],
+ ['zeta','Quantum ↔ phases',0,1.2,.01,'Qubit ZZ correlation feedback']
+ ],
+ Ports:[
+ ['gate','62-port gate',0,1,.01,'0 = exact RPC-only recovery'],
+ ['interaction','Bridge energy',0,2,.01,'Strength of single shared coupling energy'],
+ ['relaxation','Port relaxation',0,1.4,.01,'Adaptive port decay'],
+ ['source_gain','Proxy drive',0,1.0,.01,'Measured expanded-block readouts'],
+ ['multiscale_drive','100-level drive',0,1.3,.01,'Local conditional coherence'],
+ ['network_gain','Port network',0,.25,.005,'Cyclic port diffusion'],
+ ['mobility','Port mobility',0,.75,.01,'Shared energy gradient response']
+ ],
+ Quantum:[
+ ['quantumHarmonic','Q²/H experimental',0,2,.01,'User-proposed term; OFF in uploaded source'],
+ ['harmonicFloor','Harmonic floor',.005,.4,.005,'Positive denominator regularizer']
+ ],
+ Display:[
+ ['fiberCount','Filament density',24,180,2,'Source-sampled threads; view only'],
+ ['visualGain','String display gain',.5,18,.25,'Amplifies measured q(t) geometry'],
+ ['portGain','Port visibility',0,120,2,'Magnifies small computed port displacements'],
+ ['phaseGain','Phase visibility',0,8,.1,'Magnifies solved phase offsets'],
+ ['bulkGain','Bulk visibility',0,80,1,'Magnifies interpolated bulk field'],
+ ['quantumGain','Qubit visibility',0,10,.1,'Entanglement readout to strand spacing'],
+ ['thickness','Thread thickness',.25,1.8,.05,'Drawing only'],
+ ['glow','Bloom',0,1.8,.05,'Optical halo only']
+ ],
+ Compare:[
+ ['horizon','Still horizon',8,100,4,'RK4 steps from one stored initial state'],
+ ['runSpeed','Play speed',1,4,1,'RK4 steps per animation tick']
+ ]
+};
+const viewDefs=[['Silk','String + all sectors'],['Bulk','3-D bulk field'],['Phase','100 levels + tail'],['Ports','62 bridge coordinates'],['Qubit','Boundary interference']];
+const allMath=new Set(['Core','Phases','Ports','Quantum']);
+function reportError(e){playing=false;el('play').textContent='Play';status.textContent='ERROR';status.style.color='#ffc2b5';el('error').hidden=false;el('error').textContent=String(e?.stack||e).slice(0,450);console.error('OMEF',e);}
+window.addEventListener('error',ev=>reportError(ev.error||ev.message));
+window.addEventListener('unhandledrejection',ev=>reportError(ev.reason));
+function fmt(x){return Math.abs(x)<.01?x.toFixed(4):Math.abs(x)<1?x.toFixed(3):x.toFixed(2)}
+function updateDiagnostics(){
+ const d=E.diagnostics(S,params);
+ status.textContent=`${playing?'LIVE':'STILL'} · ${stepCount} · C ${d.conditionalCoherence.toFixed(3)}`;
+ sub.textContent=`ψ² ${d.qubitNorm.toFixed(6)}  ·  ports ${d.portRMS.toFixed(4)}  ·  Sᴬ ${d.qubitEntropy.toFixed(4)}  ·  Δ ${currentDelta.toExponential(1)}`;
+ el('readouts').textContent=`Native Phase-0 × 100-level RPC × 62-port bridge · ${l.D} real coordinates. Q²/H extension ${params.quantumHarmonic===0?'OFF':'ON (extra actuator)'}. Gate ${params.gate.toFixed(2)}.`;
+}
+function resize(){
+ const rect=stage.getBoundingClientRect();W=Math.max(40,rect.width);H=Math.max(40,rect.height);DPR=Math.min(window.devicePixelRatio||1,1.65);
+ canvas.width=Math.round(W*DPR);canvas.height=Math.round(H*DPR);ctx.setTransform(DPR,0,0,DPR,0,0);needRender=true;
+ if(S)draw();
+}
+const RO=window.ResizeObserver; if(RO)new RO(resize).observe(stage);window.addEventListener('resize',resize);
+function artBox(){
+ const aspect=1.48;const w=Math.min(W,H*aspect),h=w/aspect;
+ return {x:(W-w)/2,y:(H-h)/2,w,h};
+}
+function qAt(u){
+ // Periodic Catmull-Rom interpolation of actual computed closed string.
+ const v=((u%1)+1)%1*NS,i=Math.floor(v),t=v-i;
+ const a=(i+NS-1)%NS,b=i,c=(i+1)%NS,d=(i+2)%NS;
+ const out=[];
+ for(let k=0;k<3;k++){
+  const A=S[Q+3*a+k],B=S[Q+3*b+k],C=S[Q+3*c+k],D=S[Q+3*d+k];
+  out.push(.5*((2*B)+(-A+C)*t+(2*A-5*B+4*C-D)*t*t+(-A+3*B-3*C+D)*t*t*t));
+ }
+ return out;
+}
+function obsAt(u,w,m){
+ const i=Math.min(NR-1,Math.max(0,Math.floor((w*.5+.5)*(NR-1))));
+ const j=Math.min(99,Math.floor(((u*97+i)%100+100)%100));
+ const port=Math.tanh(S[PORT+i]);
+ const phase=S[TH+j];
+ const a=Math.floor(((u+.05)%1)*NB);
+ const bulk=S[PHI+a];
+ const qqr=S[PR],qqi=S[PII],qbR=S[PR+3],qbI=S[PII+3];
+ const entropy=E.qubitEntropy(S);
+ // Every channel is measured from the solved native state.
+ return {port,phase,bulk,entropy,qubit:Math.hypot(qqr,qqi)-Math.hypot(qbR,qbI)};
+}
+function xyz(u,w){
+ const q=qAt(u),prev=qAt(u-.001),next=qAt(u+.001);
+ const tang=[next[0]-prev[0],next[1]-prev[1],next[2]-prev[2]];
+ let tr=Math.hypot(...tang)||1;for(let k=0;k<3;k++)tang[k]/=tr;
+ let n=[-tang[1],tang[0],.3],nl=Math.hypot(...n)||1;n=n.map(x=>x/nl);
+ const b=[tang[1]*n[2]-tang[2]*n[1],tang[2]*n[0]-tang[0]*n[2],tang[0]*n[1]-tang[1]*n[0]];
+ const o=obsAt(u,w);
+ const portStrength=Math.tanh(visual.portGain*o.port*.1);
+ const phaseStrength=Math.sin(o.phase+TPI*u);
+ const bulkStrength=Math.tanh(visual.bulkGain*o.bulk);
+ const quantumStrength=Math.tanh(visual.quantumGain*o.entropy);
+ let sc=visual.visualGain;
+ let cross=.34*w*(1+.22*quantumStrength)+.09*portStrength+.05*phaseStrength*visual.phaseGain;
+ let zdepth=.13*w+.06*bulkStrength+.025*o.qubit*visual.quantumGain;
+ let coords=[sc*q[0]+n[0]*cross+b[0]*zdepth,sc*q[1]+n[1]*cross+b[1]*zdepth,sc*q[2]+n[2]*cross+b[2]*zdepth];
+ if(view==='Bulk'){
+  coords=[coords[0]+.35*bulkStrength,coords[1]+bulkStrength*.28,coords[2]+.22*bulkStrength];
+ }else if(view==='Phase'){
+  coords=[coords[0]+.14*phaseStrength*visual.phaseGain,coords[1]+.20*Math.cos(o.phase)*visual.phaseGain,coords[2]+.1*phaseStrength];
+ }else if(view==='Ports'){
+  coords=[coords[0]+.22*portStrength,coords[1]+.28*portStrength,coords[2]+.08*portStrength];
+ }else if(view==='Qubit'){
+  coords=[coords[0]+.08*quantumStrength,coords[1]+w*.25*quantumStrength,coords[2]+.30*o.qubit*visual.quantumGain];
+ }
+ return coords;
+}
+function proj(vec){
+ const ya=camera.yaw,ty=camera.tilt,cy=Math.cos(ya),sy=Math.sin(ya),ct=Math.cos(ty),st=Math.sin(ty);
+ let X=cy*vec[0]+sy*vec[2],Z=-sy*vec[0]+cy*vec[2],Y=ct*vec[1]-st*Z;
+ let z=st*vec[1]+ct*Z;
+ return [X*camera.stretchX,Y*camera.stretchY,z];
+}
+function pathDraw(){
+ const ab=artBox();
+ // Constant nominal scale, never stretched to fill expanded canvas.
+ const size=Math.min(ab.w/2.9,ab.h/2.55)*camera.zoom;
+ const curves=[];
+ const number=Math.round(visual.fiberCount);
+ let minX=1e20,maxX=-1e20,minY=1e20,maxY=-1e20;
+ for(let k=0;k<number;k++){
+  const w=-1+2*k/Math.max(1,number-1),arr=[];let depth=0;
+  for(let t=0;t<=172;t++){
+    const u=t/172;const p=proj(xyz(u,w));arr.push(p);depth+=p[2];
+    minX=Math.min(minX,p[0]);maxX=Math.max(maxX,p[0]);minY=Math.min(minY,p[1]);maxY=Math.max(maxY,p[1]);
+  }
+  curves.push({w,arr,depth:depth/173,k});
+ }
+ const viewCX=(minX+maxX)/2,viewCY=(minY+maxY)/2;
+ const needScale=Math.min(ab.w*.83/Math.max(.1,maxX-minX),ab.h*.81/Math.max(.1,maxY-minY));
+ // Fit is uniform: never distort aspect; soft only when user has not manually zoomed.
+ const f= camera.zoom===1 ? Math.min(size,needScale) : size;
+ curves.sort((a,b)=>a.depth-b.depth);
+ for(const curve of curves){
+  const k=curve.k,arr=curve.arr;
+  for(let s=0;s<15;s++){
+    const first=Math.floor(s*172/15),last=Math.min(172,Math.ceil((s+1)*172/15));
+    const u=(s+.5)/15,o=obsAt(u,curve.w);
+    const hue=((205+260*u+115*k/number+14*Math.sin(o.phase)+80*Math.tanh(visual.portGain*o.port*.1))%360+360)%360;
+    const a=.38+.26*Math.abs(curve.w),light=55+12*Math.sin(u*7+k*.04);
+    const draw=()=>{
+      ctx.beginPath();for(let i=first;i<=last;i++){
+        const p=arr[i];const px=ab.x+ab.w/2+(p[0]-viewCX)*f+camera.dx;
+        const py=ab.y+ab.h/2-(p[1]-viewCY)*f+camera.dy;
+        if(i===first)ctx.moveTo(px,py);else ctx.lineTo(px,py);
+      }
+      ctx.stroke();
+    };
+    ctx.strokeStyle=`hsl(${hue.toFixed(0)} 93% ${light.toFixed(0)}%)`;
+    if(visual.glow>0){ctx.lineWidth=2.3*visual.thickness;ctx.globalAlpha=visual.glow*.04;draw();}
+    ctx.lineWidth=Math.max(.25,visual.thickness*.77);ctx.globalAlpha=a;draw();
+  }
+ }
+ ctx.globalAlpha=1;
+}
+function draw(){
+ if(!ctx||!W||!H)return;
+ ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
+ pathDraw();
+ needRender=false;
+}
+function updateInputs(tabName){
+ tab=tabName;for(const b of tabstrip.children)b.classList.toggle('active',b.dataset.name===tab);
+ sliders.replaceChildren();
+ for(const [key,label,min,max,step,explain] of configs[tab]){
+  const v = key in params?params[key]:key in visual?visual[key]:key==='horizon'?horizon:runSpeed;
+  const outer=document.createElement('label');outer.className='control';outer.dataset.param=key;
+  const header=document.createElement('div');header.className='clabel';header.innerHTML=`<span>${label}</span><strong>${fmt(v)}</strong>`;
+  const input=document.createElement('input');input.type='range';input.min=min;input.max=max;input.step=step;input.value=v;input.dataset.param=key;
+  const small=document.createElement('small');small.textContent=explain;
+  outer.append(header,input,small);
+  input.addEventListener('input',()=>{
+    let val=Number(input.value);header.querySelector('strong').textContent=fmt(val);
+    if(key==='horizon'){horizon=val;if(!playing)queueRecompute();}
+    else if(key==='runSpeed'){runSpeed=val;}
+    else if(key in visual){visual[key]=val;needRender=true;if(!playing)draw();}
+    else {params[key]=val;if(!playing)queueRecompute();}
+    updateDiagnostics();
+  });
+  sliders.append(outer);
+ }
+}
+for(const name of Object.keys(configs)){
+ const b=document.createElement('button');b.textContent=name;b.dataset.name=name;b.className='tab';b.onclick=()=>updateInputs(name);tabstrip.append(b);
+}
+const vrow=el('viewrow');for(const [name,detail] of viewDefs){const b=document.createElement('button');b.className='chip';b.dataset.view=name;b.textContent=name;b.title=detail;b.onclick=()=>{view=name;for(const c of vrow.children)c.classList.toggle('active',c.dataset.view===name);draw();};vrow.append(b);}
+vrow.firstElementChild.classList.add('active');
+function solved(s,p,steps){let out=new Float64Array(s);for(let i=0;i<steps;i++){out=E.rk4(out,.004,p);if(!E.finite(out))throw new Error('Nonfinite solver state at preview step '+i);}return out;}
+function queueRecompute(){
+ const ticket=++recomputeTicket;
+ el('calc').textContent='Computing source equations…';
+ // single animation coalesces rapid slider input; never falsely reports completion.
+ requestAnimationFrame(()=>{if(ticket!==recomputeTicket||playing)return;try{
+  S=solved(base,params,horizon);stepCount=horizon;
+  if(!baseline||!E.finite(baseline)) baseline=solved(base,refParams,horizon);
+  let norm=0;for(let j=0;j<l.D;j++)norm+=(S[j]-baseline[j])**2;
+  currentDelta=Math.sqrt(norm/l.D);el('calc').textContent=`Source solver · ${l.D} coordinates · Δ ${currentDelta.toExponential(2)}`;
+  updateDiagnostics();draw();
+ }catch(e){reportError(e);}});
+}
+function start(){playing=!playing;el('play').textContent=playing?'Pause':'Play';el('play').classList.toggle('active',playing);
+ if(!playing){base=new Float64Array(S);refParams={...params};baseline=solved(base,refParams,horizon);S=new Float64Array(baseline);stepCount=horizon;currentDelta=0;draw();}
+ updateDiagnostics();
+}
+function reference(){playing=false;el('play').textContent='Play';el('play').classList.remove('active');base=new Float64Array(S);refParams={...params};baseline=solved(base,refParams,horizon);S=new Float64Array(baseline);stepCount=horizon;currentDelta=0;draw();updateDiagnostics();}
+function restart(){playing=false;el('play').textContent='Play';el('play').classList.remove('active');base=new Float64Array(startSeed);refParams={...params};baseline=solved(base,refParams,horizon);S=new Float64Array(baseline);stepCount=horizon;currentDelta=0;draw();updateDiagnostics();}
+el('play').onclick=start;el('ref').onclick=reference;el('reset').onclick=restart;
+function resetView(){camera={zoom:1,stretchX:1,stretchY:1,dx:0,dy:0,yaw:.15,tilt:0};draw();}
+el('resetView').onclick=resetView;
+el('expand').onclick=()=>{expanded=!expanded;el('app').classList.toggle('full',expanded);el('expand').textContent=expanded?'Adjust':'Expand';requestAnimationFrame(resize);};
+el('stretch').onclick=()=>{isStretch=!isStretch;el('stretch').classList.toggle('active',isStretch);};
+function points(){return Array.from(touchPts.values())}
+function distance(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
+canvas.addEventListener('pointerdown',ev=>{
+ canvas.setPointerCapture(ev.pointerId);touchPts.set(ev.pointerId,{x:ev.clientX,y:ev.clientY});
+ if(touchPts.size===1)dragStart={x:ev.clientX,y:ev.clientY,...camera};
+ else if(touchPts.size===2){const [a,b]=points();touchStart={a,b,zoom:camera.zoom,stretchX:camera.stretchX,stretchY:camera.stretchY,dx:camera.dx,dy:camera.dy,centerX:(a.x+b.x)/2,centerY:(a.y+b.y)/2};dragStart=null;}
+});
+canvas.addEventListener('pointermove',ev=>{
+ if(!touchPts.has(ev.pointerId))return;touchPts.set(ev.pointerId,{x:ev.clientX,y:ev.clientY});
+ if(touchPts.size===1&&dragStart){camera.dx=dragStart.dx+(ev.clientX-dragStart.x);camera.dy=dragStart.dy+(ev.clientY-dragStart.y);}
+ else if(touchPts.size===2&&touchStart){const [a,b]=points();
+  const startDist=Math.max(10,distance(touchStart.a,touchStart.b)),factor=distance(a,b)/startDist;
+  if(isStretch){const sx=Math.max(.2,Math.abs(touchStart.b.x-touchStart.a.x));const sy=Math.max(.2,Math.abs(touchStart.b.y-touchStart.a.y));camera.stretchX=Math.min(4,Math.max(.25,touchStart.stretchX*Math.abs(a.x-b.x)/Math.max(18,sx)));camera.stretchY=Math.min(4,Math.max(.25,touchStart.stretchY*Math.abs(a.y-b.y)/Math.max(18,sy)));}
+  else camera.zoom=Math.min(5,Math.max(.45,touchStart.zoom*factor));
+  camera.dx=touchStart.dx+((a.x+b.x)/2-touchStart.centerX);camera.dy=touchStart.dy+((a.y+b.y)/2-touchStart.centerY);
+ }
+ draw();
+});
+function drop(ev){touchPts.delete(ev.pointerId);if(touchPts.size<2)touchStart=null;dragStart=null;}
+canvas.addEventListener('pointerup',drop);canvas.addEventListener('pointercancel',drop);
+let lastFrame=0;
+function animate(t){
+ try{
+  if(playing){
+   const count=Math.max(1,Math.min(4,Math.floor(runSpeed)));
+   for(let i=0;i<count;i++){
+    const next=E.rk4(S,.004,params);
+    if(!E.finite(next))throw new Error('Numerical error at step '+stepCount+'; playback stopped, state retained');
+    S=next;stepCount++;
+   }
+   draw();
+   if(stepCount%10===0)updateDiagnostics();
+  }else if(needRender)draw();
+ }catch(e){reportError(e);}
+ requestAnimationFrame(animate);
+}
+function init(){
+ if(!E.finite(startSeed)||startSeed.length!==l.D)throw new Error('Invalid source initial vector');
+ resize();updateInputs('Core');
+ // Native reference is computed before first presentation. Avoid endless INITIALIZING state.
+ baseline=solved(base,refParams,horizon);S=new Float64Array(baseline);stepCount=horizon;
+ currentDelta=0;updateDiagnostics();draw();el('boot').hidden=true;window.__omefBootReady=true;
+ window.__omefTest={
+  getState:()=>Array.from(S),advance:n=>{for(let i=0;i<n;i++){S=E.rk4(S,.004,params);stepCount++;}draw();updateDiagnostics();},
+  setParam:(k,val)=>{if(!(k in params))throw Error('Unknown parameter '+k);params[k]=val;if(!playing)queueRecompute();},
+  diagnostic:()=>E.diagnostics(S,params),getStatus:()=>({playing,stepCount,view,horizon,delta:currentDelta,ready:window.__omefBootReady,params:{...params}}),
+  setView:v=>{view=v;draw();},fit:resetView
+ };
+ requestAnimationFrame(animate);
+}
+try{init();}catch(err){reportError(err)}
+})();
+</script></body></html>
