@@ -302,7 +302,10 @@ function project(x,y,z){
   return [W*.50+X3*perspective*W*.46,H*.52-Y3*perspective*H*.42,Z2];
 }
 function renderBg(){
-  ctx.fillStyle='#000000'; ctx.fillRect(0,0,W,H);
+  if(running && P.trail>0.01){
+    ctx.fillStyle=`rgba(0,0,0,${clip(1-P.trail*.93,.07,1)})`;
+  } else ctx.fillStyle='#000';
+  ctx.fillRect(0,0,W,H);
 }
 function draw(){
   if(W<5||H<5)return;
