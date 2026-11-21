@@ -725,7 +725,7 @@ function xyz(u,w){
    across+=signal*Math.sin(.5*(k+1)*w+u*.5);
    active++;
   }
-  const k=active?1.6/Math.sqrt(active):0;
+  const k=active?1.6*(lastResponse?.opticalTravel??0)/Math.sqrt(active):0;
   const radial=.32*w+along*k,depth=.14*w+across*k*.55;
   coords=[sc*q[0]+n[0]*radial+b[0]*depth,sc*q[1]+n[1]*radial+b[1]*depth,sc*q[2]+n[2]*radial+b[2]*depth];
  }else if(view==='Bulk'){
@@ -822,7 +822,16 @@ function measureCausalImpact(){
   }
   sections.push({label,values:dv,peak:localPeak,rms:Math.sqrt(sumSq/len),smooth:smoothed,smoothPeak});
  }
- return {sections,rms:Math.sqrt(ss/909),peak,nonzero,probeStep:probe.stepIndex};
+ // The display-only lens grows continuously as controls depart from the
+ // stored reference. A one-tick slider movement should not jump to full bloom.
+ let travelSq=0;
+ for(const name of allMath)for(const [key,_label,min,max] of configs[name]){
+  if(!(key in params)||!(key in refParams))continue;
+  const fraction=(params[key]-refParams[key])/Math.max(1e-12,max-min);
+  travelSq+=fraction*fraction;
+ }
+ const opticalTravel=1-Math.exp(-3.3*Math.sqrt(travelSq));
+ return {sections,rms:Math.sqrt(ss/909),peak,nonzero,probeStep:probe.stepIndex,opticalTravel};
 }
 function computeImpact(){
  try{lastResponse=measureCausalImpact();if(lastResponse)updateResponseWidget(lastResponse);}
