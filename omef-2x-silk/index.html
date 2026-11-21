@@ -68,6 +68,7 @@ window.__omefBootReady=false;var start=document.getElementById('status');if(star
 window.addEventListener('error',function(e){if(window.__omefBootReady)return;var s=document.getElementById('status');if(s)s.textContent='SCRIPT ERROR';var d=document.getElementById('bootWatchdog');if(d){d.textContent='Script error: '+(e.message||'unknown')+' · Open this page in Safari.';d.style.display='block';}});
 window.addEventListener('load',function(){setTimeout(function(){if(!window.__omefBootReady){var s=document.getElementById('status');if(s)s.textContent='PREVIEW ONLY';var d=document.getElementById('bootWatchdog');if(d&&!d.textContent){d.textContent='The interactive script did not start. Open this link directly in Safari.';d.style.display='block';}}},4000);});
 </script>
+<div id="runtimeNotice" hidden style="position:fixed;z-index:99;left:12px;bottom:10px;max-width:min(92vw,450px);pointer-events:none;color:#d7f5fc;background:#1a2f39df;border:1px solid #466c7b;border-radius:8px;padding:7px 11px;font:11px system-ui"></div>
 <script>
 (()=>{'use strict';
 try{
@@ -96,6 +97,15 @@ const phi = new Float32Array(R);
 const phi2 = new Float32Array(R);
 let anchorQ, anchorV, anchorPhi, anchorSteps=0, baselineQ, baselineV, baselinePhi;
 let steps=0, running=false, exploring=false, previewDelta=0, lastVel=0, seed=20261120;
+// The animation loop is never stopped by a numerical or renderer exception.
+let solverSafeties=0, renderFaults=0, playFaults=0, lastFrameError='', frameTimestamp=0, lastPaint=0;
+let lastInputAt=0, deferredEquation=false, pendingEquationAt=0, lastReportedSteps=0;
+function noteIssue(message){
+  lastFrameError=String(message).slice(0,150);
+  const el=document.getElementById('runtimeNotice');
+  if(el){el.hidden=false;el.textContent=lastFrameError;}
+}
+
 let dragState=null, W=300, H=300, DPR=1;
 // View-only touch transform. These controls deliberately do not edit OMEF state.
 const view={sx:1,sy:1,x:0,y:0,freeStretch:false};
@@ -190,6 +200,7 @@ const spec = [
     ['pump','Energy pump',0,0.22,0.08,0.001,'Active feedback that replenishes motion'],
     ['pumpTarget','Pump target',0.02,0.95,0.36,0.01,'Target RMS velocity for pump regulation'],
     ['drive','Time drive',0,1.6,0.55,0.01,'Temporal forcing amplitude'],
+    ['continuity','Continuity drive',0,0.5,0.16,0.005,'Genuine low-amplitude time forcing; set 0 to allow natural rest'],
     ['driveFreq','Drive frequency',0,4.0,1.18,0.01,'Time frequency of external drive'],
     ['beat','Beat mismatch',0,3.5,1.35,0.01,'Secondary forcing frequency mismatch'],
     ['feedback','Local feedback',0,1.6,0.48,0.01,'Field dependent temporal forcing'],
@@ -351,7 +362,10 @@ function step(dt){
     const sampleI=(steps+r*13)%N;
     const phaseArg=Math.atan2(P.logBeta*v[r][sampleI], P.logOffset+P.logAlpha*Math.tanh(qMid));
     const dph = 0.18 + P.phaseLock*(Math.sin(phL-ph)+Math.sin(phR-ph)) - P.phaseSlip*Math.sin(2.7*ph + 0.4*r) + 0.12*P.feedback*qMid + P.logPhase*phaseArg;
-    phi2[r] = ph + dt2*dph;
+    // Wrap the angular coordinate: periodic observables are unchanged by 2π.
+    const nextPhi=ph+dt2*dph;
+    phi2[r] = Number.isFinite(nextPhi) ? Math.atan2(Math.sin(nextPhi),Math.cos(nextPhi)) : 0;
+    if(!Number.isFinite(nextPhi))solverSafeties++;
   }
   for(let r=0;r<R;r++){
     const rr = q[r], vv = v[r], nr = q2[r], nv = v2[r];
@@ -376,6 +390,9 @@ function step(dt){
       const symBias = P.symmetry*((r&1)?1:-1)*0.08;
       const x = i/N*TWO; const y = r/R*TWO;
       const drive = P.drive*(Math.sin(P.driveFreq*clock + x*(1+0.35*P.anisotropy) + basePhase) + 0.65*Math.sin((P.driveFreq+P.beat)*clock - 1.4*x + .8*y));
+      // Explicit perpetual low-level excitation for the Play instrument.
+      // This is a force term, never a renderer animation. Zero restores the damped study.
+      const continuityForce=P.continuity*(Math.sin(.77*clock+.62*x+.2*y)+.43*Math.sin(1.31*clock-1.44*x+.63*y));
       const macro = P.macro*(0.55*Math.sin(0.21*clock + 0.8*x + 2.0*y) + 0.4*Math.cos(0.13*clock - 1.2*x + 0.5*y));
       const curvature = P.curvatureDrive*lap*Math.tanh(0.8+Math.abs(q0));
       const reson = P.resonance*Math.sin(2.3*clock + 5*x + y)*Math.exp(-3*Math.abs(q0));
@@ -393,13 +410,26 @@ function step(dt){
                               + P.logMagnitude*realLog*Math.tanh(q0);
       const accel =
         P.tension*lap - P.biharm*bih + P.advection*d1 + P.dispersion*d3 + P.mixX*mix + P.neighbor*across + P.longCouple*longAcross + P.shear*(qD[mod(i+1,N)]-qU[mod(i+1,N)] - qD[mod(i-1,N)] + qU[mod(i-1,N)])*0.25
-        + non + quint + curvature + drive + reson + feedbackDrive + macro + het + symBias + complexLogForce + P.crossMod*(qU[i]*qD[i]-q0*q0)*0.08 + P.fold*(r/(R-1)-0.5);
+        + non + quint + curvature + drive + continuityForce + reson + feedbackDrive + macro + het + symBias + complexLogForce + P.crossMod*(qU[i]*qD[i]-q0*q0)*0.08 + P.fold*(r/(R-1)-0.5);
       const vel = vv[i];
       const localPump = P.pump*(P.pumpTarget*P.pumpTarget - vel*vel)*vel;
       const damp = P.damping*vel;
-      nr[i] = q0 + dt2*vel;
-      nv[i] = clip(vel + dt2*(accel - damp + localPump + P.velDiff*velAcross), -3.2, 3.2);
-      velSum += nv[i]*nv[i];
+      // Semi-implicit Euler is stable for oscillatory modes that explicit
+      // position-first Euler can feed with artificial energy.
+      const rawV=vel+dt2*(accel-damp+localPump+P.velDiff*velAcross);
+      const nextV=Number.isFinite(rawV)?clip(rawV,-3.2,3.2):0;
+      let nextQ=q0+dt2*nextV;
+      // A clearly labeled numerical safety envelope, not a new OMEF force.
+      // Prevent nonfinite fields during parameter sweeps; do not toggle Play.
+      if(!Number.isFinite(nextQ)){nextQ=0;solverSafeties++;}
+      if(Math.abs(nextQ)>12){
+        nextQ=clip(nextQ,-12,12);
+        // Remove outward energy at the computational boundary.
+        nv[i]=(nextQ>0&&nextV>0)||(nextQ<0&&nextV<0)?nextV*.5:nextV;
+        solverSafeties++;
+      }else nv[i]=nextV;
+      nr[i]=nextQ;
+      velSum+=nv[i]*nv[i];
     }
   }
   for(let r=0;r<R;r++){
@@ -528,9 +558,9 @@ function drawComputed(){
   if(W<5||H<5)return;
   renderBg();
   updateSilkSmooth();
-  const strands=Math.max(54,Math.min(175,Math.round(artW*.20*P.density*(running?.82:1)))); 
-  const points=running?164:226;
-  const segs=running?15:20;
+  const strands=Math.max(running?40:54,Math.min(running?105:175,Math.round(artW*(running?.11:.20)*P.density))); 
+  const points=running?106:226;
+  const segs=running?11:20;
   const alpha=clip(P.alpha*.56,.08,.44);
   ctx.lineCap='butt';ctx.lineJoin='round';
   // Calculate all ribbons first, and paint rear to front for coherent depth.
@@ -636,8 +666,8 @@ function foldPoint(t,w,sheet){
 }
 function drawFolds(){
   renderBg(); updateSilkSmooth();
-  const total=Math.max(72,Math.min(210,Math.round(83*P.foldDensity*P.density)));
-  const samples=running?112:170;
+  const total=Math.max(running?38:72,Math.min(running?100:210,Math.round((running?55:83)*P.foldDensity*P.density)));
+  const samples=running?86:170;
   const bands=[];
   for(let sheet=0;sheet<2;sheet++)for(let i=0;i<total;i++){
     const w=-1+2*i/(total-1),pts=[];let z=0;
@@ -760,7 +790,7 @@ function draw(){
 function updateEquation(){
   mathEl.textContent=`q̈ = ${P.tension.toFixed(2)}·Δₓq − ${P.biharm.toFixed(3)}·Δₓ⁴q + ${P.neighbor.toFixed(2)}·Δᵣq + ${P.mixX.toFixed(3)}·∂ₓΔᵣq
 − ${P.cubic.toFixed(2)}·sgn(q)|q|^${P.exp.toFixed(2)}/(1+${P.saturate.toFixed(2)}q²) − ${P.quintic.toFixed(2)}q⁵
-+ driving(t,x,r) + coupling(q,Δᵣq) + feedback(q) − ${P.damping.toFixed(3)}·q̇
++ driving(t,x,r) + continuity(t,x,r) + coupling(q,Δᵣq) + feedback(q) − ${P.damping.toFixed(3)}·q̇
 + ${P.pump.toFixed(3)}·(${P.pumpTarget.toFixed(2)}²−q̇²)q̇ + remaining operators
 
 Complex logarithm:
@@ -772,7 +802,8 @@ F_log = ${P.logForce.toFixed(2)}·Im log(z) + ${P.logCouple.toFixed(2)}·Im log(
 The principal argument has a branch cut on the negative real axis. The log modulus is regularized near zero.`;
 }
 function updateUI(force=false){
-  statusEl.textContent=`${running?'MOVING':'STILL'}  ·  Δ ${previewDelta.toFixed(4)}  ·  v ${lastVel.toFixed(3)}`;
+  const activity=lastVel<0.012?'QUIET':'ACTIVE';
+  statusEl.textContent=`${running?'PLAY '+activity:'STILL'} · ${steps} steps · v ${lastVel.toFixed(3)}${solverSafeties?' · guard '+solverSafeties:''}`;
   modeText.textContent=running?'LIVE DYNAMICS':'STILL REFERENCE';
   runBtn.classList.toggle('active',running);
   runBtn.textContent=running?'Pause':'Play';
@@ -780,20 +811,41 @@ function updateUI(force=false){
   if(force)updateEquation();
 }
 let frames=0;
-function animate(){
-  if(exploring){
-    autoMorph();
-    if(!running && frames%4===0)recomputeStill();
+function animate(time=0){
+  // Always reschedule, even after a costly or failed frame.
+  try{
+    if(exploring){
+      autoMorph();
+      if(!running && frames%5===0)recomputeStill();
+    }
+    if(running){
+      // Bounded simulation work per animation callback prevents input starvation.
+      const count=Math.max(1,Math.min(3,Math.round(P.speed*1.4)));
+      for(let i=0;i<count;i++)step(.032);
+      if(!Number.isFinite(lastVel)){
+        // Retain Play. The solver has per-coordinate nonfinite protection.
+        playFaults++;
+        lastVel=0;
+        noteIssue('Solver recovered a nonfinite observable — playback continues');
+      }
+      // 24-ish FPS is intentionally less costly than continuous 60 FPS redraw.
+      // On touch input, redraw immediately; elsewhere keep solver advancing.
+      const interval=window.matchMedia?.('(max-width: 700px)').matches?42:30;
+      if(!lastPaint || time-lastPaint>interval){draw();lastPaint=time;}
+      previewDelta=0;
+    }
+    if(++frames%7===0 || (running && steps-lastReportedSteps>=36)){
+      updateUI();lastReportedSteps=steps;
+    }
+    if(deferredEquation && time-pendingEquationAt>110){updateEquation();deferredEquation=false;}
+  }catch(e){
+    renderFaults++;
+    noteIssue('Render/playback recovered: '+(e&&e.message||e));
+    // The instrument should not remain dead because a single canvas draw failed.
+    console.error('OMEF frame recovery',e);
+  }finally{
+    requestAnimationFrame(animate);
   }
-  if(running){
-    const count=Math.max(1,Math.round(P.speed*1.6));
-    for(let i=0;i<count;i++)step(.032);
-    if(!Number.isFinite(lastVel)||lastVel>30){running=false;statusEl.textContent='SOLVER ERROR';}
-    else draw();
-    previewDelta=0;
-  }
-  if(++frames%8===0)updateUI();
-  requestAnimationFrame(animate);
 }
 
 let autoTargets={};
@@ -851,9 +903,9 @@ function addControls(){
       const input=card.querySelector('input');inputs[key]=input;
       input.addEventListener('input',()=>{
         // Every adjustment starts with the full sculpture visible.
-        fitAdjustmentView();
+        if(!running)fitAdjustmentView();
         P[key]=Number(input.value);card.querySelector('.val').textContent=formatVal(P[key]);
-        updateEquation();
+        deferredEquation=true;pendingEquationAt=performance.now();lastInputAt=pendingEquationAt;
         if(!running){
           if(['amplitude','ribbonGap','xSpread','yCompress','perspective','tilt','yaw','roll','zoom','density','thickness','glow','alpha','hueSpin','depthHue','curvHue','contrast','trail','foldArc','foldFan','foldCross','foldWave','foldDensity','silkWidth','silkTwist','silkPinch','silkResponse','materialHue','materialBright','materialContrast','materialSaturate','materialMotion'].includes(key))draw();
           else requestStill();
@@ -926,7 +978,7 @@ function randomizeInteresting(){
 
 runBtn.onclick = ()=>{
   running = !running;
-  if(!running){ captureAnchor(); computeBaseline(); recomputeStill(); } else { previewDelta=0; }
+  if(!running){ captureAnchor(); computeBaseline(); recomputeStill(); } else { previewDelta=0; lastPaint=0; }
   updateUI();
 };
 refBtn.onclick = ()=>{ running=false; captureAnchor(); computeBaseline(); recomputeStill(); updateUI(); };
@@ -990,7 +1042,9 @@ window.__omefTest={
   view:()=>viewStats(),
   resetView:()=>resetView(),
   stretch:(on)=>{view.freeStretch=!!on;syncViewButtons();draw();},
-  stats:()=>({steps,vel:lastVel,delta:previewDelta,running,pixels:W*H,art:{x:artX,y:artY,width:artW,height:artH},expanded:document.getElementById('app').classList.contains('full')}),
+  stats:()=>({steps,vel:lastVel,delta:previewDelta,running,solverSafeties,renderFaults,playFaults,lastFrameError,pixels:W*H,art:{x:artX,y:artY,width:artW,height:artH},expanded:document.getElementById('app').classList.contains('full')}),
+  guardReport:()=>({solverSafeties,renderFaults,playFaults,lastFrameError}),
+  isPlaying:()=>running,
   advance:(n=1)=>{for(let i=0;i<n;i++)step(.032);draw();},
   parameter:(k,value)=>{if(!(k in P))throw Error('bad key');P[k]=value;if(inputs[k]){inputs[k].value=value;inputs[k].parentElement.querySelector('.val').textContent=formatVal(value);}if(!running)recomputeStill();},
   snapshot:()=>Array.from(q[0]).slice(0,32),
