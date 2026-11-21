@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"><meta name="theme-color" content="#050608"><meta name="apple-mobile-web-app-capable" content="yes"><title>OMEF · Reference Silk Studio 06</title><style>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"><meta name="theme-color" content="#050608"><meta name="apple-mobile-web-app-capable" content="yes"><title>OMEF · Floating Folds Studio 09</title><style>
 :root{color-scheme:dark;--b:#06080b;--panel:#0e1117;--raised:#151a22;--line:#28313b;--text:#f3f4f5;--muted:#8e9aa7;--accent:#afe6dd}
 *{box-sizing:border-box}html,body{margin:0;height:100%;background:#000;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,Inter,system-ui,sans-serif}button,input{font:inherit}button{cursor:pointer;touch-action:manipulation}
 #app{position:fixed;inset:0;background:var(--b);display:flex;flex-direction:column;overflow:hidden}
@@ -57,7 +57,7 @@
 #app.full #stageWrap{height:100dvh;max-height:none;min-height:0}
 </style></head><body><div id="app"><div id="stageWrap">
 <canvas id="stage" aria-label="Numerically integrated rainbow filament sculpture"></canvas>
-<div class="topbar"><div class="identity">OMEF <span>SILK / TOUCH</span></div><button class="iconbtn" id="runBtn">Play</button><button class="iconbtn" id="refBtn">Set ref</button><button class="iconbtn" id="exploreBtn">Explore</button><button class="iconbtn" id="expandBtn" aria-label="Expand sculpture without stretching">Expand</button></div>
+<div class="topbar"><div class="identity">OMEF <span>FLOATING FOLDS</span></div><button class="iconbtn" id="runBtn">Play</button><button class="iconbtn" id="refBtn">Set ref</button><button class="iconbtn" id="exploreBtn">Explore</button><button class="iconbtn" id="expandBtn" aria-label="Expand sculpture without stretching">Expand</button></div>
 <div id="gestureHint" aria-hidden="true">One finger: rotate · Two fingers: zoom · Stretch mode: reshape</div>
 <div id="status">INITIALIZING</div>
 </div>
@@ -248,6 +248,11 @@ const spec = [
     ['materialMotion','Warp response',0,2.5,1,0.01,'Scale motion arising from the computed OMEF state']
   ]},
   {group:'Rendering', items:[
+    ['foldArc','Wing arch',0.25,1.8,1.02,0.01,'Height of the two structural arches'],
+    ['foldFan','Filament fan',0.3,1.85,1.0,0.01,'How widely the neighboring fibers spread'],
+    ['foldCross','Ribbon crossing',0,2.2,1.02,0.01,'How the two sheets weave through each other'],
+    ['foldWave','Wave response',0,2.0,0.88,0.01,'How strongly the OMEF field sculpts the folded fibers'],
+    ['foldDensity','Fiber count',0.45,2.2,1.25,0.01,'Filaments per arch surface'],
     ['silkWidth','Silk ribbon width',0.08,0.90,0.64,0.01,'True transverse spread of the measured field'],
     ['silkTwist','Ribbon twist',-2.0,3.0,1.05,0.01,'Turns the ribbon cross-section in 3D'],
     ['silkPinch','Center pinch',0,0.96,0.64,0.01,'Controls the narrow waist near the center'],
@@ -579,11 +584,109 @@ function drawComputed(){
   ctx.shadowBlur=0;ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
 }
 
+
+// FLOATING FOLDS — a reference-guided geometric embedding, not a baked image.
+// Coordinates are smoothly deformed by the *evolved* q[r][i] and phi[r]
+// (including the existing real/imaginary logarithmic forces).
+const foldPalette=[71,92,149,184,209,239,277,309,326];
+function foldHue(t){
+  const a=clip(t,0,.99999)*(foldPalette.length-1);
+  const j=a|0;return lerp(foldPalette[j],foldPalette[j+1],a-j);
+}
+function foldPoint(t,w,sheet){
+  // Two connected, open wave sheets: arch, central saddle, and raised wing.
+  // This is a view-only embedding; no independent motion is generated here.
+  const s=t;
+  const arch=Math.exp(-Math.pow((s-.27)/.255,2));
+  const wing=Math.exp(-Math.pow((s-.83)/.255,2));
+  const saddle=Math.exp(-Math.pow((s-.56)/.145,2));
+  const pinch=(1-.77*Math.exp(-Math.pow((s-.535)/.11,2)));
+  const side=(sheet===0?-1:1);
+  const tShift=sheet===0?-.11:.11;
+  const transverse=P.foldFan*(.50+.28*arch+.26*wing)*pinch*w;
+  // At the crossing, the transverse direction rotates from y to depth.
+  const spin=(1.18+P.foldCross*1.05)*Math.PI*s+side*.23;
+  const flared=transverse*Math.cos(spin);
+  const x0=3.6*(s-.50)+(sheet===0?-.06:.06)+.14*w*Math.sin(Math.PI*s);
+  const y0= -0.25 + P.foldArc*(.79*arch+.65*wing-.36*saddle) + .20*side*saddle;
+  // The second sheet diverges at the right; their intersection remains open.
+  const y=y0+flared+ .24*(sheet===1?wing:-arch)*w;
+  const z=.20*side*saddle+transverse*Math.sin(spin)*1.10 + .11*side*wing;
+  const rf=clip((w+1)/2,0,1);
+  const source=silkSample(rf,s);
+  const neighboring=silkSample(1-rf,s);
+  const center=silkSample(.5,s);
+  const deform=P.foldWave*P.silkResponse*P.amplitude;
+  const wave=Math.tanh(source*1.15);
+  const common=Math.tanh(center);
+  const exchange=Math.tanh(source-neighboring);
+  // Local field affects all three spatial coordinates (not merely color).
+  const xx=x0+deform*(.070*exchange+.030*wave);
+  const yy=y+deform*(.16*wave+.09*common);
+  const zz=z+deform*(.09*exchange+.025*wave);
+  const cy=Math.cos(P.yaw*.55),sy=Math.sin(P.yaw*.55);
+  const X=cy*xx+sy*zz,Z=-sy*xx+cy*zz;
+  const ct=Math.cos(P.tilt-.64),st=Math.sin(P.tilt-.64);
+  const Y=ct*yy-st*Z, depth=st*yy+ct*Z;
+  const rc=Math.cos(P.roll),rs=Math.sin(P.roll);
+  const outX=rc*X-rs*Y, outY=rs*X+rc*Y;
+  const base=Math.min(artW/4.55,artH/2.9)*P.zoom*P.xSpread;
+  const persp=clip(1/(1+depth*.12*P.perspective),.79,1.18);
+  return [artX+artW*.5+outX*base*persp,
+    artY+artH*.53-outY*base*persp*P.yCompress,depth];
+}
+function drawFolds(){
+  renderBg(); updateSilkSmooth();
+  const total=Math.max(72,Math.min(210,Math.round(83*P.foldDensity*P.density)));
+  const samples=running?112:170;
+  const bands=[];
+  for(let sheet=0;sheet<2;sheet++)for(let i=0;i<total;i++){
+    const w=-1+2*i/(total-1),pts=[];let z=0;
+    for(let j=0;j<samples;j++){
+      const t=j/(samples-1),p=foldPoint(t,w,sheet);
+      pts.push(p);z+=p[2];
+    }
+    bands.push({sheet,w,pts,depth:z/samples});
+  }
+  bands.sort((a,b)=>a.depth-b.depth);
+  ctx.lineCap='round';ctx.lineJoin='round';
+  const al=clip(.31+P.alpha*.38,.12,.77);
+  // Layered strokes: subtle bloom for luminous silk without obscuring gaps.
+  for(const band of bands){
+    const {sheet,w,pts}=band;
+    for(let part=0;part<9;part++){
+      const first=Math.round(part*(samples-1)/9);
+      const last=Math.round((part+1)*(samples-1)/9);
+      const s=(part+.5)/9;
+      const h0=foldHue(clip((w+1)/2,0,1));
+      const hue=((h0*P.hueSpin + P.depthHue*sheet*15 + P.curvHue*14*Math.tanh(silkSample((w+1)/2,s)))%360+360)%360;
+      const intensity=clip(61+5*P.contrast+7*Math.sin(w*1.6+s*2),37,84);
+      const tr=(w+1)/2;
+      const color=`hsl(${hue.toFixed(1)} 94% ${intensity.toFixed(1)}%)`;
+      const path=()=>{
+        ctx.beginPath();ctx.moveTo(pts[first][0],pts[first][1]);
+        for(let j=first+1;j<=last;j++)ctx.lineTo(pts[j][0],pts[j][1]);
+        ctx.stroke();
+      };
+      ctx.strokeStyle=color;
+      // minimal halo (important to preserve individually resolved strands)
+      if(P.glow>.5 && part%2===0){
+        ctx.globalAlpha=al*.055*P.glow;
+        ctx.lineWidth=1.25+P.thickness*.5;path();
+      }
+      ctx.globalAlpha=al*(.65+.35*tr);
+      ctx.lineWidth=.32+.39*P.thickness;
+      path();
+    }
+  }
+  ctx.globalAlpha=1;ctx.shadowBlur=0;
+}
+
 // SOURCE-ACCURATE RENDERING. The user's image supplies the original fine
 // filament material; the OMEF numerical state supplies a differentiable
 // warp to it. This is explicitly a texture-based visualization rather than
 // a claim that the model generated the original reference artwork.
-let referenceMode=true,referenceReady=false;
+let renderVariant='folds',referenceMode=false,referenceReady=false;
 const referenceImage=new Image();
 referenceImage.onload=()=>{referenceReady=true;if(baselineQ)draw();};
 referenceImage.onerror=()=>{referenceReady=false;if(baselineQ)draw();};
@@ -652,7 +755,7 @@ function draw(){
   ctx.setTransform(DPR,0,0,DPR,0,0);
   ctx.translate(view.x,view.y);
   ctx.scale(view.sx,view.sy);
-  if(referenceMode)drawReference();else drawComputed();
+  if(renderVariant==='reference')drawReference();else if(renderVariant==='classic')drawComputed();else drawFolds();
   ctx.restore();
 }
 function updateEquation(){
@@ -753,7 +856,7 @@ function addControls(){
         P[key]=Number(input.value);card.querySelector('.val').textContent=formatVal(P[key]);
         updateEquation();
         if(!running){
-          if(['amplitude','ribbonGap','xSpread','yCompress','perspective','tilt','yaw','roll','zoom','density','thickness','glow','alpha','hueSpin','depthHue','curvHue','contrast','trail','silkWidth','silkTwist','silkPinch','silkResponse','materialHue','materialBright','materialContrast','materialSaturate','materialMotion'].includes(key))draw();
+          if(['amplitude','ribbonGap','xSpread','yCompress','perspective','tilt','yaw','roll','zoom','density','thickness','glow','alpha','hueSpin','depthHue','curvHue','contrast','trail','foldArc','foldFan','foldCross','foldWave','foldDensity','silkWidth','silkTwist','silkPinch','silkResponse','materialHue','materialBright','materialContrast','materialSaturate','materialMotion'].includes(key))draw();
           else requestStill();
         }
       });
@@ -784,8 +887,13 @@ function addPresets(){
   };
   resetBtn=document.createElement('button');resetBtn.className='preset';resetBtn.onclick=()=>{resetView();fitAdjustmentView();draw();};
   presetRow.appendChild(stretchBtn);presetRow.appendChild(resetBtn);syncViewButtons();
-  const viewButton=document.createElement('button');viewButton.className='preset active';viewButton.textContent='View: Reference silk';
-  viewButton.onclick=()=>{referenceMode=!referenceMode;viewButton.textContent=referenceMode?'View: Reference silk':'View: Computed fibers';viewButton.classList.toggle('active',referenceMode);updateRenderTabs();draw();};
+  const viewButton=document.createElement('button');viewButton.className='preset active';viewButton.textContent='View: Floating folds';
+  viewButton.onclick=()=>{
+    renderVariant=renderVariant==='folds'?'classic':renderVariant==='classic'?'reference':'folds';
+    referenceMode=(renderVariant==='reference');
+    viewButton.textContent=renderVariant==='folds'?'View: Floating folds':renderVariant==='classic'?'View: Classic fibers':'View: Reference silk';
+    viewButton.classList.toggle('active',renderVariant==='folds');updateRenderTabs();draw();
+  };
   presetRow.appendChild(viewButton);
   let active='';
   function setActive(name){ active=name; [...presetRow.children].filter(b=>b!==viewButton).forEach(b=>b.classList.toggle('active', b.textContent===name)); }
@@ -887,9 +995,6 @@ window.__omefTest={
   advance:(n=1)=>{for(let i=0;i<n;i++)step(.032);draw();},
   parameter:(k,value)=>{if(!(k in P))throw Error('bad key');P[k]=value;if(inputs[k]){inputs[k].value=value;inputs[k].parentElement.querySelector('.val').textContent=formatVal(value);}if(!running)recomputeStill();},
   snapshot:()=>Array.from(q[0]).slice(0,32),
+  renderMode:()=>renderVariant,
   summary:()=>({maxq:Math.max(...q.map(a=>Math.max(...a.map(x=>Math.abs(x))))), rmsV:lastVel, fieldsFinite:q.every(a=>a.every(Number.isFinite)), referenceMode,referenceReady, logTerms:{logForce:P.logForce,logCouple:P.logCouple,logCurve:P.logCurve,logPhase:P.logPhase,logAlpha:P.logAlpha,logBeta:P.logBeta,logOffset:P.logOffset}}),
   keys:()=>Object.keys(P)
-};
-requestAnimationFrame(animate);
-})();
-</script></body></html>
