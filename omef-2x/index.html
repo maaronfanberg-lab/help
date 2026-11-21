@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"><meta name="theme-color" content="#050608"><meta name="apple-mobile-web-app-capable" content="yes"><title>OMEF · Complex Log Studio 05</title><style>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"><meta name="theme-color" content="#050608"><meta name="apple-mobile-web-app-capable" content="yes"><title>OMEF · Complex Ribbon Studio 06</title><style>
 :root{color-scheme:dark;--b:#06080b;--panel:#0e1117;--raised:#151a22;--line:#28313b;--text:#f3f4f5;--muted:#8e9aa7;--accent:#afe6dd}
 *{box-sizing:border-box}html,body{margin:0;height:100%;background:#000;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,Inter,system-ui,sans-serif}button,input{font:inherit}button{cursor:pointer;touch-action:manipulation}
 #app{position:fixed;inset:0;background:var(--b);display:flex;flex-direction:column;overflow:hidden}
@@ -44,7 +44,7 @@
 @media(max-height:610px){#stageWrap{min-height:195px;height:40dvh}.control{min-height:90px}}
 </style></head><body><div id="app"><div id="stageWrap">
 <canvas id="stage" aria-label="Numerically integrated rainbow filament sculpture"></canvas>
-<div class="topbar"><div class="identity">OMEF <span>EXPRESSION / 04</span></div><button class="iconbtn" id="runBtn">Play</button><button class="iconbtn" id="refBtn">Set ref</button><button class="iconbtn" id="exploreBtn">Explore</button><button class="iconbtn" id="expandBtn" aria-label="Expand sculpture without stretching">Expand</button></div>
+<div class="topbar"><div class="identity">OMEF <span>RIBBON / 06</span></div><button class="iconbtn" id="runBtn">Play</button><button class="iconbtn" id="refBtn">Set ref</button><button class="iconbtn" id="exploreBtn">Explore</button><button class="iconbtn" id="expandBtn" aria-label="Expand sculpture without stretching">Expand</button></div>
 <div id="status">INITIALIZING</div>
 <div id="presetRow" class="presetRow"></div></div>
 <div id="panel"><div class="panelTitle"><div><strong>Instrument controls</strong><small>Adjust the equations while viewing the sculpture</small></div><span id="modeText">STILL REFERENCE</span></div><nav class="tabs" id="tabs"></nav><div id="groups"><div id="mathReadout"></div></div></div>
@@ -159,17 +159,23 @@ const spec = [
     ['ribbonGap','Ribbon gap',0.45,2.4,1.05,0.01,'Distance between layered filaments'],
     ['xSpread','X spread',0.55,2.3,1.00,0.01,'Horizontal scaling'],
     ['yCompress','Y compression',0.3,2.3,1.00,0.01,'Vertical compression'],
-    ['perspective','Perspective',0.1,2.5,1.05,0.01,'Depth magnification'],
-    ['tilt','Tilt',-1.1,1.1,0.72,0.01,'Camera tilt'],
-    ['yaw','Yaw',-2.4,2.4,-0.20,0.01,'Camera rotation'],
+    ['perspective','Perspective',0.1,2.5,0.44,0.01,'Depth magnification'],
+    ['tilt','Tilt',-1.1,1.1,0.45,0.01,'Camera tilt'],
+    ['yaw','Yaw',-2.4,2.4,-0.05,0.01,'Camera rotation'],
     ['roll','Roll',-1.2,1.2,0.02,0.01,'Camera roll'],
     ['zoom','Zoom',0.55,1.75,1.08,0.01,'View scaling']
   ]},
   {group:'Rendering', items:[
-    ['density','Line density',0.25,2.0,1.25,0.01,'How many filaments are drawn'],
-    ['thickness','Thickness',0.2,2.6,0.85,0.01,'Stroke thickness'],
-    ['glow','Glow',0,1.7,0.54,0.01,'Outer luminous halo'],
-    ['alpha','Alpha',0.05,0.95,0.48,0.01,'Line transparency'],
+    ['visualMode','Flow ribbon / terrain',0,1,1,1,'1: floating folded ribbon, 0: original wave terrain'],
+    ['ribbonWidth','Ribbon width',0.12,1.5,0.68,0.01,'Width of the mathematical ribbon cross-section'],
+    ['ribbonTwist','Ribbon twist',-2.0,2.0,0.90,0.01,'Transverse rotation along the fiber loop'],
+    ['pinch','Center pinch',0,1.2,0.78,0.01,'Tighten the waist where ribbon segments cross'],
+    ['loopShape','Loop shape',0.35,1.75,1.00,0.01,'Open or elongate the two lobes'],
+    ['fieldImprint','Field imprint',0,1.8,0.56,0.01,'Amount of simulated q and velocity sculpting ribbon'],
+    ['density','Line density',0.25,2.0,1.70,0.01,'How many filaments are drawn'],
+    ['thickness','Thickness',0.2,2.6,0.58,0.01,'Stroke thickness'],
+    ['glow','Glow',0,1.7,0.32,0.01,'Outer luminous halo'],
+    ['alpha','Alpha',0.05,0.95,0.56,0.01,'Line transparency'],
     ['hueSpin','Hue spin',0,2.2,0.92,0.01,'How quickly color cycles'],
     ['depthHue','Depth hue',0,1.5,0.55,0.01,'Hue changes with depth'],
     ['curvHue','Curvature hue',0,2.2,1.08,0.01,'Hue changes with curvature'],
@@ -180,6 +186,7 @@ const spec = [
 const P = Object.fromEntries(spec.flatMap(g=>g.items.map(i=>[i[0],i[4]])));
 const inputs = {};
 const presets = {
+  'Flow ribbon': {visualMode:1,ribbonWidth:.68,ribbonTwist:.90,pinch:.78,loopShape:1,fieldImprint:.72,amplitude:1.40,density:1.7,thickness:.58,glow:.32,alpha:.56},
   'Serene': {damping:.028,pump:.03,drive:.24,tension:.8,biharm:.022,neighbor:.6,cubic:.42,quintic:.06,fold:.0,amplitude:1.05,density:0.8,glow:0.6,alpha:0.22,curvHue:0.55,phaseSlip:.10},
   'Storm': {damping:.018,pump:.14,drive:.86,driveFreq:1.64,beat:2.28,feedback:.82,tension:1.46,biharm:.051,dispersion:.12,neighbor:1.25,cubic:.98,quintic:.13,curvatureDrive:.74,phaseSlip:.48,macro:.95,amplitude:1.65,density:1.35,glow:1.1,alpha:.25},
   'Lattice': {damping:.026,pump:.06,drive:.35,feedback:.22,tension:1.25,biharm:.012,neighbor:1.52,longCouple:.76,phaseLock:1.05,phaseSlip:.05,heteroAmp:.55,symmetry:0,fold:0,amplitude:1.15,density:1.05},
@@ -355,7 +362,7 @@ function renderBg(){
   } else ctx.fillStyle='#000';
   ctx.fillRect(0,0,W,H);
 }
-function draw(){
+function drawTerrain(){
   if(W<5||H<5)return;
   renderBg();
   const count= Math.round(55 + P.density*62);
@@ -404,6 +411,92 @@ function draw(){
   }
   ctx.globalAlpha=1;ctx.shadowBlur=0;ctx.globalCompositeOperation='source-over';
 }
+
+// Ribbon geometry is a coordinate chart for the numerical field.
+// The coordinates are a folded closed loop; changing q, v and phi actually
+// displaces its normals and twisting, not a pre-rendered animation.
+function drawRibbon(){
+  if(W<5||H<5)return;
+  renderBg();
+  const strands=Math.max(30,Math.round(56+P.density*63));
+  const samples=138;
+  const bands=[];
+  const w=P.ribbonWidth*P.ribbonGap;
+  for(let j=0;j<strands;j++){
+    const u=2*(j/(strands-1)) - 1;
+    const rpos=(j/(strands-1))*(R-1),r0=Math.floor(rpos),r1=Math.min(R-1,r0+1),rf=rpos-r0;
+    const phase=lerp(phi[r0],phi[r1],rf);
+    const points=[];
+    let zsum=0;
+    for(let k=0;k<=samples;k++){
+      const t=k/samples*TWO;
+      const ii=(k/samples)*(N-1), i0=Math.floor(ii), i1=Math.min(N-1,i0+1), fr=ii-i0;
+      const q0=lerp(q[r0][i0],q[r0][i1],fr);
+      const q1=lerp(q[r1][i0],q[r1][i1],fr);
+      const vt0=lerp(v[r0][i0],v[r0][i1],fr);
+      const vt1=lerp(v[r1][i0],v[r1][i1],fr);
+      const field=lerp(q0,q1,rf), vel=lerp(vt0,vt1,rf);
+      const si=Math.sin(t),co=Math.cos(t),s2=Math.sin(2*t),c2=Math.cos(2*t);
+      // Crossing loop, from a continuous 3D chart rather than a flat overlay.
+      const lx=1.72*si + 0.11*Math.sin(3*t);
+      const ly=(1.15*s2 -0.19*co +0.11*Math.sin(3*t))*P.loopShape;
+      const lz=0.43*co +0.18*c2;
+      const dx=1.72*co+0.33*Math.cos(3*t);
+      const dy=P.loopShape*(2.30*c2+0.19*si+0.33*Math.cos(3*t));
+      const normalLen=Math.hypot(dx,dy)+1e-8;
+      const nx=-dy/normalLen,ny=dx/normalLen;
+      const bet=P.ribbonTwist*(0.66*t+0.30*Math.sin(2*t))+0.09*phase;
+      const waist=1-0.82*P.pinch*Math.exp(-Math.pow(lx/0.57,2));
+      const envelope=(0.74 + .22*Math.cos(t -0.4))*Math.max(.14,waist);
+      const transverse=u*w*envelope;
+      // Field and velocity imprint shape and depth with bounded displacement.
+      const Q=P.fieldImprint*Math.tanh(field*1.4), V=P.fieldImprint*Math.tanh(vel);
+      const x=lx+0.12*Q*nx + transverse*Math.cos(bet)*nx;
+      const y=ly+0.23*Q+0.04*V + transverse*Math.cos(bet)*ny;
+      const z=lz+0.19*Q + transverse*Math.sin(bet)+0.10*V;
+      const xyz=project(x*P.xSpread, y*P.amplitude*.69*P.yCompress, z*P.perspective*.35);
+      points.push(xyz);zsum+=xyz[2];
+    }
+    bands.push({points,u,depth:zsum/(samples+1)});
+  }
+  // Uniform fit of the *entire* folded sculpture into the locked art viewport.
+  // Fullscreen introduces black margins instead of cropping or stretching.
+  let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+  for(const band of bands)for(const point of band.points){
+    if(point[0]<minX)minX=point[0];if(point[0]>maxX)maxX=point[0];
+    if(point[1]<minY)minY=point[1];if(point[1]>maxY)maxY=point[1];
+  }
+  const spanX=Math.max(.01,maxX-minX),spanY=Math.max(.01,maxY-minY);
+  const fit=Math.min(1,(artW*.88)/spanX,(artH*.77)/spanY);
+  const centerX=(minX+maxX)*.5,centerY=(minY+maxY)*.5;
+  const shiftX=artX+artW*.5,shiftY=artY+artH*.52;
+  for(const band of bands)for(const point of band.points){
+    point[0]=shiftX+(point[0]-centerX)*fit;
+    point[1]=shiftY+(point[1]-centerY)*fit;
+  }
+  bands.sort((a,b)=>a.depth-b.depth);
+  ctx.lineCap='round';ctx.lineJoin='round';
+  for(const band of bands){
+    const gradient=ctx.createLinearGradient(artX,0,artX+artW,0);
+    for(let k=0;k<=12;k++){
+      const t=k/12;
+      const hue=(12+325*t*P.hueSpin+band.u*P.depthHue*84+3600)%360;
+      gradient.addColorStop(t,`hsl(${hue.toFixed(1)} 100% ${Math.max(39,Math.min(71,55 + 9*P.contrast*Math.cos(TWO*t))) .toFixed(1)}%)`);
+    }
+    if(P.glow>.02){
+      ctx.strokeStyle=gradient;ctx.globalAlpha=Math.min(.13,.065*P.glow*P.alpha);
+      ctx.lineWidth=1.1+P.glow*2.2+P.thickness*1.2;
+      ctx.shadowBlur=3.5*P.glow;ctx.shadowColor='rgba(255,255,255,.34)';
+      strokePoints(band.points);ctx.shadowBlur=0;
+    }
+    ctx.strokeStyle=gradient;
+    ctx.globalAlpha=Math.min(.91, P.alpha*(.8+.22*(band.u+1)/2));
+    ctx.lineWidth=.22+P.thickness*.62;
+    strokePoints(band.points);
+  }
+  ctx.globalAlpha=1;ctx.shadowBlur=0;
+}
+function draw(){if(P.visualMode>.5)drawRibbon();else drawTerrain();}
 function strokePoints(pts){
   ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);
   for(let k=1;k<pts.length;k++) ctx.lineTo(pts[k][0],pts[k][1]);
@@ -497,7 +590,7 @@ function addControls(){
         P[key]=Number(input.value);card.querySelector('.val').textContent=formatVal(P[key]);
         updateEquation();
         if(!running){
-          if(['amplitude','ribbonGap','xSpread','yCompress','perspective','tilt','yaw','roll','zoom','density','thickness','glow','alpha','hueSpin','depthHue','curvHue','contrast','trail'].includes(key))draw();
+          if(['visualMode','ribbonWidth','ribbonTwist','pinch','loopShape','fieldImprint','amplitude','ribbonGap','xSpread','yCompress','perspective','tilt','yaw','roll','zoom','density','thickness','glow','alpha','hueSpin','depthHue','curvHue','contrast','trail'].includes(key))draw();
           else requestStill();
         }
       });
