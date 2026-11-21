@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"><meta name="theme-color" content="#050608"><meta name="apple-mobile-web-app-capable" content="yes"><title>OMEF · Studio 04 · Contain Fix</title><style>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"><meta name="theme-color" content="#050608"><meta name="apple-mobile-web-app-capable" content="yes"><title>OMEF · Complex Log Studio 05</title><style>
 :root{color-scheme:dark;--b:#06080b;--panel:#0e1117;--raised:#151a22;--line:#28313b;--text:#f3f4f5;--muted:#8e9aa7;--accent:#afe6dd}
 *{box-sizing:border-box}html,body{margin:0;height:100%;background:#000;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,Inter,system-ui,sans-serif}button,input{font:inherit}button{cursor:pointer;touch-action:manipulation}
 #app{position:fixed;inset:0;background:var(--b);display:flex;flex-direction:column;overflow:hidden}
@@ -124,6 +124,16 @@ const spec = [
     ['longCouple','Long coupling',0,1.4,0.42,0.01,'Two-ribbon distance coupling'],
     ['anisotropy','Anisotropy',-1.2,1.2,0.18,0.01,'Biases left/right and top/bottom propagation']
   ]},
+  {group:'Complex log', items:[
+    ['logForce','Imaginary log force',-1.1,1.1,0.55,0.01,'Im log(z) feeds directly into acceleration; negative values invert the effect'],
+    ['logCouple','Log neighbor coupling',-1.2,1.2,0.28,0.01,'Im log of cross-ribbon differences changes reciprocal coupling'],
+    ['logCurve','Log curvature',-1.2,1.2,0.34,0.01,'Im log of spatial curvature changes the restoring force'],
+    ['logPhase','Log phase feedback',-1.5,1.5,0.46,0.01,'Complex log argument changes oscillator phase evolution'],
+    ['logMagnitude','Real-log feedback',-0.8,0.8,0.10,0.01,'Real part of complex log also modifies the force'],
+    ['logAlpha','Real sensitivity',0,1.9,0.80,0.01,'How strongly real q enters z'],
+    ['logBeta','Imaginary sensitivity',0,2.5,0.85,0.01,'How strongly velocity and coupling enter Im z'],
+    ['logOffset','Real offset',0.08,2.2,1.12,0.01,'Move the complex input toward the negative real axis and branch cut']
+  ]},
   {group:'Nonlinearity', items:[
     ['cubic','Cubic force',0,2.6,0.78,0.01,'Odd nonlinear restoring force'],
     ['quintic','Quintic force',0,0.80,0.11,0.005,'Higher-order envelope control'],
@@ -174,7 +184,9 @@ const presets = {
   'Storm': {damping:.018,pump:.14,drive:.86,driveFreq:1.64,beat:2.28,feedback:.82,tension:1.46,biharm:.051,dispersion:.12,neighbor:1.25,cubic:.98,quintic:.13,curvatureDrive:.74,phaseSlip:.48,macro:.95,amplitude:1.65,density:1.35,glow:1.1,alpha:.25},
   'Lattice': {damping:.026,pump:.06,drive:.35,feedback:.22,tension:1.25,biharm:.012,neighbor:1.52,longCouple:.76,phaseLock:1.05,phaseSlip:.05,heteroAmp:.55,symmetry:0,fold:0,amplitude:1.15,density:1.05},
   'Folded': {damping:.024,pump:.09,drive:.56,feedback:.4,tension:.95,biharm:.065,dispersion:.08,mixX:.09,shear:.12,cubic:.72,quintic:.18,fold:.72,symmetry:.34,macro:1.2,amplitude:1.8,ribbonGap:1.2,glow:1.0},
-  'Prismatic': {damping:.02,pump:.10,drive:.62,driveFreq:1.0,beat:1.4,tension:1.0,neighbor:.88,cubic:.7,quintic:.12,phaseLock:.38,phaseSlip:.34,amplitude:1.45,hueSpin:1.45,depthHue:.88,curvHue:1.55,glow:1.25,density:1.4}
+  'Prismatic': {damping:.02,pump:.10,drive:.62,driveFreq:1.0,beat:1.4,tension:1.0,neighbor:.88,cubic:.7,quintic:.12,phaseLock:.38,phaseSlip:.34,amplitude:1.45,hueSpin:1.45,depthHue:.88,curvHue:1.55,glow:1.25,density:1.4},
+  'Complex tide': {logForce:.73,logCouple:.48,logCurve:.62,logPhase:.76,logMagnitude:.16,logAlpha:1.05,logBeta:1.52,logOffset:.92,drive:.55,tension:1.10,neighbor:1.15,amplitude:1.45},
+  'Branch folds': {logForce:.46,logCouple:-.58,logCurve:.79,logPhase:1.05,logMagnitude:.12,logAlpha:1.72,logBeta:1.45,logOffset:.30,drive:.62,neighbor:1.02,amplitude:1.48}
 };
 
 function resize(){
@@ -236,7 +248,11 @@ function step(dt){
   // phase evolution per ribbon
   for(let r=0;r<R;r++){
     const ph=phi[r], phL=phi[mod(r-1,R)], phR=phi[mod(r+1,R)], qMid=q[r][(steps+r*13)%N];
-    const dph = 0.18 + P.phaseLock*(Math.sin(phL-ph)+Math.sin(phR-ph)) - P.phaseSlip*Math.sin(2.7*ph + 0.4*r) + 0.12*P.feedback*qMid;
+    // Principal complex logarithm: Im log(a + i b) = atan2(b,a).
+    // q and velocity both enter this phase feedback, rather than a renderer trick.
+    const sampleI=(steps+r*13)%N;
+    const phaseArg=Math.atan2(P.logBeta*v[r][sampleI], P.logOffset+P.logAlpha*Math.tanh(qMid));
+    const dph = 0.18 + P.phaseLock*(Math.sin(phL-ph)+Math.sin(phR-ph)) - P.phaseSlip*Math.sin(2.7*ph + 0.4*r) + 0.12*P.feedback*qMid + P.logPhase*phaseArg;
     phi2[r] = ph + dt2*dph;
   }
   for(let r=0;r<R;r++){
@@ -266,9 +282,20 @@ function step(dt){
       const curvature = P.curvatureDrive*lap*Math.tanh(0.8+Math.abs(q0));
       const reson = P.resonance*Math.sin(2.3*clock + 5*x + y)*Math.exp(-3*Math.abs(q0));
       const feedbackDrive = P.feedback*(0.45*Math.tanh(q0) + 0.25*Math.tanh(across));
+      // z = a + i*b. Principal complex log(z) = 1/2 ln(a²+b²) + i atan2(b,a).
+      // Offsetting the real part ensures tunable distance to z=0; log modulus
+      // is epsilon-regularized while the genuine principal argument is retained.
+      const logRe = P.logOffset + P.logAlpha*Math.tanh(q0);
+      const logIm = P.logBeta*(vv[i] + 0.24*across);
+      const imaginaryLog = Math.atan2(logIm,logRe);
+      const realLog = 0.5*Math.log(Math.max(1e-8,logRe*logRe+logIm*logIm));
+      const coupledLog = Math.atan2(P.logBeta*across, P.logOffset+P.logAlpha*Math.tanh(d1));
+      const curvedLog = Math.atan2(P.logBeta*lap, P.logOffset+P.logAlpha*Math.tanh(d3));
+      const complexLogForce = P.logForce*imaginaryLog + P.logCouple*coupledLog + P.logCurve*curvedLog
+                              + P.logMagnitude*realLog*Math.tanh(q0);
       const accel =
         P.tension*lap - P.biharm*bih + P.advection*d1 + P.dispersion*d3 + P.mixX*mix + P.neighbor*across + P.longCouple*longAcross + P.shear*(qD[mod(i+1,N)]-qU[mod(i+1,N)] - qD[mod(i-1,N)] + qU[mod(i-1,N)])*0.25
-        + non + quint + curvature + drive + reson + feedbackDrive + macro + het + symBias + P.crossMod*(qU[i]*qD[i]-q0*q0)*0.08 + P.fold*(r/(R-1)-0.5);
+        + non + quint + curvature + drive + reson + feedbackDrive + macro + het + symBias + complexLogForce + P.crossMod*(qU[i]*qD[i]-q0*q0)*0.08 + P.fold*(r/(R-1)-0.5);
       const vel = vv[i];
       const localPump = P.pump*(P.pumpTarget*P.pumpTarget - vel*vel)*vel;
       const damp = P.damping*vel;
@@ -386,7 +413,15 @@ function updateEquation(){
   mathEl.textContent=`q̈ = ${P.tension.toFixed(2)}·Δₓq − ${P.biharm.toFixed(3)}·Δₓ⁴q + ${P.neighbor.toFixed(2)}·Δᵣq + ${P.mixX.toFixed(3)}·∂ₓΔᵣq
 − ${P.cubic.toFixed(2)}·sgn(q)|q|^${P.exp.toFixed(2)}/(1+${P.saturate.toFixed(2)}q²) − ${P.quintic.toFixed(2)}q⁵
 + driving(t,x,r) + coupling(q,Δᵣq) + feedback(q) − ${P.damping.toFixed(3)}·q̇
-+ ${P.pump.toFixed(3)}·(${P.pumpTarget.toFixed(2)}²−q̇²)q̇ + remaining operators`;
++ ${P.pump.toFixed(3)}·(${P.pumpTarget.toFixed(2)}²−q̇²)q̇ + remaining operators
+
+Complex logarithm:
+z = ${P.logOffset.toFixed(2)} + ${P.logAlpha.toFixed(2)}·tanh(q) + i·${P.logBeta.toFixed(2)}·(q̇+0.24·Δᵣq)
+log(z) = ½ ln(Re(z)²+Im(z)²) + i atan2(Im(z),Re(z))
+F_log = ${P.logForce.toFixed(2)}·Im log(z) + ${P.logCouple.toFixed(2)}·Im log(z_neighbor) + ${P.logCurve.toFixed(2)}·Im log(z_curvature) + ${P.logMagnitude.toFixed(2)}·Re log(z)·tanh(q)
+φ̇ includes ${P.logPhase.toFixed(2)}·Im log(z_phase)
+
+The principal argument has a branch cut on the negative real axis. The log modulus is regularized near zero.`;
 }
 function updateUI(force=false){
   statusEl.textContent=`${running?'MOVING':'STILL'}  ·  Δ ${previewDelta.toFixed(4)}  ·  v ${lastVel.toFixed(3)}`;
@@ -415,7 +450,7 @@ function animate(){
 
 let autoTargets={};
 function reseedTargets(){
-  const keys = ['tension','biharm','neighbor','cubic','exp','drive','driveFreq','beat','feedback','heteroAmp','macro','phaseLock','phaseSlip','fold','amplitude','density','glow','depthHue','curvHue'];
+  const keys = ['tension','biharm','neighbor','cubic','exp','drive','driveFreq','beat','feedback','heteroAmp','macro','phaseLock','phaseSlip','fold','amplitude','density','glow','depthHue','curvHue','logForce','logCouple','logCurve','logPhase','logAlpha','logBeta','logOffset'];
   for(const k of keys){
     const item = spec.flatMap(g=>g.items).find(i=>i[0]===k); if(!item) continue;
     autoTargets[k] = item[1] ? null : null;
@@ -497,7 +532,7 @@ function applyValues(vals){
   updateEquation();if(!running) requestStill(); else updateUI(true);
 }
 function randomizeInteresting(){
-  const keys = ['tension','biharm','dispersion','mixX','neighbor','longCouple','cubic','quintic','exp','feedback','drive','driveFreq','beat','phaseLock','phaseSlip','heteroAmp','macro','fold','symmetry','amplitude','density','glow','depthHue','curvHue'];
+  const keys = ['tension','biharm','dispersion','mixX','neighbor','longCouple','cubic','quintic','exp','feedback','drive','driveFreq','beat','phaseLock','phaseSlip','heteroAmp','macro','fold','symmetry','amplitude','density','glow','depthHue','curvHue','logForce','logCouple','logCurve','logPhase','logAlpha','logBeta','logOffset'];
   for(const key of keys){
     const item = spec.flatMap(g=>g.items).find(i=>i[0]===key); if(!item) continue;
     const [,,min,max,,,] = item;
@@ -529,14 +564,16 @@ canvas.addEventListener('pointermove', e=>{
 });
 canvas.addEventListener('pointerup', ()=>dragState=null); canvas.addEventListener('pointercancel', ()=>dragState=null);
 
-addControls(); addPresets(); resize(); initialize(0.5); recomputeStill(); updateUI(true);
+addControls(); addPresets(); activateGroup('Complex log'); resize(); initialize(0.5); recomputeStill(); updateUI(true);
 const fullBtn=document.getElementById('expandBtn');
 fullBtn.onclick=()=>{const on=document.getElementById('app').classList.toggle('full');fullBtn.textContent=on?'Close':'Expand';resize();draw()};
 window.__omefTest={
   stats:()=>({steps,vel:lastVel,delta:previewDelta,running,pixels:W*H,art:{x:artX,y:artY,width:artW,height:artH},expanded:document.getElementById('app').classList.contains('full')}),
   advance:(n=1)=>{for(let i=0;i<n;i++)step(.032);draw();},
   parameter:(k,value)=>{if(!(k in P))throw Error('bad key');P[k]=value;if(inputs[k]){inputs[k].value=value;inputs[k].parentElement.querySelector('.val').textContent=formatVal(value);}if(!running)recomputeStill();},
-  snapshot:()=>Array.from(q[0]).slice(0,32)
+  snapshot:()=>Array.from(q[0]).slice(0,32),
+  summary:()=>({maxq:Math.max(...q.map(a=>Math.max(...a.map(x=>Math.abs(x))))), rmsV:lastVel, fieldsFinite:q.every(a=>a.every(Number.isFinite)), logTerms:{logForce:P.logForce,logCouple:P.logCouple,logCurve:P.logCurve,logPhase:P.logPhase,logAlpha:P.logAlpha,logBeta:P.logBeta,logOffset:P.logOffset}}),
+  keys:()=>Object.keys(P)
 };
 requestAnimationFrame(animate);
 })();
