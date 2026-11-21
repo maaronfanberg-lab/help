@@ -1,0 +1,1157 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"><meta name="theme-color" content="#050608"><meta name="apple-mobile-web-app-capable" content="yes"><title>OMEF · Floating Folds Studio 09</title><style>
+:root{color-scheme:dark;--b:#06080b;--panel:#0e1117;--raised:#151a22;--line:#28313b;--text:#f3f4f5;--muted:#8e9aa7;--accent:#afe6dd}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:#000;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,Inter,system-ui,sans-serif}button,input{font:inherit}button{cursor:pointer;touch-action:manipulation}
+#app{position:fixed;inset:0;background:var(--b);display:flex;flex-direction:column;overflow:hidden}
+#stageWrap{height:40dvh;min-height:240px;max-height:55dvh;flex:none;background:#000;position:relative;overflow:hidden;border-bottom:1px solid #161a20}
+#stageWrap::before{content:"";position:absolute;top:0;left:0;right:0;height:62px;z-index:1;pointer-events:none;background:linear-gradient(to bottom,#000a,transparent)}
+#stage{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.topbar{position:absolute;z-index:2;top:max(9px,env(safe-area-inset-top));left:12px;right:12px;display:flex;align-items:center;gap:7px}
+.identity{color:#f2f2f3;text-shadow:0 1px 5px #000,0 0 18px #000;font-size:12px;font-weight:760;letter-spacing:.12em;text-shadow:0 1px 4px #000;min-width:0;flex:1}
+.identity span{font-weight:400;color:#8a969e;margin-left:6px;letter-spacing:.025em;font-size:10px}
+.iconbtn{background:#11161bed;color:#e5eced;border:1px solid #39414a;border-radius:10px;padding:8px 10px;font-size:11px;white-space:nowrap}
+.iconbtn.active{background:#d3efe8;color:#132825;border-color:#d3efe8}
+#status{position:absolute;left:14px;bottom:48px;font:10px ui-monospace,SFMono-Regular,monospace;letter-spacing:.03em;color:#b6ced0;background:#02050777;border-radius:7px;padding:5px 7px;pointer-events:none;white-space:nowrap}
+#gestureHint{position:absolute;right:11px;top:66px;color:#a0b8c0;background:#03080ab5;border-radius:7px;padding:5px 7px;font:9px ui-monospace,SFMono-Regular,monospace;z-index:2;pointer-events:none}#stage{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.presetRow{position:absolute;bottom:9px;left:10px;right:10px;z-index:2;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.presetRow::-webkit-scrollbar{display:none}
+.preset{font-size:10px;letter-spacing:.01em;color:#dae2e5;padding:7px 12px;border:1px solid #3b4045;border-radius:100px;background:#0a1015c9;white-space:nowrap}
+.preset.active{color:#d8f8ed;border-color:#b1dfd3;background:#19352fa6}
+#panel{flex:1;min-height:0;background:var(--panel);display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom)}
+.panelTitle{display:flex;align-items:center;justify-content:space-between;padding:15px 16px 11px;gap:12px}
+.panelTitle strong{font-size:15px;font-weight:680;letter-spacing:-.015em}
+.panelTitle small{display:block;color:var(--muted);font-size:11px;margin-top:4px}
+#modeText{font-size:9px;letter-spacing:.12em;font-weight:700;color:var(--accent);white-space:nowrap}
+.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line);padding:0 10px;flex:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabBtn{position:relative;flex:none;border:0;background:none;color:#8d9ba6;font-size:11px;font-weight:600;padding:12px 10px 13px;white-space:nowrap}
+.tabBtn.selected{color:#f3f6f5}.tabBtn.selected:after{content:'';position:absolute;height:2px;bottom:0;left:10px;right:10px;background:#b6e9db;border-radius:3px}
+#groups{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:0 12px 30px}
+.tabPage{display:none}.tabPage.selected{display:block}
+.sectionLabel{font-size:11px;text-transform:uppercase;letter-spacing:.10em;color:#c0cbd1;padding:17px 3px 12px;display:flex;justify-content:space-between;align-items:center;font-weight:720}
+.sectionLabel span{letter-spacing:normal;font-weight:440;color:#7f929f;text-transform:none;font-size:10px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.control{display:block;min-width:0;padding:13px 11px 10px;background:#151a20;border-radius:11px;border:1px solid #252d35;min-height:100px}
+.control header{display:flex;gap:5px;align-items:center;justify-content:space-between;margin-bottom:12px}
+.control .name{font-size:11px;color:#cfd6dc;min-width:0;overflow-wrap:anywhere}
+.control .val{font-size:11px;color:#b2e8dc;font-variant-numeric:tabular-nums;font-family:ui-monospace,SFMono-Regular,monospace;white-space:nowrap}
+.control input{width:100%;display:block;accent-color:#a9e9de;touch-action:pan-y;height:23px;margin:0}
+.control small{font-size:9px;color:#8295a3;line-height:1.25;margin-top:6px;display:block}
+#mathReadout{font:11px/1.8 ui-monospace,SFMono-Regular,monospace;white-space:pre-wrap;overflow-wrap:anywhere;color:#c5e6df;background:#151c22;border:1px solid #34454b;border-radius:12px;padding:14px;margin:9px 0}
+.description{font-size:12px;line-height:1.5;color:#94a4b3;margin:8px 2px}
+#app.full #stageWrap{height:100dvh;min-height:0;max-height:none;flex:1}
+#app.full #panel{display:none}
+@media(min-width:720px){#app{max-width:850px;margin:0 auto;border-inline:1px solid #222}.grid{grid-template-columns:repeat(3,minmax(0,1fr))}#stageWrap{height:48dvh}}
+@media(max-width:490px){.identity span{display:none}.identity{letter-spacing:.09em}.topbar{gap:5px;left:10px;right:10px}.iconbtn{padding:8px 9px}}
+@media(max-height:610px){#stageWrap{min-height:195px;height:40dvh}.control{min-height:90px}}
+
+/* Studio 08: fixed, unobstructed artwork preview above scrolling adjustments */
+#stageWrap{height:44dvh;min-height:260px;max-height:52dvh}
+#stageWrap::before{height:54px}
+#status{bottom:5px;left:10px;z-index:2;opacity:.75;padding:3px 6px;font-size:9px}
+#gestureHint{display:none}
+#app.full #gestureHint{display:block}
+#panel>.presetRow{position:relative;bottom:auto;left:auto;right:auto;z-index:1;flex:0 0 auto;min-height:42px;padding:6px 9px 7px;border-bottom:1px solid var(--line);background:#0e1117}
+#panel>.presetRow .preset{padding:6px 10px}
+#panelTitle{flex:0 0 auto}
+@media(max-height:610px){#stageWrap{height:43dvh;min-height:180px;max-height:50dvh}}
+#app.full #stageWrap{height:100dvh;max-height:none;min-height:0}
+</style></head><body><div id="app"><div id="stageWrap">
+<img id="fallbackPreview" alt="Preview of rainbow silk sculpture" src="data:image/webp;base64,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" style="position:absolute;inset:52px 0 18px;width:100%;height:calc(100% - 70px);object-fit:contain;pointer-events:none;opacity:.9"><canvas id="stage" aria-label="Numerically integrated rainbow filament sculpture"></canvas>
+<div class="topbar"><div class="identity">OMEF <span>FLOATING FOLDS</span></div><button class="iconbtn" id="runBtn">Play</button><button class="iconbtn" id="refBtn">Set ref</button><button class="iconbtn" id="exploreBtn">Explore</button><button class="iconbtn" id="expandBtn" aria-label="Expand sculpture without stretching">Expand</button></div>
+<div id="gestureHint" aria-hidden="true">One finger: rotate · Two fingers: zoom · Stretch mode: reshape</div>
+<div id="status">PREVIEW ONLY · OPEN IN SAFARI</div>
+</div>
+<div id="bootWatchdog" style="display:none;position:absolute;z-index:4;bottom:55px;left:14px;right:14px;background:#351a19;color:#ffdfd9;border:1px solid #aa6458;border-radius:8px;padding:10px;font-size:12px"></div><div id="panel"><div class="panelTitle"><div><strong>Instrument controls</strong><small>Complete sculpture above · always fitted while adjusting</small></div><span id="modeText">STILL REFERENCE</span></div><div id="presetRow" class="presetRow"></div><nav class="tabs" id="tabs"></nav><div id="groups"><div id="mathReadout"></div></div></div>
+<button id="randomBtn" style="position:absolute;left:-1000px;width:1px;height:1px" aria-hidden="true">Random</button>
+<script>
+window.__omefBootReady=false;var start=document.getElementById('status');if(start)start.textContent='ENGINE LOADING';
+window.addEventListener('error',function(e){if(window.__omefBootReady)return;var s=document.getElementById('status');if(s)s.textContent='SCRIPT ERROR';var d=document.getElementById('bootWatchdog');if(d){d.textContent='Script error: '+(e.message||'unknown')+' · Open this page in Safari.';d.style.display='block';}});
+window.addEventListener('load',function(){setTimeout(function(){if(!window.__omefBootReady){var s=document.getElementById('status');if(s)s.textContent='PREVIEW ONLY';var d=document.getElementById('bootWatchdog');if(d&&!d.textContent){d.textContent='The interactive script did not start. Open this link directly in Safari.';d.style.display='block';}}},4000);});
+</script>
+<div id="runtimeNotice" hidden style="position:fixed;z-index:99;left:12px;bottom:10px;max-width:min(92vw,450px);pointer-events:none;color:#d7f5fc;background:#1a2f39df;border:1px solid #466c7b;border-radius:8px;padding:7px 11px;font:11px system-ui"></div>
+<script>
+(()=>{'use strict';
+try{
+const bootStatus=document.getElementById('status');if(bootStatus)bootStatus.textContent='BUILDING SCULPTURE';
+const canvas = document.getElementById('stage');
+const ctx = canvas.getContext('2d');
+const stageWrap = document.getElementById('stageWrap');
+const statusEl = document.getElementById('status');
+const modeText = document.getElementById('modeText');
+const mathEl = document.getElementById('mathReadout');
+const groupsEl = document.getElementById('groups');
+const presetRow = document.getElementById('presetRow');
+const runBtn = document.getElementById('runBtn');
+const refBtn = document.getElementById('refBtn');
+const exploreBtn = document.getElementById('exploreBtn');
+const randomBtn = document.getElementById('randomBtn');
+
+const R=34, N=196;
+const q = Array.from({length:R},()=>new Float32Array(N));
+const v = Array.from({length:R},()=>new Float32Array(N));
+const q2= Array.from({length:R},()=>new Float32Array(N));
+const v2= Array.from({length:R},()=>new Float32Array(N));
+const tmp=Array.from({length:R},()=>new Float32Array(N));
+const tmp2=Array.from({length:R},()=>new Float32Array(N));
+const phi = new Float32Array(R);
+const phi2 = new Float32Array(R);
+// Genuine finite two-qubit state: normalized complex amplitudes |00>, |01>, |10>, |11>.
+// Qubit "errors" are expectation-based reference parity probabilities, not
+// measured device error rates. The new coupling is an experimental actuator.
+const qr = new Float64Array(4), qi = new Float64Array(4);
+const qrTmp=new Float64Array(4), qiTmp=new Float64Array(4);
+const permXX=[3,2,1,0],permXA=[2,3,0,1],permXB=[1,0,3,2];
+let errX=0.5, errZ=0, harmonicPower=1, errorQuotient=0, qubitNorm=1;
+let anchorQR,anchorQI,anchorQObs, baselineQObs;
+let anchorQ, anchorV, anchorPhi, anchorSteps=0, baselineQ, baselineV, baselinePhi;
+let steps=0, running=false, exploring=false, previewDelta=0, lastVel=0, seed=20261120;
+// The animation loop is never stopped by a numerical or renderer exception.
+let solverSafeties=0, renderFaults=0, playFaults=0, lastFrameError='', frameTimestamp=0, lastPaint=0;
+let lastInputAt=0, deferredEquation=false, pendingEquationAt=0, lastReportedSteps=0;
+function noteIssue(message){
+  lastFrameError=String(message).slice(0,150);
+  const el=document.getElementById('runtimeNotice');
+  if(el){el.hidden=false;el.textContent=lastFrameError;}
+}
+
+let dragState=null, W=300, H=300, DPR=1;
+// View-only touch transform. These controls deliberately do not edit OMEF state.
+const view={sx:1,sy:1,x:0,y:0,freeStretch:false};
+// Store gesture zoom for Expanded inspection only. The adjusting preview always
+// returns to a complete, fitted silhouette, with no lost/cropped sections.
+const inspectView={sx:1,sy:1,x:0,y:0,freeStretch:false};
+function isExpanded(){return document.getElementById('app').classList.contains('full')}
+function saveInspectView(){inspectView.sx=view.sx;inspectView.sy=view.sy;inspectView.x=view.x;inspectView.y=view.y;inspectView.freeStretch=view.freeStretch;}
+function restoreInspectView(){Object.assign(view,inspectView);}
+function fitAdjustmentView(){if(isExpanded())return; view.sx=1;view.sy=1;view.x=0;view.y=0;view.freeStretch=false;syncViewButtons();}
+const pointers=new Map();
+let touchGesture=null, lastTapTime=-1, lastTapPos=null;
+let stretchBtn=null, resetBtn=null;
+function viewStats(){return {scaleX:view.sx,scaleY:view.sy,panX:view.x,panY:view.y,freeStretch:view.freeStretch,pointers:pointers.size};}
+function resetView(){view.sx=1;view.sy=1;view.x=0;view.y=0;view.freeStretch=false;if(isExpanded())saveInspectView();syncViewButtons();draw();}
+function syncViewButtons(){
+  if(stretchBtn){stretchBtn.textContent=view.freeStretch?'Stretch: ON':'Stretch: OFF';stretchBtn.classList.toggle('active',view.freeStretch);}
+  if(resetBtn)resetBtn.textContent='Reset view';
+}
+function localPoint(p){const b=stageWrap.getBoundingClientRect();return {x:p.x-b.left,y:p.y-b.top};}
+function twoData(){const arr=Array.from(pointers.values()),a=localPoint(arr[0]),b=localPoint(arr[1]);return {center:{x:(a.x+b.x)/2,y:(a.y+b.y)/2},dx:b.x-a.x,dy:b.y-a.y,dist:Math.max(1,Math.hypot(b.x-a.x,b.y-a.y))};}
+function startTouchGesture(){
+  if(pointers.size===2){
+    const d=twoData(),base={...view};
+    touchGesture={kind:'two',init:d,base,anchorX:(d.center.x-base.x)/base.sx,anchorY:(d.center.y-base.y)/base.sy};
+    dragState=null;
+  }else if(pointers.size===1){
+    const p=Array.from(pointers.values())[0];
+    touchGesture={kind:'one',x:p.x,y:p.y,yaw:P.yaw,tilt:P.tilt};
+  }else{touchGesture=null;dragState=null;}
+}
+function moveTouchGesture(){
+  if(!touchGesture)return;
+  if(touchGesture.kind==='two'&&pointers.size>=2){
+    const d=twoData(),g=touchGesture,distRatio=d.dist/g.init.dist;
+    let rx=distRatio,ry=distRatio;
+    if(view.freeStretch){
+      rx=Math.abs(g.init.dx)>24? Math.abs(d.dx)/Math.abs(g.init.dx):1;
+      ry=Math.abs(g.init.dy)>24? Math.abs(d.dy)/Math.abs(g.init.dy):1;
+    }
+    view.sx=clip(g.base.sx*rx,.35,7.5);
+    view.sy=clip(g.base.sy*ry,.35,7.5);
+    view.x=d.center.x-view.sx*g.anchorX;
+    view.y=d.center.y-view.sy*g.anchorY;
+    // Bound panning to prevent losing the entire artwork outside the viewport.
+    view.x=clip(view.x,-W*6,W*6);
+    view.y=clip(view.y,-H*6,H*6);
+    if(isExpanded())saveInspectView();
+    draw();
+  }else if(touchGesture.kind==='one' && pointers.size===1){
+    const p=Array.from(pointers.values())[0];
+    P.yaw=clip(touchGesture.yaw+(p.x-touchGesture.x)*.006,-2.4,2.4);
+    P.tilt=clip(touchGesture.tilt+(p.y-touchGesture.y)*.004,-1.1,1.1);
+    for(const key of ['yaw','tilt'])if(inputs[key]){
+      inputs[key].value=P[key];inputs[key].parentElement.querySelector('.val').textContent=formatVal(P[key]);
+    }
+    if(!running)draw();
+  }
+}
+
+// The artwork lives in an aspect-ratio-locked virtual viewport. Expand
+// grows only the black canvas, NEVER the vertical geometry independently.
+let compactW=0, compactH=0;
+let artW=300, artH=300, artX=0, artY=0;
+function updateArtFrame(){
+  const expanded=isExpanded();
+  if(!expanded){
+    compactW=W; compactH=H;
+    // Keep all artwork below the toolbar and above the bottom status strip.
+    // Presets are now in the panel, never on top of the sculpture.
+    const top=(H>=245?55:43), bottom=(H>=245?22:17);
+    artW=Math.max(20,W-16); artH=Math.max(20,H-top-bottom);
+    artX=8; artY=top;
+    return;
+  }
+  // A black letterbox in expanded view is deliberate: the work never gets
+  // vertically stretched by a taller phone screen.
+  const factor=Math.min(1, W/Math.max(1,compactW), H/Math.max(1,compactH));
+  artW=compactW*factor; artH=Math.max(20,compactH-77)*factor;
+  artX=Math.round((W-artW)/2); artY=Math.round((H-artH)/2);
+}
+const TWO=Math.PI*2;
+function rng(){seed ^= seed<<13; seed ^= seed>>>17; seed ^= seed<<5; return (seed>>>0)/4294967296;}
+function clip(x,a,b){return x<a?a:x>b?b:x}
+function lerp(a,b,t){return a+(b-a)*t}
+function mod(i,m){i%=m; return i<0?i+m:i}
+
+const spec = [
+  {group:'Dynamics', items:[
+    ['speed','Speed',0.2,3.5,1.2,0.01,'Multiplier for solver steps per frame'],
+    ['damping','Damping',0.000,0.12,0.022,0.001,'Global dissipation'],
+    ['pump','Energy pump',0,0.22,0.08,0.001,'Active feedback that replenishes motion'],
+    ['pumpTarget','Pump target',0.02,0.95,0.36,0.01,'Target RMS velocity for pump regulation'],
+    ['drive','Time drive',0,1.6,0.55,0.01,'Temporal forcing amplitude'],
+    ['continuity','Continuity drive',0,0.5,0.16,0.005,'Genuine low-amplitude time forcing; set 0 to allow natural rest'],
+    ['driveFreq','Drive frequency',0,4.0,1.18,0.01,'Time frequency of external drive'],
+    ['beat','Beat mismatch',0,3.5,1.35,0.01,'Secondary forcing frequency mismatch'],
+    ['feedback','Local feedback',0,1.6,0.48,0.01,'Field dependent temporal forcing'],
+    ['tempo','Clock scale',0.2,2.4,1.0,0.01,'Global temporal rate']
+  ]},
+  {group:'Spatial operators', items:[
+    ['tension','Tension',0,3.5,1.22,0.01,'Second derivative along each ribbon'],
+    ['biharm','Biharmonic',0,0.18,0.038,0.001,'Fourth derivative smoothing or sharpening'],
+    ['advection','Advection',-0.55,0.55,0.10,0.001,'First derivative drift along x'],
+    ['dispersion','Dispersion',-0.42,0.42,0.066,0.001,'Third derivative dispersive twist'],
+    ['mixX','Mixed derivative',-0.22,0.22,0.042,0.001,'x-derivative modulated by neighboring ribbons'],
+    ['shear','Ribbon shear',-0.30,0.30,0.07,0.001,'Cross-ribbon phase skew'],
+    ['neighbor','Neighbor coupling',0,2.2,0.94,0.01,'Second difference across ribbons'],
+    ['longCouple','Long coupling',0,1.4,0.42,0.01,'Two-ribbon distance coupling'],
+    ['anisotropy','Anisotropy',-1.2,1.2,0.18,0.01,'Biases left/right and top/bottom propagation']
+  ]},
+  {group:'Complex log', items:[
+    ['logForce','Imaginary log force',-1.1,1.1,0.55,0.01,'Im log(z) feeds directly into acceleration; negative values invert the effect'],
+    ['logCouple','Log neighbor coupling',-1.2,1.2,0.28,0.01,'Im log of cross-ribbon differences changes reciprocal coupling'],
+    ['logCurve','Log curvature',-1.2,1.2,0.34,0.01,'Im log of spatial curvature changes the restoring force'],
+    ['logPhase','Log phase feedback',-1.5,1.5,0.46,0.01,'Complex log argument changes oscillator phase evolution'],
+    ['logMagnitude','Real-log feedback',-0.8,0.8,0.10,0.01,'Real part of complex log also modifies the force'],
+    ['logAlpha','Real sensitivity',0,1.9,0.80,0.01,'How strongly real q enters z'],
+    ['logBeta','Imaginary sensitivity',0,2.5,0.85,0.01,'How strongly velocity and coupling enter Im z'],
+    ['logOffset','Real offset',0.08,2.2,1.12,0.01,'Move the complex input toward the negative real axis and branch cut']
+  ]},
+  {group:'Qubit / harmonic', items:[
+    ['qErrorGain','Q²/H backreaction',0,1.5,0.24,0.01,'Strength of the squared qubit-error / harmonic-mean feedback force'],
+    ['qRead','Qubit field readout',0,4,1.15,0.01,'How strongly the wave modifies the two-qubit Hamiltonian'],
+    ['qXX','Entangling XX',0,3,1.00,0.01,'Two-qubit XX Hamiltonian interaction'],
+    ['qBitDrive','Local X drive',0,3,0.42,0.01,'Independent qubit flips, allowing both error channels to vary'],
+    ['qHFloor','Harmonic floor',0.01,1.0,0.14,0.01,'Strictly positive denominator regularizer; avoids division by zero'],
+    ['qCap','Backreaction limiter',0.1,5,1.8,0.01,'Smoothly caps the force for very small harmonic energy'],
+    ['qSpatialMode','Feedback spatial mode',0.1,4,1.5,0.01,'Spatial organization of quantum-to-wave feedback']
+  ]},
+  {group:'Nonlinearity', items:[
+    ['cubic','Cubic force',0,2.6,0.78,0.01,'Odd nonlinear restoring force'],
+    ['quintic','Quintic force',0,0.80,0.11,0.005,'Higher-order envelope control'],
+    ['exp','Exponent',1.2,5.4,2.7,0.01,'Power in the odd nonlinearity'],
+    ['saturate','Saturation',0,1.5,0.33,0.01,'Damps the nonlinear growth at large amplitude'],
+    ['curvatureDrive','Curvature drive',0,1.6,0.42,0.01,'Inject energy from local curvature'],
+    ['velDiff','Velocity diffusion',0,1.4,0.24,0.01,'Cross-ribbon smoothing of velocity'],
+    ['phaseLock','Phase lock',0,1.7,0.45,0.01,'Tends neighboring ribbon oscillators toward coherence'],
+    ['phaseSlip','Phase slip',0,1.2,0.25,0.01,'Breaks synchronization for richer regimes']
+  ]},
+  {group:'Heterogeneity', items:[
+    ['heteroAmp','Heterogeneity',0,2.6,0.90,0.01,'Spatially varying stiffness field'],
+    ['heteroFreq','Hetero frequency',0.1,6.0,2.1,0.01,'Frequency of the static modulation field'],
+    ['crossMod','Cross modulation',0,1.7,0.52,0.01,'Lets neighboring ribbons modulate each other'],
+    ['resonance','Resonance',0,1.8,0.44,0.01,'Strength of narrow-band resonant response'],
+    ['fold','Fold bias',-1.3,1.3,0.05,0.01,'Tilts upper versus lower layers'],
+    ['symmetry','Symmetry break',-1.4,1.4,0.16,0.01,'Biases even and odd ribbons differently'],
+    ['macro','Macro warp',0,1.9,0.55,0.01,'Slow large-scale bending field']
+  ]},
+  {group:'Geometry', items:[
+    ['previewSteps','Preview horizon',8,160,34,1,'Solver horizon used in still mode'],
+    ['amplitude','Vertical amplitude',0.25,3.4,1.40,0.01,'Maps field values to screen height'],
+    ['ribbonGap','Ribbon gap',0.45,2.4,1.05,0.01,'Distance between layered filaments'],
+    ['xSpread','X spread',0.55,2.3,1.00,0.01,'Horizontal scaling'],
+    ['yCompress','Y compression',0.3,2.3,1.00,0.01,'Vertical compression'],
+    ['perspective','Perspective',0.1,2.5,1.05,0.01,'Depth magnification'],
+    ['tilt','Tilt',-1.1,1.1,0.72,0.01,'Camera tilt'],
+    ['yaw','Yaw',-2.4,2.4,-0.20,0.01,'Camera rotation'],
+    ['roll','Roll',-1.2,1.2,0.02,0.01,'Camera roll'],
+    ['zoom','Zoom',0.55,1.75,1.08,0.01,'View scaling']
+  ]},
+  {group:'Silk material', items:[
+    ['materialHue','Hue rotation',-180,180,0,1,'Shift the rainbow colors without changing the equations'],
+    ['materialBright','Brightness',0.5,1.6,1,0.01,'Fine material luminance, keeping the black background'],
+    ['materialContrast','Contrast',0.6,1.6,1,0.01,'Change color separation and filament clarity'],
+    ['materialSaturate','Saturation',0.5,1.6,1,0.01,'Alter rainbow color intensity'],
+    ['materialMotion','Warp response',0,2.5,1,0.01,'Scale motion arising from the computed OMEF state']
+  ]},
+  {group:'Rendering', items:[
+    ['foldArc','Wing arch',0.25,1.8,1.02,0.01,'Height of the two structural arches'],
+    ['foldFan','Filament fan',0.3,1.85,1.0,0.01,'How widely the neighboring fibers spread'],
+    ['foldCross','Ribbon crossing',0,2.2,1.02,0.01,'How the two sheets weave through each other'],
+    ['foldWave','Wave response',0,2.0,0.88,0.01,'How strongly the OMEF field sculpts the folded fibers'],
+    ['foldDensity','Fiber count',0.45,2.2,1.25,0.01,'Filaments per arch surface'],
+    ['silkWidth','Silk ribbon width',0.08,0.90,0.64,0.01,'True transverse spread of the measured field'],
+    ['silkTwist','Ribbon twist',-2.0,3.0,1.05,0.01,'Turns the ribbon cross-section in 3D'],
+    ['silkPinch','Center pinch',0,0.96,0.64,0.01,'Controls the narrow waist near the center'],
+    ['silkResponse','Field sculpture response',0,2.2,0.37,0.01,'How strongly the OMEF equations deform the ribbon'],
+    ['density','Line density',0.25,2.0,1.25,0.01,'How many filaments are drawn'],
+    ['thickness','Thickness',0.2,2.6,0.85,0.01,'Stroke thickness'],
+    ['glow','Glow',0,1.7,0.24,0.01,'Outer luminous halo'],
+    ['alpha','Alpha',0.05,0.95,0.48,0.01,'Line transparency'],
+    ['hueSpin','Hue spin',0,2.2,1.00,0.01,'How quickly color cycles'],
+    ['depthHue','Depth hue',0,1.5,0.55,0.01,'Hue changes with depth'],
+    ['curvHue','Curvature hue',0,2.2,1.08,0.01,'Hue changes with curvature'],
+    ['contrast','Contrast',0.2,2.0,1.08,0.01,'Depth/brightness contrast'],
+    ['trail','Trails',0,1.0,0.0,0.01,'Frame persistence while running']
+  ]}
+];
+const P = Object.fromEntries(spec.flatMap(g=>g.items.map(i=>[i[0],i[4]])));
+const inputs = {};
+const presets = {
+  'Serene': {damping:.028,pump:.03,drive:.24,tension:.8,biharm:.022,neighbor:.6,cubic:.42,quintic:.06,fold:.0,amplitude:1.05,density:0.8,glow:0.6,alpha:0.22,curvHue:0.55,phaseSlip:.10},
+  'Storm': {damping:.018,pump:.14,drive:.86,driveFreq:1.64,beat:2.28,feedback:.82,tension:1.46,biharm:.051,dispersion:.12,neighbor:1.25,cubic:.98,quintic:.13,curvatureDrive:.74,phaseSlip:.48,macro:.95,amplitude:1.65,density:1.35,glow:1.1,alpha:.25},
+  'Lattice': {damping:.026,pump:.06,drive:.35,feedback:.22,tension:1.25,biharm:.012,neighbor:1.52,longCouple:.76,phaseLock:1.05,phaseSlip:.05,heteroAmp:.55,symmetry:0,fold:0,amplitude:1.15,density:1.05},
+  'Folded': {damping:.024,pump:.09,drive:.56,feedback:.4,tension:.95,biharm:.065,dispersion:.08,mixX:.09,shear:.12,cubic:.72,quintic:.18,fold:.72,symmetry:.34,macro:1.2,amplitude:1.8,ribbonGap:1.2,glow:1.0},
+  'Prismatic': {damping:.02,pump:.10,drive:.62,driveFreq:1.0,beat:1.4,tension:1.0,neighbor:.88,cubic:.7,quintic:.12,phaseLock:.38,phaseSlip:.34,amplitude:1.45,hueSpin:1.45,depthHue:.88,curvHue:1.55,glow:1.25,density:1.4},
+  'Complex tide': {logForce:.73,logCouple:.48,logCurve:.62,logPhase:.76,logMagnitude:.16,logAlpha:1.05,logBeta:1.52,logOffset:.92,drive:.55,tension:1.10,neighbor:1.15,amplitude:1.45},
+  'Branch folds': {logForce:.46,logCouple:-.58,logCurve:.79,logPhase:1.05,logMagnitude:.12,logAlpha:1.72,logBeta:1.45,logOffset:.30,drive:.62,neighbor:1.02,amplitude:1.48}
+};
+
+function resize(){
+  const r = stageWrap.getBoundingClientRect();
+  DPR = Math.min(window.devicePixelRatio || 1, 1.5);
+  W = Math.max(50,r.width); H = Math.max(50,r.height);
+  canvas.width = Math.round(W*DPR); canvas.height = Math.round(H*DPR);
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  updateArtFrame();
+  if(anchorQ && baselineQ) draw();
+}
+window.addEventListener('resize', resize);
+if(typeof ResizeObserver!=="undefined") new ResizeObserver(resize).observe(stageWrap);
+
+function clearState(){
+  for(let r=0;r<R;r++){
+    q[r].fill(0); v[r].fill(0); q2[r].fill(0); v2[r].fill(0);
+    phi[r]=0; phi2[r]=0;
+  }
+  qr.fill(0); qi.fill(0); qr[0]=1;
+  errX=.5;errZ=0;harmonicPower=1;errorQuotient=0;qubitNorm=1;
+}
+function initialize(seedJolt=0){
+  clearState(); steps=0;
+  for(let r=0;r<R;r++){
+    const basePhase = TWO*r/R;
+    phi[r] = basePhase*.45 + (rng()-.5)*0.08;
+    for(let i=0;i<N;i++){
+      const x = i/N*TWO;
+      const field = 0.32*Math.sin(1.7*x + basePhase) + 0.18*Math.sin(3.3*x - basePhase*1.2) + 0.08*Math.cos(6.8*x + r*0.17);
+      q[r][i] = field + seedJolt*(rng()-.5)*0.12;
+      v[r][i] = 0.05*Math.sin(2.2*x + r*0.2) + seedJolt*(rng()-.5)*0.02;
+    }
+  }
+  captureAnchor();
+  computeBaseline();
+}
+function clone2D(arr){ return arr.map(a=>new Float32Array(a)); }
+function captureAnchor(){
+  anchorQ = clone2D(q); anchorV = clone2D(v); anchorPhi = new Float32Array(phi); anchorSteps = steps;
+  anchorQR=new Float64Array(qr);anchorQI=new Float64Array(qi);
+  anchorQObs=[errX,errZ,harmonicPower,errorQuotient,qubitNorm];
+}
+function restoreAnchor(){
+  for(let r=0;r<R;r++){ q[r].set(anchorQ[r]); v[r].set(anchorV[r]); phi[r]=anchorPhi[r]; }
+  if(anchorQR){qr.set(anchorQR);qi.set(anchorQI);}
+  if(anchorQObs)[errX,errZ,harmonicPower,errorQuotient,qubitNorm]=anchorQObs;
+  steps = anchorSteps;
+}
+function computeBaseline(){
+  restoreAnchor();
+  const horizon = Math.max(1, Math.round(P.previewSteps));
+  for(let k=0;k<horizon;k++) step(0.032);
+  baselineQ = clone2D(q); baselineV = clone2D(v); baselinePhi = new Float32Array(phi);
+  baselineQObs=[errX,errZ,harmonicPower,errorQuotient,qubitNorm];
+  restoreAnchor(); previewDelta = 0;
+}
+function fieldAt(arr,r,i){ return arr[mod(r,R)][mod(i,N)] }
+function hetero(r,i){
+  const x=i/N*TWO, y=r/R*TWO;
+  return P.heteroAmp*(0.45*Math.sin(P.heteroFreq*x + .7*Math.cos(y)) + 0.3*Math.cos((P.heteroFreq*0.6+1.0)*y - 0.8*Math.sin(x)));
+}
+// Exact unitary Pauli rotations; the Z and X operators preserve the quantum norm.
+// psi <- exp(-i angle P) psi, P^2 = I, using the appropriate basis permutation.
+function qubitPauliRotate(permutation,angle){
+  const c=Math.cos(angle),s=Math.sin(angle);
+  for(let j=0;j<4;j++){
+    const k=permutation[j];
+    qrTmp[j]=c*qr[j]+s*qi[k];
+    qiTmp[j]=c*qi[j]-s*qr[k];
+  }
+  qr.set(qrTmp);qi.set(qiTmp);
+}
+function qubitZRotate(a,b){
+  for(let j=0;j<4;j++){
+    const za=j<2?1:-1,zb=j%2===0?1:-1,theta=a*za+b*zb;
+    const c=Math.cos(theta),s=Math.sin(theta),r=qr[j],i=qi[j];
+    qr[j]=c*r+s*i;qi[j]=c*i-s*r;
+  }
+}
+function quantumCouplingStep(dt){
+  // Read two opposite halves of the actual ribbon field, and its kinetic power.
+  let fLeft=0,fRight=0,sqQ=0,sqV=0;
+  for(let r=0;r<R;r++){
+    const row=q[r],momentum=v[r];
+    for(let k=0;k<N;k++){
+      const u=row[k],w=momentum[k];
+      if(r<R/2) fLeft+=u; else fRight+=u;
+      sqQ+=u*u;sqV+=w*w;
+    }
+  }
+  const half=R*N/2, hA=P.qRead*Math.tanh(fLeft/half),hB=P.qRead*Math.tanh(fRight/half);
+  const time=dt*.5;
+  qubitZRotate(time*hA,time*hB);
+  qubitPauliRotate(permXX,dt*P.qXX);
+  qubitPauliRotate(permXA,dt*P.qBitDrive);
+  qubitPauliRotate(permXB,dt*P.qBitDrive*.71);
+  qubitZRotate(time*hA,time*hB);
+  let zParity=0,xParity=0,norm=0;
+  for(let j=0;j<4;j++){
+    const pj=qr[j]*qr[j]+qi[j]*qi[j];
+    zParity+=(j===0||j===3?1:-1)*pj;
+    xParity+=qr[j]*qr[permXX[j]]+qi[j]*qi[permXX[j]];
+    norm+=pj;
+  }
+  // The unitary step should conserve norm to floating-point precision.
+  qubitNorm=norm;
+  errZ=clip((1-zParity/norm)*.5,0,1);
+  errX=clip((1-xParity/norm)*.5,0,1);
+  // Harmonic mean of positive wave-field and momentum-power proxies.
+  // Both are in dimensionless, regularized units; qHFloor ensures H>0.
+  const qPower=P.qHFloor+sqQ/(R*N),vPower=P.qHFloor+sqV/(R*N);
+  harmonicPower=2*qPower*vPower/(qPower+vPower);
+  errorQuotient=(errX*errX+errZ*errZ)/harmonicPower;
+  return P.qCap*Math.tanh(errorQuotient/P.qCap);
+}
+function step(dt){
+  const dt2 = dt*P.tempo;
+  const qErrorFeedback=quantumCouplingStep(dt2);
+  let velSum=0;
+  // phase evolution per ribbon
+  for(let r=0;r<R;r++){
+    const ph=phi[r], phL=phi[mod(r-1,R)], phR=phi[mod(r+1,R)], qMid=q[r][(steps+r*13)%N];
+    // Principal complex logarithm: Im log(a + i b) = atan2(b,a).
+    // q and velocity both enter this phase feedback, rather than a renderer trick.
+    const sampleI=(steps+r*13)%N;
+    const phaseArg=Math.atan2(P.logBeta*v[r][sampleI], P.logOffset+P.logAlpha*Math.tanh(qMid));
+    const dph = 0.18 + P.phaseLock*(Math.sin(phL-ph)+Math.sin(phR-ph)) - P.phaseSlip*Math.sin(2.7*ph + 0.4*r) + 0.12*P.feedback*qMid + P.logPhase*phaseArg;
+    // Wrap the angular coordinate: periodic observables are unchanged by 2π.
+    const nextPhi=ph+dt2*dph;
+    phi2[r] = Number.isFinite(nextPhi) ? Math.atan2(Math.sin(nextPhi),Math.cos(nextPhi)) : 0;
+    if(!Number.isFinite(nextPhi))solverSafeties++;
+  }
+  for(let r=0;r<R;r++){
+    const rr = q[r], vv = v[r], nr = q2[r], nv = v2[r];
+    const qU = q[mod(r-1,R)], qD = q[mod(r+1,R)], qUU = q[mod(r-2,R)], qDD = q[mod(r+2,R)];
+    const vU = v[mod(r-1,R)], vD = v[mod(r+1,R)];
+    const basePhase = phi[r], clock = steps*dt2;
+    for(let i=0;i<N;i++){
+      const qm2=rr[mod(i-2,N)], qm1=rr[mod(i-1,N)], q0=rr[i], qp1=rr[mod(i+1,N)], qp2=rr[mod(i+2,N)];
+      const lap = qp1 - 2*q0 + qm1;
+      const bih = qm2 - 4*qm1 + 6*q0 - 4*qp1 + qp2;
+      const d1 = 0.5*(qp1 - qm1);
+      const d3 = 0.5*(qp2 - 2*qp1 + 2*qm1 - qm2);
+      const across = qD[i] - 2*q0 + qU[i];
+      const longAcross = qDD[i] - 2*q0 + qUU[i];
+      const mix = 0.25*((qD[mod(i+1,N)]-qD[mod(i-1,N)]) - (qU[mod(i+1,N)]-qU[mod(i-1,N)]));
+      const velAcross = vD[i] - 2*vv[i] + vU[i];
+      const amp = Math.abs(q0);
+      const sign = q0===0?0:Math.sign(q0);
+      const non = -P.cubic*sign*Math.pow(amp,P.exp)/(1 + P.saturate*amp*amp);
+      const quint = -P.quintic*q0*q0*q0*q0*q0;
+      const het = hetero(r,i);
+      const symBias = P.symmetry*((r&1)?1:-1)*0.08;
+      const x = i/N*TWO; const y = r/R*TWO;
+      const drive = P.drive*(Math.sin(P.driveFreq*clock + x*(1+0.35*P.anisotropy) + basePhase) + 0.65*Math.sin((P.driveFreq+P.beat)*clock - 1.4*x + .8*y));
+      // Explicit perpetual low-level excitation for the Play instrument.
+      // This is a force term, never a renderer animation. Zero restores the damped study.
+      const continuityForce=P.continuity*(Math.sin(.77*clock+.62*x+.2*y)+.43*Math.sin(1.31*clock-1.44*x+.63*y));
+      const macro = P.macro*(0.55*Math.sin(0.21*clock + 0.8*x + 2.0*y) + 0.4*Math.cos(0.13*clock - 1.2*x + 0.5*y));
+      const curvature = P.curvatureDrive*lap*Math.tanh(0.8+Math.abs(q0));
+      const reson = P.resonance*Math.sin(2.3*clock + 5*x + y)*Math.exp(-3*Math.abs(q0));
+      const feedbackDrive = P.feedback*(0.45*Math.tanh(q0) + 0.25*Math.tanh(across));
+      // z = a + i*b. Principal complex log(z) = 1/2 ln(a²+b²) + i atan2(b,a).
+      // Offsetting the real part ensures tunable distance to z=0; log modulus
+      // is epsilon-regularized while the genuine principal argument is retained.
+      const logRe = P.logOffset + P.logAlpha*Math.tanh(q0);
+      const logIm = P.logBeta*(vv[i] + 0.24*across);
+      const imaginaryLog = Math.atan2(logIm,logRe);
+      const realLog = 0.5*Math.log(Math.max(1e-8,logRe*logRe+logIm*logIm));
+      const coupledLog = Math.atan2(P.logBeta*across, P.logOffset+P.logAlpha*Math.tanh(d1));
+      const curvedLog = Math.atan2(P.logBeta*lap, P.logOffset+P.logAlpha*Math.tanh(d3));
+      const complexLogForce = P.logForce*imaginaryLog + P.logCouple*coupledLog + P.logCurve*curvedLog
+                              + P.logMagnitude*realLog*Math.tanh(q0);
+      const qBackreaction=P.qErrorGain*qErrorFeedback*(.62*Math.sin(P.qSpatialMode*x+basePhase)+.38*Math.tanh(q0+across));
+      const accel =
+        P.tension*lap - P.biharm*bih + P.advection*d1 + P.dispersion*d3 + P.mixX*mix + P.neighbor*across + P.longCouple*longAcross + P.shear*(qD[mod(i+1,N)]-qU[mod(i+1,N)] - qD[mod(i-1,N)] + qU[mod(i-1,N)])*0.25
+        + non + quint + curvature + drive + continuityForce + reson + feedbackDrive + macro + het + symBias + complexLogForce + qBackreaction + P.crossMod*(qU[i]*qD[i]-q0*q0)*0.08 + P.fold*(r/(R-1)-0.5);
+      const vel = vv[i];
+      const localPump = P.pump*(P.pumpTarget*P.pumpTarget - vel*vel)*vel;
+      const damp = P.damping*vel;
+      // Semi-implicit Euler is stable for oscillatory modes that explicit
+      // position-first Euler can feed with artificial energy.
+      const rawV=vel+dt2*(accel-damp+localPump+P.velDiff*velAcross);
+      const nextV=Number.isFinite(rawV)?clip(rawV,-3.2,3.2):0;
+      let nextQ=q0+dt2*nextV;
+      // A clearly labeled numerical safety envelope, not a new OMEF force.
+      // Prevent nonfinite fields during parameter sweeps; do not toggle Play.
+      if(!Number.isFinite(nextQ)){nextQ=0;solverSafeties++;}
+      if(Math.abs(nextQ)>12){
+        nextQ=clip(nextQ,-12,12);
+        // Remove outward energy at the computational boundary.
+        nv[i]=(nextQ>0&&nextV>0)||(nextQ<0&&nextV<0)?nextV*.5:nextV;
+        solverSafeties++;
+      }else nv[i]=nextV;
+      nr[i]=nextQ;
+      velSum+=nv[i]*nv[i];
+    }
+  }
+  for(let r=0;r<R;r++){
+    q[r].set(q2[r]); v[r].set(v2[r]); phi[r]=phi2[r];
+  }
+  lastVel = Math.sqrt(velSum/(R*N));
+  steps++;
+}
+function calcDelta(){
+  let s=0;
+  for(let r=0;r<R;r++){
+    const a=q[r], b=baselineQ[r];
+    for(let i=0;i<N;i++){
+      const d=a[i]-b[i]; s += d*d;
+    }
+  }
+  previewDelta = Math.sqrt(s/(R*N));
+}
+function recomputeStill(){
+  if(running) return;
+  restoreAnchor();
+  const horizon = Math.max(1, Math.round(P.previewSteps));
+  for(let k=0;k<horizon;k++) step(0.032);
+  calcDelta();
+  draw();
+}
+
+function project(x,y,z){
+  const cy=Math.cos(P.yaw), sy=Math.sin(P.yaw);
+  let X=cy*x+sy*z, Z=-sy*x+cy*z, Y=y;
+  const ct=Math.cos(P.tilt), st=Math.sin(P.tilt);
+  let Y2=ct*Y-st*Z, Z2=st*Y+ct*Z, X2=X;
+  const cr=Math.cos(P.roll), sr=Math.sin(P.roll);
+  let X3=cr*X2-sr*Y2, Y3=sr*X2+cr*Y2;
+  let perspective=P.zoom*3.4/(3.4+P.perspective*(Z2+0.3));
+  perspective=clip(perspective,.36,2.2);
+  return [artX+artW*.50+X3*perspective*artW*.46,
+          artY+artH*.52-Y3*perspective*artH*.42,Z2];
+}
+function renderBg(){
+  // Always clear in untransformed screen coordinates: pinch/zoom must not
+  // transform the black background or leave stale borders behind.
+  ctx.save();
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  if(running && P.trail>0.01) ctx.fillStyle=`rgba(0,0,0,${clip(1-P.trail*.93,.07,1)})`;
+  else ctx.fillStyle='#000';
+  ctx.fillRect(0,0,W,H);
+  ctx.restore();
+}
+
+// SILK RIBBON VIEW — the geometry is a smooth observation of the evolved
+// OMEF ribbon fields q[r][i]. A twisted 3-D embedding supplies coordinates,
+// not an independently evolving animation.
+const silkNodes = [
+  [ 0.00, -0.01, 0.00], [ 0.92, 0.34, 0.04], [ 1.60, 0.39, 0.08],
+  [ 1.73, -0.12, 0.10], [ 1.20,-0.51,-0.04], [ 0.25,-0.71,-0.08],
+  [-0.92,-0.75,-0.01], [-1.57,-0.47, 0.03], [-1.35,-0.05, 0.04],
+  [-1.64, 0.53, 0.04], [-1.28, 0.85, 0.08], [-1.25, 0.25, 0.02],
+  [-0.60,-0.06, 0.02]
+];
+const silkHue = [185,213,255,293,333,350,378,415,431,420,458,508,545];
+function cr(a,b,c,d,t){
+  const t2=t*t,t3=t2*t;
+  return 0.5*((2*b)+(-a+c)*t+(2*a-5*b+4*c-d)*t2+(-a+3*b-3*c+d)*t3);
+}
+function silkCenter(u){
+  const m=silkNodes.length;
+  const x=clip(u,0,0.999999)*m;
+  const j=Math.floor(x),f=x-j;
+  const a=silkNodes[mod(j-1,m)],b=silkNodes[j],c=silkNodes[(j+1)%m],d=silkNodes[(j+2)%m];
+  return [cr(a[0],b[0],c[0],d[0],f),cr(a[1],b[1],c[1],d[1],f),cr(a[2],b[2],c[2],d[2],f)];
+}
+function silkHueAt(u){
+  const x=clip(u,0,0.99999)*(silkHue.length-1),k=Math.floor(x),f=x-k;
+  return silkHue[k] + (silkHue[k+1]-silkHue[k])*f;
+}
+const silkSmooth=new Float32Array(R*N);
+function updateSilkSmooth(){
+  // Spatial Gaussian-like low-pass over the *evolved* simulated state,
+  // preserving the same structures while avoiding aliasing into the strands.
+  const w=[1,3,5,7,5,3,1], norm=25*25;
+  for(let r=0;r<R;r++)for(let i=0;i<N;i++){
+    let sum=0;
+    for(let a=-3;a<=3;a++){
+      const qa=q[mod(r+a,R)],wa=w[a+3];
+      for(let b=-3;b<=3;b++)sum+=wa*w[b+3]*qa[mod(i+b,N)];
+    }
+    silkSmooth[r*N+i]=sum/norm;
+  }
+}
+function silkSample(rf,u){
+  const rn=clip(rf,0,1)*(R-1),r0=Math.floor(rn),r1=Math.min(R-1,r0+1),rt=rn-r0;
+  const x=clip(u,0,1)*(N-1),i=Math.floor(x),j=Math.min(N-1,i+1),t=x-i;
+  const low=lerp(silkSmooth[r0*N+i],silkSmooth[r0*N+j],t);
+  const high=lerp(silkSmooth[r1*N+i],silkSmooth[r1*N+j],t);
+  return lerp(low,high,rt);
+}
+function silkPoint(u,w){
+  const cen=silkCenter(u),prev=silkCenter(mod(u-.0009,1)),next=silkCenter(mod(u+.0009,1));
+  let tx=next[0]-prev[0],ty=next[1]-prev[1],ll=Math.hypot(tx,ty)||1;
+  tx/=ll;ty/=ll;
+  const nx=-ty,ny=tx;
+  const rf=w*.5+.5,field=silkSample(rf,u),fieldCenter=silkSample(.5,u);
+  const wave=Math.tanh(field*.75),common=Math.tanh(fieldCenter*.8);
+  const waveScale=P.amplitude*P.silkResponse;
+  // A turning ribbon: a half-twist controls the cross-section orientation.
+  const theta=Math.PI*(P.silkTwist*u+.35) + .22*Math.tanh(phi[Math.min(R-1,Math.floor(rf*(R-1)))]);
+  const pinch=clip(1-P.silkPinch*Math.exp(-Math.pow(Math.min(u,1-u)/.072,2)),.09,1);
+  const width=P.silkWidth*pinch*(.9+.12*Math.sin(3*Math.PI*u));
+  const bent=(w*width*Math.cos(theta));
+  const x=cen[0]+nx*bent + .036*waveScale*wave*nx;
+  const y=cen[1]+ny*bent + .14*waveScale*common + .11*waveScale*(wave-common);
+  const z=cen[2]+w*width*.95*Math.sin(theta) + .065*waveScale*wave;
+  // Rotate the numerically deformed spatial embedding using the camera.
+  const cy=Math.cos(P.yaw*.60),sy=Math.sin(P.yaw*.60);
+  const xx=cy*x+sy*z,zz=-sy*x+cy*z;
+  const tilt=P.tilt-.25,ct=Math.cos(tilt),st=Math.sin(tilt);
+  const yy=ct*y-st*zz, depth=st*y+ct*zz;
+  const roll=P.roll,rc=Math.cos(roll),rs=Math.sin(roll);
+  const ox=rc*xx-rs*yy,oy=rs*xx+rc*yy;
+  const scale=Math.min(artW/5.10,artH/3.55)*P.zoom*P.xSpread*1.04;
+  const per=clip(1/(1+depth*.13*P.perspective),.76,1.25);
+  return [artX+artW*.50+ox*scale*per,artY+artH*.51-oy*scale*per,depth];
+}
+function drawComputed(){
+  if(W<5||H<5)return;
+  renderBg();
+  updateSilkSmooth();
+  const strands=Math.max(running?40:54,Math.min(running?105:175,Math.round(artW*(running?.11:.20)*P.density))); 
+  const points=running?106:226;
+  const segs=running?11:20;
+  const alpha=clip(P.alpha*.56,.08,.44);
+  ctx.lineCap='butt';ctx.lineJoin='round';
+  // Calculate all ribbons first, and paint rear to front for coherent depth.
+  const bands=[];
+  for(let r=0;r<strands;r++){
+    const w=-1+2*r/(strands-1),pts=[];
+    let depth=0;
+    for(let j=0;j<points;j++){
+      const u=j/(points-1),p=silkPoint(u,w);
+      pts.push(p);
+      depth+=p[2];
+    }
+    bands.push({w,pts,depth:depth/points,index:r});
+  }
+  bands.sort((a,b)=>a.depth-b.depth);
+  for(const band of bands){
+    // 20 subtly blended color arcs, each covering a smooth portion of
+    // the evolving 3-D ribbon. No decorative strokes unrelated to fields.
+    const w=band.w,pts=band.pts,weight=(.6+.4*(w+1)/2);
+    for(let segment=0;segment<segs;segment++){
+      const first=Math.round(segment*(points-1)/segs);
+      const last=Math.min(points-1,Math.round((segment+1)*(points-1)/segs));
+      const u=(segment+.5)/segs;
+      const hueFor=(uu)=>(silkHueAt(uu)*P.hueSpin+P.depthHue*w*24+P.curvHue*.65*Math.tanh(silkSample((w+1)/2,uu)));
+      const luminance=(uu)=>clip(59+7*P.contrast*weight+5*Math.cos(w*2.4+uu*9),43,78);
+      // A continuous gradient between segment endpoints eliminates color seams.
+      const p0=pts[first],p1=pts[last];
+      const grad=ctx.createLinearGradient(p0[0],p0[1],p1[0]+.001,p1[1]+.001);
+      for(const [f,uu] of [[0,first/(points-1)],[1,last/(points-1)]]){
+        const hue=((hueFor(uu)%360)+360)%360;
+        grad.addColorStop(f,`hsl(${hue.toFixed(1)} 97% ${luminance(uu).toFixed(1)}%)`);
+      }
+      ctx.strokeStyle=grad;
+      const lineA=alpha*(.7+.3*weight);
+      const trace=()=>{
+        ctx.beginPath();ctx.moveTo(pts[first][0],pts[first][1]);
+        for(let k=first+1;k<=last;k++)ctx.lineTo(pts[k][0],pts[k][1]);
+        ctx.stroke();
+      };
+      if(P.glow>.65){
+        ctx.globalAlpha=lineA*.035*P.glow;
+        ctx.lineWidth=1.6+P.thickness*.8;
+        trace();
+      }
+      ctx.globalAlpha=lineA;
+      ctx.lineWidth=.26+.37*P.thickness;
+      trace();
+    }
+  }
+  ctx.shadowBlur=0;ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
+}
+
+
+// FLOATING FOLDS — a reference-guided geometric embedding, not a baked image.
+// Coordinates are smoothly deformed by the *evolved* q[r][i] and phi[r]
+// (including the existing real/imaginary logarithmic forces).
+const foldPalette=[71,92,149,184,209,239,277,309,326];
+function foldHue(t){
+  const a=clip(t,0,.99999)*(foldPalette.length-1);
+  const j=a|0;return lerp(foldPalette[j],foldPalette[j+1],a-j);
+}
+function foldPoint(t,w,sheet){
+  // Two connected, open wave sheets: arch, central saddle, and raised wing.
+  // This is a view-only embedding; no independent motion is generated here.
+  const s=t;
+  const arch=Math.exp(-Math.pow((s-.27)/.255,2));
+  const wing=Math.exp(-Math.pow((s-.83)/.255,2));
+  const saddle=Math.exp(-Math.pow((s-.56)/.145,2));
+  const pinch=(1-.77*Math.exp(-Math.pow((s-.535)/.11,2)));
+  const side=(sheet===0?-1:1);
+  const tShift=sheet===0?-.11:.11;
+  const transverse=P.foldFan*(.50+.28*arch+.26*wing)*pinch*w;
+  // At the crossing, the transverse direction rotates from y to depth.
+  const spin=(1.18+P.foldCross*1.05)*Math.PI*s+side*.23;
+  const flared=transverse*Math.cos(spin);
+  const x0=3.6*(s-.50)+(sheet===0?-.06:.06)+.14*w*Math.sin(Math.PI*s);
+  const y0= -0.25 + P.foldArc*(.79*arch+.65*wing-.36*saddle) + .20*side*saddle;
+  // The second sheet diverges at the right; their intersection remains open.
+  const y=y0+flared+ .24*(sheet===1?wing:-arch)*w;
+  const z=.20*side*saddle+transverse*Math.sin(spin)*1.10 + .11*side*wing;
+  const rf=clip((w+1)/2,0,1);
+  const source=silkSample(rf,s);
+  const neighboring=silkSample(1-rf,s);
+  const center=silkSample(.5,s);
+  const deform=P.foldWave*P.silkResponse*P.amplitude;
+  const wave=Math.tanh(source*1.15);
+  const common=Math.tanh(center);
+  const exchange=Math.tanh(source-neighboring);
+  // Local field affects all three spatial coordinates (not merely color).
+  const xx=x0+deform*(.070*exchange+.030*wave);
+  const yy=y+deform*(.16*wave+.09*common);
+  const zz=z+deform*(.09*exchange+.025*wave);
+  const cy=Math.cos(P.yaw*.55),sy=Math.sin(P.yaw*.55);
+  const X=cy*xx+sy*zz,Z=-sy*xx+cy*zz;
+  const ct=Math.cos(P.tilt-.64),st=Math.sin(P.tilt-.64);
+  const Y=ct*yy-st*Z, depth=st*yy+ct*Z;
+  const rc=Math.cos(P.roll),rs=Math.sin(P.roll);
+  const outX=rc*X-rs*Y, outY=rs*X+rc*Y;
+  const base=Math.min(artW/4.55,artH/2.9)*P.zoom*P.xSpread;
+  const persp=clip(1/(1+depth*.12*P.perspective),.79,1.18);
+  return [artX+artW*.5+outX*base*persp,
+    artY+artH*.53-outY*base*persp*P.yCompress,depth];
+}
+function drawFolds(){
+  renderBg(); updateSilkSmooth();
+  const total=Math.max(running?38:72,Math.min(running?100:210,Math.round((running?55:83)*P.foldDensity*P.density)));
+  const samples=running?86:170;
+  const bands=[];
+  for(let sheet=0;sheet<2;sheet++)for(let i=0;i<total;i++){
+    const w=-1+2*i/(total-1),pts=[];let z=0;
+    for(let j=0;j<samples;j++){
+      const t=j/(samples-1),p=foldPoint(t,w,sheet);
+      pts.push(p);z+=p[2];
+    }
+    bands.push({sheet,w,pts,depth:z/samples});
+  }
+  bands.sort((a,b)=>a.depth-b.depth);
+  ctx.lineCap='round';ctx.lineJoin='round';
+  const al=clip(.31+P.alpha*.38,.12,.77);
+  // Layered strokes: subtle bloom for luminous silk without obscuring gaps.
+  for(const band of bands){
+    const {sheet,w,pts}=band;
+    for(let part=0;part<9;part++){
+      const first=Math.round(part*(samples-1)/9);
+      const last=Math.round((part+1)*(samples-1)/9);
+      const s=(part+.5)/9;
+      const h0=foldHue(clip((w+1)/2,0,1));
+      const hue=((h0*P.hueSpin + P.depthHue*sheet*15 + P.curvHue*14*Math.tanh(silkSample((w+1)/2,s)))%360+360)%360;
+      const intensity=clip(61+5*P.contrast+7*Math.sin(w*1.6+s*2),37,84);
+      const tr=(w+1)/2;
+      const color=`hsl(${hue.toFixed(1)} 94% ${intensity.toFixed(1)}%)`;
+      const path=()=>{
+        ctx.beginPath();ctx.moveTo(pts[first][0],pts[first][1]);
+        for(let j=first+1;j<=last;j++)ctx.lineTo(pts[j][0],pts[j][1]);
+        ctx.stroke();
+      };
+      ctx.strokeStyle=color;
+      // minimal halo (important to preserve individually resolved strands)
+      if(P.glow>.5 && part%2===0){
+        ctx.globalAlpha=al*.055*P.glow;
+        ctx.lineWidth=1.25+P.thickness*.5;path();
+      }
+      ctx.globalAlpha=al*(.65+.35*tr);
+      ctx.lineWidth=.32+.39*P.thickness;
+      path();
+    }
+  }
+  ctx.globalAlpha=1;ctx.shadowBlur=0;
+}
+
+// SOURCE-ACCURATE RENDERING. The user's image supplies the original fine
+// filament material; the OMEF numerical state supplies a differentiable
+// warp to it. This is explicitly a texture-based visualization rather than
+// a claim that the model generated the original reference artwork.
+let renderVariant='folds',referenceMode=false,referenceReady=false;
+const referenceImage=new Image();
+referenceImage.onload=()=>{referenceReady=true;if(baselineQ)draw();};
+referenceImage.onerror=()=>{referenceReady=false;if(baselineQ)draw();};
+referenceImage.src=document.getElementById('fallbackPreview').src;
+function fieldDisplacement(u){
+  const idx=clip(Math.floor(u*(N-1)),0,N-1);
+  const rows=[4,10,16,22,30];let dy=0,dx=0;
+  // Spatial averaging is a *measurement filter*. It prevents numerical
+  // high-frequency modes from tearing the supplied fine artwork into strips.
+  for(let j=0;j<rows.length;j++){
+    const r=rows[j];let sum=0,wsum=0;
+    for(let k=-18;k<=18;k+=2){
+      const ii=clip(idx+k,0,N-1),weight=.5+.5*Math.cos(Math.PI*k/20);
+      const base=baselineQ?.[r]?.[ii]??q[r][ii];
+      sum+=weight*(q[r][ii]-base);wsum+=weight;
+    }
+    const d=sum/(wsum||1);
+    dy+=d*Math.sin(.8+j*1.1+u*3.7);
+    dx+=d*Math.cos(j*.64+u*5.1);
+  }
+  return [dy*.44,dx*.29];
+}
+function drawReference(){
+  if(!referenceReady){drawComputed();return;}
+  renderBg();
+  const ar=referenceImage.width/referenceImage.height;
+  const pw=Math.min(artW*.96,artH*.96*ar),ph=pw/ar;
+  const widthScale=P.zoom/1.08;
+  const hScale=clip(P.yCompress,.4,2.4);
+  let actualW=pw*widthScale,actualH=ph*hScale;
+  if(!isExpanded()){
+    // All of the current stretched artwork must fit in the preview, even
+    // if a Geometry slider has increased width, height, or zoom.
+    const scale=Math.min(1,artW*.965/Math.max(1,actualW),artH*.965/Math.max(1,actualH));
+    actualW*=scale; actualH*=scale;
+  }
+  const x0=artX+(artW-actualW)*.5;
+  const y0=artY+(artH-actualH)*.5;
+  const isIdentity=!running && previewDelta<1e-9;
+  // An identity operation preserves the supplied source material exactly.
+  if(isIdentity){
+    ctx.drawImage(referenceImage,x0,y0,actualW,actualH);
+  }else{
+    const columns=Math.max(110,Math.min(500,Math.ceil(actualW*1.05)));
+    const sourceW=referenceImage.width,sourceH=referenceImage.height;
+    const gain=clip(P.silkResponse*P.materialMotion*P.amplitude,0,4.5);
+    for(let c=0;c<columns;c++){
+      const u=(c+.5)/columns;
+      const delta=fieldDisplacement(u);
+      const srcX=c*sourceW/columns,srcWidth=sourceW/columns;
+      const destX=x0+c*actualW/columns;
+      const offsetY=clip(24*gain*Math.tanh(delta[0]*1.5),-actualH*.055,actualH*.055);
+      const offsetX=clip(18*gain*Math.tanh(delta[1]*1.4),-sourceW*.018,sourceW*.018);
+      ctx.drawImage(referenceImage,
+        clip(srcX+offsetX,0,sourceW-srcWidth),0,srcWidth,sourceH,
+        destX,y0+offsetY,actualW/columns+.3,actualH);
+    }
+  }
+  ctx.globalAlpha=1;
+}
+function draw(){
+  // The artwork is always rerendered at device resolution, even when zoomed.
+  // OMEF differential equations and the letterboxed art viewport are unchanged.
+  canvas.style.filter=referenceMode?`hue-rotate(${P.materialHue}deg) brightness(${P.materialBright}) contrast(${P.materialContrast}) saturate(${P.materialSaturate})`:'none';
+  ctx.save();
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  ctx.translate(view.x,view.y);
+  ctx.scale(view.sx,view.sy);
+  if(renderVariant==='reference')drawReference();else if(renderVariant==='classic')drawComputed();else drawFolds();
+  ctx.restore();
+}
+function updateEquation(){
+  mathEl.textContent=`q̈ = ${P.tension.toFixed(2)}·Δₓq − ${P.biharm.toFixed(3)}·Δₓ⁴q + ${P.neighbor.toFixed(2)}·Δᵣq + ${P.mixX.toFixed(3)}·∂ₓΔᵣq
+− ${P.cubic.toFixed(2)}·sgn(q)|q|^${P.exp.toFixed(2)}/(1+${P.saturate.toFixed(2)}q²) − ${P.quintic.toFixed(2)}q⁵
++ driving(t,x,r) + continuity(t,x,r) + coupling(q,Δᵣq) + feedback(q) − ${P.damping.toFixed(3)}·q̇
++ ${P.pump.toFixed(3)}·(${P.pumpTarget.toFixed(2)}²−q̇²)q̇ + remaining operators
+
+Complex logarithm:
+z = ${P.logOffset.toFixed(2)} + ${P.logAlpha.toFixed(2)}·tanh(q) + i·${P.logBeta.toFixed(2)}·(q̇+0.24·Δᵣq)
+log(z) = ½ ln(Re(z)²+Im(z)²) + i atan2(Im(z),Re(z))
+F_log = ${P.logForce.toFixed(2)}·Im log(z) + ${P.logCouple.toFixed(2)}·Im log(z_neighbor) + ${P.logCurve.toFixed(2)}·Im log(z_curvature) + ${P.logMagnitude.toFixed(2)}·Re log(z)·tanh(q)
+φ̇ includes ${P.logPhase.toFixed(2)}·Im log(z_phase)
+
+Qubit errors squared / harmonic mean (finite two-qubit experimental subsystem):
+H_Q = hA·(Z⊗I) + hB·(I⊗Z) + ${P.qXX.toFixed(2)}·(X⊗X) + ${P.qBitDrive.toFixed(2)}·(X⊗I) + ${(P.qBitDrive*.71).toFixed(2)}·(I⊗X)
+e_Z = (1 - ⟨Z⊗Z⟩)/2 = ${errZ.toFixed(4)}
+e_X = (1 - ⟨X⊗X⟩)/2 = ${errX.toFixed(4)}
+H_harm = 2 / [1/(⟨q²⟩+${P.qHFloor.toFixed(2)}) + 1/(⟨q̇²⟩+${P.qHFloor.toFixed(2)})]
+Q = (e_X²+e_Z²)/H_harm = ${errorQuotient.toFixed(4)}
+F_Q = ${P.qErrorGain.toFixed(2)}·${P.qCap.toFixed(2)}·tanh(Q/${P.qCap.toFixed(2)})·[.62sin(kx+φ)+.38tanh(q+Δᵣq)]
+This is a finite two-qubit model with phenomenological feedback, not measured hardware error or a demonstrated quantum-gravity dual.
+
+The principal argument has a branch cut on the negative real axis. The log modulus is regularized near zero.`;
+}
+function updateUI(force=false){
+  const activity=lastVel<0.012?'QUIET':'ACTIVE';
+  statusEl.textContent=`${running?'PLAY '+activity:'STILL'} · ${steps} steps · v ${lastVel.toFixed(3)} · Q²/H ${errorQuotient.toFixed(2)}${solverSafeties?' · guard '+solverSafeties:''}`;
+  modeText.textContent=running?'LIVE DYNAMICS':'STILL REFERENCE';
+  runBtn.classList.toggle('active',running);
+  runBtn.textContent=running?'Pause':'Play';
+  exploreBtn.classList.toggle('active',exploring);
+  if(force)updateEquation();
+}
+let frames=0;
+function animate(time=0){
+  // Always reschedule, even after a costly or failed frame.
+  try{
+    if(exploring){
+      autoMorph();
+      if(!running && frames%5===0)recomputeStill();
+    }
+    if(running){
+      // Bounded simulation work per animation callback prevents input starvation.
+      const count=Math.max(1,Math.min(3,Math.round(P.speed*1.4)));
+      for(let i=0;i<count;i++)step(.032);
+      if(!Number.isFinite(lastVel)){
+        // Retain Play. The solver has per-coordinate nonfinite protection.
+        playFaults++;
+        lastVel=0;
+        noteIssue('Solver recovered a nonfinite observable — playback continues');
+      }
+      // 24-ish FPS is intentionally less costly than continuous 60 FPS redraw.
+      // On touch input, redraw immediately; elsewhere keep solver advancing.
+      const interval=window.matchMedia?.('(max-width: 700px)').matches?42:30;
+      if(!lastPaint || time-lastPaint>interval){draw();lastPaint=time;}
+      previewDelta=0;
+    }
+    if(++frames%7===0 || (running && steps-lastReportedSteps>=36)){
+      updateUI();lastReportedSteps=steps;
+    }
+    if(deferredEquation && time-pendingEquationAt>110){updateEquation();deferredEquation=false;}
+  }catch(e){
+    renderFaults++;
+    noteIssue('Render/playback recovered: '+(e&&e.message||e));
+    // The instrument should not remain dead because a single canvas draw failed.
+    console.error('OMEF frame recovery',e);
+  }finally{
+    requestAnimationFrame(animate);
+  }
+}
+
+let autoTargets={};
+function reseedTargets(){
+  const keys = ['qErrorGain','qRead','qXX','qBitDrive','qHFloor','tension','biharm','neighbor','cubic','exp','drive','driveFreq','beat','feedback','heteroAmp','macro','phaseLock','phaseSlip','fold','amplitude','density','glow','depthHue','curvHue','logForce','logCouple','logCurve','logPhase','logAlpha','logBeta','logOffset'];
+  for(const k of keys){
+    const item = spec.flatMap(g=>g.items).find(i=>i[0]===k); if(!item) continue;
+    autoTargets[k] = item[1] ? null : null;
+  }
+  for(const group of spec) for(const item of group.items){
+    const [k,,min,max] = item;
+    if(k in autoTargets) autoTargets[k] = min + rng()*(max-min);
+  }
+}
+function autoMorph(){
+  if(!Object.keys(autoTargets).length) reseedTargets();
+  let settled = 0, total = 0;
+  for(const [k,target] of Object.entries(autoTargets)){
+    total++;
+    P[k] = lerp(P[k], target, 0.006);
+    if(Math.abs(P[k]-target)<0.015) settled++;
+    if(inputs[k]){ inputs[k].value = P[k]; inputs[k].parentElement.querySelector('.val').textContent = formatVal(P[k]); }
+  }
+  if(settled > total*0.85) reseedTargets();
+}
+function formatVal(v){ return Math.abs(v)>=100 ? v.toFixed(0) : Math.abs(v)>=10 ? v.toFixed(1) : v.toFixed(3).replace(/0+$/,'').replace(/\.$/,''); }
+let activeGroup='Dynamics';
+function updateRenderTabs(){
+  for(const el of document.querySelectorAll('.tabBtn,.tabPage')){
+    const name=el.dataset.group||el.dataset.name;
+    const hide=(name==='Rendering'&&referenceMode)||(name==='Silk material'&&!referenceMode);
+    el.style.display=hide?'none':'';
+  }
+  if((referenceMode&&activeGroup==='Rendering')||(!referenceMode&&activeGroup==='Silk material'))activateGroup('Complex log');
+}
+function activateGroup(name){
+  activeGroup=name;
+  document.querySelectorAll('.tabPage').forEach(el=>el.classList.toggle('selected',el.dataset.name===name));
+  document.querySelectorAll('.tabBtn').forEach(el=>el.classList.toggle('selected',el.dataset.group===name));
+  groupsEl.scrollTop=0;
+}
+function addControls(){
+  const tabBar=document.getElementById('tabs');
+  for(const group of spec){
+    const btn=document.createElement('button');btn.className='tabBtn';
+    btn.textContent=group.group;btn.dataset.group=group.group;
+    btn.onclick=()=>activateGroup(group.group);tabBar.appendChild(btn);
+    const section=document.createElement('section');section.className='tabPage';section.dataset.name=group.group;
+    section.innerHTML=`<div class="sectionLabel">${group.group} <span>${group.items.length} parameters</span></div><div class="grid"></div>`;
+    const grid=section.querySelector('.grid');
+    for(const item of group.items){
+      const [key,label,min,max,def,step,desc]=item;
+      const card=document.createElement('label');card.className='control';
+      card.innerHTML=`<header><span class="name">${label}</span><output class="val">${formatVal(def)}</output></header><input type="range" min="${min}" max="${max}" step="${step}" value="${def}" aria-label="${label}"><small>${desc}</small>`;
+      const input=card.querySelector('input');inputs[key]=input;
+      input.addEventListener('input',()=>{
+        // Every adjustment starts with the full sculpture visible.
+        if(!running)fitAdjustmentView();
+        P[key]=Number(input.value);card.querySelector('.val').textContent=formatVal(P[key]);
+        deferredEquation=true;pendingEquationAt=performance.now();lastInputAt=pendingEquationAt;
+        if(!running){
+          if(['amplitude','ribbonGap','xSpread','yCompress','perspective','tilt','yaw','roll','zoom','density','thickness','glow','alpha','hueSpin','depthHue','curvHue','contrast','trail','foldArc','foldFan','foldCross','foldWave','foldDensity','silkWidth','silkTwist','silkPinch','silkResponse','materialHue','materialBright','materialContrast','materialSaturate','materialMotion'].includes(key))draw();
+          else requestStill();
+        }
+      });
+      grid.appendChild(card);
+    }
+    groupsEl.appendChild(section);
+  }
+  const eq=document.createElement('button');eq.className='tabBtn';eq.textContent='Equation';eq.dataset.group='Equation';
+  eq.onclick=()=>activateGroup('Equation');tabBar.appendChild(eq);
+  const page=document.createElement('section');page.className='tabPage';page.dataset.name='Equation';
+  page.innerHTML='<div class="sectionLabel">Equation inspector <span>LIVE MODEL</span></div><p class="description">These terms are computed in the numerical solver. The artwork is a measurement of the simulated field, not an independently animated preset.</p>';
+  page.appendChild(mathEl);groupsEl.appendChild(page);
+  activateGroup(activeGroup);updateRenderTabs();updateEquation();
+}
+let pendingStill=false;
+function requestStill(){if(pendingStill)return;pendingStill=true;requestAnimationFrame(()=>{pendingStill=false;recomputeStill();updateUI();});}
+function addPresets(){
+  stretchBtn=document.createElement('button');stretchBtn.className='preset';stretchBtn.title='Off: proportional two-finger zoom. On: independently stretch horizontal and vertical dimensions.';
+  stretchBtn.onclick=()=>{
+    view.freeStretch=!view.freeStretch;
+    if(!view.freeStretch){
+      // Return to a single uniform scale around the viewport center.
+      const scale=Math.sqrt(view.sx*view.sy),cx=W*.5,cy=H*.5;
+      const anchorX=(cx-view.x)/view.sx,anchorY=(cy-view.y)/view.sy;
+      view.sx=scale;view.sy=scale;view.x=cx-scale*anchorX;view.y=cy-scale*anchorY;
+    }
+    syncViewButtons();draw();
+  };
+  resetBtn=document.createElement('button');resetBtn.className='preset';resetBtn.onclick=()=>{resetView();fitAdjustmentView();draw();};
+  presetRow.appendChild(stretchBtn);presetRow.appendChild(resetBtn);syncViewButtons();
+  const viewButton=document.createElement('button');viewButton.className='preset active';viewButton.textContent='View: Floating folds';
+  viewButton.onclick=()=>{
+    renderVariant=renderVariant==='folds'?'classic':renderVariant==='classic'?'reference':'folds';
+    referenceMode=(renderVariant==='reference');
+    viewButton.textContent=renderVariant==='folds'?'View: Floating folds':renderVariant==='classic'?'View: Classic fibers':'View: Reference silk';
+    viewButton.classList.toggle('active',renderVariant==='folds');updateRenderTabs();draw();
+  };
+  presetRow.appendChild(viewButton);
+  let active='';
+  function setActive(name){ active=name; [...presetRow.children].filter(b=>b!==viewButton).forEach(b=>b.classList.toggle('active', b.textContent===name)); }
+  for(const [name,vals] of Object.entries(presets)){
+    const b=document.createElement('button'); b.className='preset'; b.textContent=name;
+    b.onclick=()=>{ applyValues(vals); setActive(name); };
+    presetRow.appendChild(b);
+  }
+  const rnd=document.createElement('button');rnd.className='preset';rnd.textContent='Surprise';rnd.onclick=()=>{randomizeInteresting();setActive('')};presetRow.appendChild(rnd);setActive('');
+}
+function applyValues(vals){
+  fitAdjustmentView();
+  for(const [k,val] of Object.entries(vals)){
+    P[k]=val;
+    if(inputs[k]){ inputs[k].value = val; inputs[k].parentElement.querySelector('.val').textContent = formatVal(val); }
+  }
+  updateEquation();if(!running) requestStill(); else updateUI(true);
+}
+function randomizeInteresting(){
+  const keys = ['qErrorGain','qRead','qXX','qBitDrive','qHFloor','qCap','qSpatialMode','tension','biharm','dispersion','mixX','neighbor','longCouple','cubic','quintic','exp','feedback','drive','driveFreq','beat','phaseLock','phaseSlip','heteroAmp','macro','fold','symmetry','amplitude','density','glow','depthHue','curvHue','logForce','logCouple','logCurve','logPhase','logAlpha','logBeta','logOffset'];
+  for(const key of keys){
+    const item = spec.flatMap(g=>g.items).find(i=>i[0]===key); if(!item) continue;
+    const [,,min,max,,,] = item;
+    let t = (rng()+rng()+rng())/3; // bias center
+    const val = min + t*(max-min);
+    P[key]=val;
+    if(inputs[key]){ inputs[key].value=val; inputs[key].parentElement.querySelector('.val').textContent = formatVal(val); }
+  }
+  updateEquation();if(!running) requestStill(); else updateUI(true);
+}
+
+runBtn.onclick = ()=>{
+  running = !running;
+  if(!running){ captureAnchor(); computeBaseline(); recomputeStill(); } else { previewDelta=0; lastPaint=0; }
+  updateUI();
+};
+refBtn.onclick = ()=>{ running=false; captureAnchor(); computeBaseline(); recomputeStill(); updateUI(); };
+exploreBtn.onclick = ()=>{ exploring=!exploring; if(exploring){running=true;reseedTargets();} updateUI(true); };
+randomBtn.onclick = ()=>{ randomizeInteresting(); };
+
+// Real two-pointer gestures, independent of the OMEF simulation timestep.
+// One finger preserves the earlier orbit action; two fingers zoom and pan.
+canvas.addEventListener('pointerdown',e=>{
+  e.preventDefault();
+  pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  try{canvas.setPointerCapture(e.pointerId);}catch(_){}
+  startTouchGesture();
+});
+canvas.addEventListener('pointermove',e=>{
+  if(!pointers.has(e.pointerId))return;
+  e.preventDefault();
+  pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  moveTouchGesture();
+});
+function endPointer(e){
+  if(!pointers.has(e.pointerId))return;
+  pointers.delete(e.pointerId);
+  try{if(canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);}catch(_){}
+  startTouchGesture();
+}
+canvas.addEventListener('pointerup',endPointer);
+canvas.addEventListener('pointercancel',endPointer);
+canvas.addEventListener('lostpointercapture',endPointer);
+// Keep iOS Safari from treating a gesture over the sculpture as a page zoom.
+for(const name of ['gesturestart','gesturechange','gestureend','touchmove'])
+  canvas.addEventListener(name,e=>{if(e.cancelable)e.preventDefault();},{passive:false});
+canvas.addEventListener('wheel',e=>{
+  e.preventDefault();
+  const b=stageWrap.getBoundingClientRect(),x=e.clientX-b.left,y=e.clientY-b.top;
+  const next=clip(view.sx*Math.exp(-e.deltaY*.002),.35,7.5);
+  const ratio=next/view.sx;
+  view.x=x-(x-view.x)*ratio;view.y=y-(y-view.y)*ratio;
+  view.sx=next;view.sy=clip(view.sy*ratio,.35,7.5);
+  draw();
+},{passive:false});
+
+addControls(); addPresets(); activateGroup('Qubit / harmonic'); resize(); initialize(0.5); recomputeStill(); updateUI(true);
+const fullBtn=document.getElementById('expandBtn');
+fullBtn.onclick=()=>{
+  const app=document.getElementById('app');
+  const on=!app.classList.contains('full');
+  if(on){
+    // Start expanded inspection with a full fit; the user can then pinch.
+    Object.assign(view,{sx:1,sy:1,x:0,y:0,freeStretch:false});
+    app.classList.add('full');
+  }else{
+    saveInspectView();
+    app.classList.remove('full');
+    fitAdjustmentView();
+  }
+  fullBtn.textContent=on?'Adjust':'Expand';
+  resize();draw();
+};
+window.__omefTest={
+  view:()=>viewStats(),
+  resetView:()=>resetView(),
+  stretch:(on)=>{view.freeStretch=!!on;syncViewButtons();draw();},
+  stats:()=>({steps,vel:lastVel,delta:previewDelta,running,solverSafeties,renderFaults,playFaults,lastFrameError,pixels:W*H,art:{x:artX,y:artY,width:artW,height:artH},expanded:document.getElementById('app').classList.contains('full')}),
+  guardReport:()=>({solverSafeties,renderFaults,playFaults,lastFrameError}),
+  isPlaying:()=>running,
+  advance:(n=1)=>{for(let i=0;i<n;i++)step(.032);draw();},
+  parameter:(k,value)=>{if(!(k in P))throw Error('bad key');P[k]=value;if(inputs[k]){inputs[k].value=value;inputs[k].parentElement.querySelector('.val').textContent=formatVal(value);}if(!running)recomputeStill();},
+  snapshot:()=>Array.from(q[0]).slice(0,32),
+  renderMode:()=>renderVariant,
+  qubit:()=>({stateReal:Array.from(qr),stateImag:Array.from(qi),norm:qubitNorm,errorX:errX,errorZ:errZ,harmonicMean:harmonicPower,quotient:errorQuotient}),
+  summary:()=>({maxq:Math.max(...q.map(a=>Math.max(...a.map(x=>Math.abs(x))))), rmsV:lastVel, fieldsFinite:q.every(a=>a.every(Number.isFinite)), referenceMode,referenceReady, logTerms:{logForce:P.logForce,logCouple:P.logCouple,logCurve:P.logCurve,logPhase:P.logPhase,logAlpha:P.logAlpha,logBeta:P.logBeta,logOffset:P.logOffset}}),
+  keys:()=>Object.keys(P)
+};
+requestAnimationFrame(animate);
+const fallback=document.getElementById('fallbackPreview');
+if(fallback)fallback.style.display='none';
+window.__omefBootReady=true;
+const watchdog=document.getElementById('bootWatchdog');if(watchdog)watchdog.style.display='none';
+}catch(err){
+  window.__omefBootError=String(err&&err.stack||err);
+  const status=document.getElementById('status');if(status)status.textContent='STARTUP ERROR';
+  const watch=document.getElementById('bootWatchdog');if(watch){watch.style.display='block';watch.textContent='Startup failed: '+String(err&&err.message||err).slice(0,180);}
+  console.error('OMEF boot failure',err);
+}
+})();
+</script></body></html>
