@@ -1,0 +1,28 @@
+name: OMEF Studio 18 mobile regression
+on:
+  push:
+    branches: [omef-2x-rainbow-live-20261120]
+    paths:
+      - 'omef-2x-studio-18/**'
+      - '.github/workflows/omef-studio-18.yml'
+  pull_request:
+    paths:
+      - 'omef-2x-studio-18/**'
+      - '.github/workflows/omef-studio-18.yml'
+permissions:
+  contents: read
+jobs:
+  mobile-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Chromium and Playwright
+        run: |
+          python -m pip install playwright
+          python -m playwright install --with-deps chromium
+      - name: Verify worker, slider, Play and fullscreen in mobile browser
+        run: python omef-2x-studio-18/ci_smoke.py
