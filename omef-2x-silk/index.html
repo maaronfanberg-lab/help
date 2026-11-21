@@ -1,1067 +1,709 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"><meta name="theme-color" content="#050608"><meta name="apple-mobile-web-app-capable" content="yes"><title>OMEF · Floating Folds Studio 09</title><style>
-:root{color-scheme:dark;--b:#06080b;--panel:#0e1117;--raised:#151a22;--line:#28313b;--text:#f3f4f5;--muted:#8e9aa7;--accent:#afe6dd}
-*{box-sizing:border-box}html,body{margin:0;height:100%;background:#000;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,Inter,system-ui,sans-serif}button,input{font:inherit}button{cursor:pointer;touch-action:manipulation}
-#app{position:fixed;inset:0;background:var(--b);display:flex;flex-direction:column;overflow:hidden}
-#stageWrap{height:40dvh;min-height:240px;max-height:55dvh;flex:none;background:#000;position:relative;overflow:hidden;border-bottom:1px solid #161a20}
-#stageWrap::before{content:"";position:absolute;top:0;left:0;right:0;height:62px;z-index:1;pointer-events:none;background:linear-gradient(to bottom,#000a,transparent)}
-#stage{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
-.topbar{position:absolute;z-index:2;top:max(9px,env(safe-area-inset-top));left:12px;right:12px;display:flex;align-items:center;gap:7px}
-.identity{color:#f2f2f3;text-shadow:0 1px 5px #000,0 0 18px #000;font-size:12px;font-weight:760;letter-spacing:.12em;text-shadow:0 1px 4px #000;min-width:0;flex:1}
-.identity span{font-weight:400;color:#8a969e;margin-left:6px;letter-spacing:.025em;font-size:10px}
-.iconbtn{background:#11161bed;color:#e5eced;border:1px solid #39414a;border-radius:10px;padding:8px 10px;font-size:11px;white-space:nowrap}
-.iconbtn.active{background:#d3efe8;color:#132825;border-color:#d3efe8}
-#status{position:absolute;left:14px;bottom:48px;font:10px ui-monospace,SFMono-Regular,monospace;letter-spacing:.03em;color:#b6ced0;background:#02050777;border-radius:7px;padding:5px 7px;pointer-events:none;white-space:nowrap}
-#gestureHint{position:absolute;right:11px;top:66px;color:#a0b8c0;background:#03080ab5;border-radius:7px;padding:5px 7px;font:9px ui-monospace,SFMono-Regular,monospace;z-index:2;pointer-events:none}#stage{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
-.presetRow{position:absolute;bottom:9px;left:10px;right:10px;z-index:2;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
-.presetRow::-webkit-scrollbar{display:none}
-.preset{font-size:10px;letter-spacing:.01em;color:#dae2e5;padding:7px 12px;border:1px solid #3b4045;border-radius:100px;background:#0a1015c9;white-space:nowrap}
-.preset.active{color:#d8f8ed;border-color:#b1dfd3;background:#19352fa6}
-#panel{flex:1;min-height:0;background:var(--panel);display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom)}
-.panelTitle{display:flex;align-items:center;justify-content:space-between;padding:15px 16px 11px;gap:12px}
-.panelTitle strong{font-size:15px;font-weight:680;letter-spacing:-.015em}
-.panelTitle small{display:block;color:var(--muted);font-size:11px;margin-top:4px}
-#modeText{font-size:9px;letter-spacing:.12em;font-weight:700;color:var(--accent);white-space:nowrap}
-.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line);padding:0 10px;flex:none}
-.tabs::-webkit-scrollbar{display:none}
-.tabBtn{position:relative;flex:none;border:0;background:none;color:#8d9ba6;font-size:11px;font-weight:600;padding:12px 10px 13px;white-space:nowrap}
-.tabBtn.selected{color:#f3f6f5}.tabBtn.selected:after{content:'';position:absolute;height:2px;bottom:0;left:10px;right:10px;background:#b6e9db;border-radius:3px}
-#groups{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:0 12px 30px}
-.tabPage{display:none}.tabPage.selected{display:block}
-.sectionLabel{font-size:11px;text-transform:uppercase;letter-spacing:.10em;color:#c0cbd1;padding:17px 3px 12px;display:flex;justify-content:space-between;align-items:center;font-weight:720}
-.sectionLabel span{letter-spacing:normal;font-weight:440;color:#7f929f;text-transform:none;font-size:10px}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-.control{display:block;min-width:0;padding:13px 11px 10px;background:#151a20;border-radius:11px;border:1px solid #252d35;min-height:100px}
-.control header{display:flex;gap:5px;align-items:center;justify-content:space-between;margin-bottom:12px}
-.control .name{font-size:11px;color:#cfd6dc;min-width:0;overflow-wrap:anywhere}
-.control .val{font-size:11px;color:#b2e8dc;font-variant-numeric:tabular-nums;font-family:ui-monospace,SFMono-Regular,monospace;white-space:nowrap}
-.control input{width:100%;display:block;accent-color:#a9e9de;touch-action:pan-y;height:23px;margin:0}
-.control small{font-size:9px;color:#8295a3;line-height:1.25;margin-top:6px;display:block}
-#mathReadout{font:11px/1.8 ui-monospace,SFMono-Regular,monospace;white-space:pre-wrap;overflow-wrap:anywhere;color:#c5e6df;background:#151c22;border:1px solid #34454b;border-radius:12px;padding:14px;margin:9px 0}
-.description{font-size:12px;line-height:1.5;color:#94a4b3;margin:8px 2px}
-#app.full #stageWrap{height:100dvh;min-height:0;max-height:none;flex:1}
+<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"><meta name="theme-color" content="#000000"><meta name="apple-mobile-web-app-capable" content="yes"><title>OMEF Studio 15 · 747-state native solver</title><style>:root{--bg:#03070c;--panel:#0b121a;--tile:#111d28;--line:#263747;--text:#eef6fa;--muted:#93a8b8;--aqua:#95f3eb;color-scheme:dark}*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:#000;color:var(--text);font:13px -apple-system,BlinkMacSystemFont,system-ui,sans-serif}button,input{font:inherit}button{touch-action:manipulation;cursor:pointer}
+#app{position:fixed;inset:0;display:flex;flex-direction:column;overflow:hidden;background:#000;isolation:isolate}
+#stage{position:relative;flex:0 0 42dvh;min-height:230px;max-height:47dvh;background:#000;border-bottom:1px solid #162532;overflow:hidden}
+#art{display:block;width:100%;height:100%;touch-action:none;background:#000}
+.toolbar{position:absolute;inset:10px 10px auto 10px;display:flex;align-items:center;gap:5px;z-index:5;pointer-events:none}
+.toolbar>*{pointer-events:auto}
+.brand{color:#ecf8fc;font-size:12px;font-weight:800;letter-spacing:.14em;padding:8px 6px 8px 0;margin-right:auto;text-shadow:0 1px 5px #000}
+.btn{background:#0d1b26d9;border:1px solid #29465b;color:#effcff;border-radius:9px;padding:9px 10px;font-size:11px;white-space:nowrap;backdrop-filter:blur(11px)}
+.btn.active{background:#96f5ea;color:#091923;border-color:#acefe7}
+#status{position:absolute;left:12px;bottom:12px;font:10px ui-monospace,SFMono-Regular,monospace;color:#89efe7;background:#061720cf;padding:5px 8px;border:1px solid #203a43;border-radius:6px;pointer-events:none}
+#boot{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#000;color:#9ca7ba;font:12px monospace;z-index:10}
+#boot[hidden]{display:none}
+#error{position:absolute;left:10px;right:10px;bottom:40px;color:#ffbeb7;background:#320d16;border:1px solid #903b3a;font:11px monospace;padding:9px;border-radius:6px;white-space:pre-wrap;z-index:11}
+#error[hidden]{display:none}
+#panel{background:var(--panel);flex:1;min-height:0;display:flex;flex-direction:column;position:relative;overflow:hidden}
+#panelhead{padding:13px 14px 8px;display:flex;gap:5px;align-items:center}
+#panelhead .identity{flex:1}
+#panelhead strong{display:block;font-size:14px;letter-spacing:.01em}
+#panelhead small{display:block;color:var(--muted);font-size:10px;margin-top:3px}
+#viewrow{display:flex;gap:7px;padding:6px 12px 9px;overflow-x:auto;flex:none;scrollbar-width:none}
+#viewrow::-webkit-scrollbar,#tabs::-webkit-scrollbar{display:none}
+.chip{background:transparent;border:1px solid #345063;color:#b5ceda;padding:8px 11px;border-radius:30px;font-size:11px;white-space:nowrap}
+.chip.active{background:#1c3e4c;color:#bffdf5;border-color:#7adbd8}
+#readouts{padding:3px 14px 7px;color:#8199a8;font-size:10px;line-height:1.35}
+#substatus{font-size:10px;color:#9bcfca;font-variant-numeric:tabular-nums;text-align:center;background:#091720;border-block:1px solid #1d313d;padding:7px 8px}
+#tabs{display:flex;gap:6px;padding:8px 10px 7px;overflow-x:auto;flex:none;scrollbar-width:none;border-bottom:1px solid #203342}
+.tab{background:#0d1a25;color:#a9c3cd;border:1px solid #263f50;border-radius:8px;padding:8px 12px;white-space:nowrap;font-size:11px}
+.tab.active{background:#a4ece7;color:#08242e;border-color:#a4ece7}
+#sliders{overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:10px 12px 35px;min-height:0}
+.control{border:1px solid #243d4e;border-radius:10px;padding:10px;background:#0e1c29;min-width:0;min-height:91px;display:flex;flex-direction:column}
+.clabel{display:flex;align-items:center;gap:4px;justify-content:space-between;font-size:11px}
+.clabel span{flex:1;min-width:0;line-height:1.2}.clabel strong{color:#93efe8;font:11px ui-monospace,monospace;white-space:nowrap}
+.control input{accent-color:#9cf5ea;width:100%;margin:9px 0 3px;min-height:14px}
+.control small{color:#7f9da9;font-size:9px;line-height:1.2}
+#calc{margin-left:7px;font:10px ui-monospace,monospace;color:#91aab7}
+#app.full #stage{position:absolute;inset:0;min-height:0;max-height:none;z-index:10;border:0}
 #app.full #panel{display:none}
-@media(min-width:720px){#app{max-width:850px;margin:0 auto;border-inline:1px solid #222}.grid{grid-template-columns:repeat(3,minmax(0,1fr))}#stageWrap{height:48dvh}}
-@media(max-width:490px){.identity span{display:none}.identity{letter-spacing:.09em}.topbar{gap:5px;left:10px;right:10px}.iconbtn{padding:8px 9px}}
-@media(max-height:610px){#stageWrap{min-height:195px;height:40dvh}.control{min-height:90px}}
-
-/* Studio 08: fixed, unobstructed artwork preview above scrolling adjustments */
-#stageWrap{height:44dvh;min-height:260px;max-height:52dvh}
-#stageWrap::before{height:54px}
-#status{bottom:5px;left:10px;z-index:2;opacity:.75;padding:3px 6px;font-size:9px}
-#gestureHint{display:none}
-#app.full #gestureHint{display:block}
-#panel>.presetRow{position:relative;bottom:auto;left:auto;right:auto;z-index:1;flex:0 0 auto;min-height:42px;padding:6px 9px 7px;border-bottom:1px solid var(--line);background:#0e1117}
-#panel>.presetRow .preset{padding:6px 10px}
-#panelTitle{flex:0 0 auto}
-@media(max-height:610px){#stageWrap{height:43dvh;min-height:180px;max-height:50dvh}}
-#app.full #stageWrap{height:100dvh;max-height:none;min-height:0}
-</style></head><body><div id="app"><div id="stageWrap">
-<img id="fallbackPreview" alt="Preview of rainbow silk sculpture" src="data:image/webp;base64,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" style="position:absolute;inset:52px 0 18px;width:100%;height:calc(100% - 70px);object-fit:contain;pointer-events:none;opacity:.9"><canvas id="stage" aria-label="Numerically integrated rainbow filament sculpture"></canvas>
-<div class="topbar"><div class="identity">OMEF <span>FLOATING FOLDS</span></div><button class="iconbtn" id="runBtn">Play</button><button class="iconbtn" id="refBtn">Set ref</button><button class="iconbtn" id="exploreBtn">Explore</button><button class="iconbtn" id="expandBtn" aria-label="Expand sculpture without stretching">Expand</button></div>
-<div id="gestureHint" aria-hidden="true">One finger: rotate · Two fingers: zoom · Stretch mode: reshape</div>
-<div id="status">PREVIEW ONLY · OPEN IN SAFARI</div>
+#app.full #stage .toolbar{top:max(env(safe-area-inset-top),10px)}
+#stretch,#resetView{display:none}#app.full #stretch,#app.full #resetView{display:block}
+@media(max-width:395px){.toolbar{gap:4px;left:6px;right:6px}.brand{font-size:11px;letter-spacing:.1em}.btn{padding:9px 8px;font-size:10px}.control{min-height:94px}}
+@media(max-height:640px){#stage{flex-basis:38dvh;min-height:155px}#panelhead{padding-top:6px}.control{min-height:74px}}
+</style></head><body>
+<div id="app">
+  <section id="stage" aria-label="OMEF mathematically driven visual sculpture">
+    <canvas id="art"></canvas>
+    <div id="boot">Initializing native 747-coordinate solver…</div>
+    <div id="error" hidden role="alert"></div>
+    <nav class="toolbar">
+      <div class="brand">OMEF 15</div>
+      <button id="play" class="btn">Play</button>
+      <button id="ref" class="btn">Set ref</button>
+      <button id="reset" class="btn">Reset</button>
+      <button id="stretch" class="btn">Stretch</button>
+      <button id="resetView" class="btn">Fit</button>
+      <button id="expand" class="btn">Expand</button>
+    </nav>
+    <div id="status">SOURCE ENGINE · STARTING</div>
+  </section>
+  <section id="panel">
+    <header id="panelhead"><div class="identity"><strong>Native OMEF · Interaction Studio</strong><small>String · bulk · 2 qubits · 100 levels · 62 ports</small></div></header>
+    <nav id="viewrow" aria-label="Visual measurements"></nav>
+    <div id="readouts">Verified mathematical sources</div>
+    <div id="substatus"></div>
+    <nav id="tabs" aria-label="Mathematical controls"></nav>
+    <div id="sliders"></div>
+    <div id="calc">Source 747-state solver</div>
+  </section>
 </div>
-<div id="bootWatchdog" style="display:none;position:absolute;z-index:4;bottom:55px;left:14px;right:14px;background:#351a19;color:#ffdfd9;border:1px solid #aa6458;border-radius:8px;padding:10px;font-size:12px"></div><div id="panel"><div class="panelTitle"><div><strong>Instrument controls</strong><small>Complete sculpture above · always fitted while adjusting</small></div><span id="modeText">STILL REFERENCE</span></div><div id="presetRow" class="presetRow"></div><nav class="tabs" id="tabs"></nav><div id="groups"><div id="mathReadout"></div></div></div>
-<button id="randomBtn" style="position:absolute;left:-1000px;width:1px;height:1px" aria-hidden="true">Random</button>
-<script>
-window.__omefBootReady=false;var start=document.getElementById('status');if(start)start.textContent='ENGINE LOADING';
-window.addEventListener('error',function(e){if(window.__omefBootReady)return;var s=document.getElementById('status');if(s)s.textContent='SCRIPT ERROR';var d=document.getElementById('bootWatchdog');if(d){d.textContent='Script error: '+(e.message||'unknown')+' · Open this page in Safari.';d.style.display='block';}});
-window.addEventListener('load',function(){setTimeout(function(){if(!window.__omefBootReady){var s=document.getElementById('status');if(s)s.textContent='PREVIEW ONLY';var d=document.getElementById('bootWatchdog');if(d&&!d.textContent){d.textContent='The interactive script did not start. Open this link directly in Safari.';d.style.display='block';}}},4000);});
+<noscript><div style="position:fixed;inset:10%;z-index:100;background:#000;color:#fff;text-align:center;padding:15px">JavaScript is disabled in this document viewer. Please open the hosted webpage in Safari rather than the file preview.</div></noscript>
+<script id="seed747" type="application/json">[-0.13026581141523305,-0.29195456543707354,0.013905038539338506,-0.13308241120967157,-0.25029507893495134,0.004317139718698481,-0.12696097032038456,-0.18434104941289292,0.005198966544541405,-0.07732947619312293,-0.12927289235443967,-0.017775124602244525,0.01611457877244931,-0.08565659831861837,-0.07426307204748712,0.11255671729192027,-0.022823632839143855,-0.12394443685363271,0.17160146837387152,0.07402658721390229,-0.12146654112830578,0.18966384837605701,0.1759604603521067,-0.07408836210350178,0.1895993446599243,0.23804994898355727,-0.03213456854138847,0.18678692150919468,0.24442289359552494,-0.02431241750403098,0.17909662405118615,0.21432298320774154,-0.02647798373055545,0.1640932996982801,0.17146913687705348,-0.0040730442798911255,0.1468522333650891,0.12558738908670816,0.035221628484951154,0.12482456716886016,0.08562623974920028,0.0530528591388653,0.08050849616581951,0.07046677442389895,0.036173797039462156,0.004196871797950106,0.08917235524714194,0.014753947371665238,-0.08170084741811239,0.11756801473617985,0.01921489129458047,-0.1374598157048537,0.11322301996939524,0.040487690399118245,-0.1482162283822995,0.058171674188261184,0.04927430373764475,-0.13888696985257548,-0.024879051170747506,0.04094707019218715,-0.14059949796411725,-0.10359418905075336,0.03805608227000543,-0.15362597905544986,-0.1701534415400252,0.050399165100981656,-0.15602938988819312,-0.23264696962091092,0.05729745753721295,-0.1417375738265888,-0.28245000895111466,0.040235513421785156,-0.10846955567729977,0.0480123554379394,0.15266106306357302,-0.02001027947015737,-0.03324157479628285,0.014781624464461915,-0.03118307817659193,0.007001044091188146,-0.09689757404585564,0.037251881772680115,0.033369248843261305,-0.2070104803892359,-0.00936920535252546,0.013847844502447122,0.047704104622359036,-0.0693676292973746,-0.11288291246231213,-0.0808123968432784,0.04658348195622882,-0.07240601826431182,-0.0649522239795042,0.09722007410453887,-0.06682339510572458,-0.07638377276406257,-0.007755192898636542,0.016881893894575728,0.08819852098705615,-0.07474285290123639,-0.13329314052700014,-0.010412215383073653,0.05470912933700072,-0.1259297561762001,-0.04141735634169924,0.026026641988780803,0.019637065501881025,0.007085514227978319,-0.021835608977091955,-0.06794444893607758,-0.07889173008170179,0.09828228991312667,-0.09496282576526607,0.10438000837399151,-0.11177996704855286,0.246804451892692,-0.14773942895508832,0.13636331545359665,-0.07625113341216737,-0.009827315843068755,-0.005571968527753714,-0.05543892653152416,0.1894133739599028,0.00806780442345355,-0.11229126815460506,0.054957626175860017,0.06055414846211628,-0.09753605825742001,0.04552710856788689,0.005861241973945775,0.06972853112278872,0.060536615102538785,-0.0007176045592059268,-0.03470404378232942,0.07738167806746114,0.026621932342210206,-0.12658857671628984,-0.04631387976944681,-0.04108155388171886,-0.022283133002849894,0.19416482548621228,-0.032069420903704765,0.040573616561215914,0.14070333504041366,0.009065763602749237,0.007773796303279814,0.02336325674274626,0.0035515924161887576,0.003347682855959467,0.012397293788858366,0.007417383949434375,-0.01224643546141734,-0.020986035037107192,-0.002040704922798042,0.025164216600939104,-0.004075483607979509,0.020671730854467243,0.0074267767641663235,-0.00556014654068893,-0.04740110841904192,0.003998405807267273,-0.0049850125409497265,-0.028809346622230832,0.009261086370231316,-0.00045760531778863463,0.006750955274789708,-0.01087948612585438,0.003636406100469883,-0.008518174848645267,0.019169040115677133,0.0022378619965846853,-0.02524543707138941,0.0038576888499074263,0.0012175400752236947,-0.003661999183337879,-0.02429392043906875,0.01907168004229499,-0.013168744559218662,0.028487437955054897,-0.011878991679259352,0.0005845834683752603,-0.0008066325679588242,0.002721139696794899,0.04758147018075563,-0.008969180480470849,0.03725023237103214,0.011222248035148265,-0.012510135738878863,0.022600088295931124,0.015134839314069995,0.017179863335913342,-0.02401171923464402,0.009050608891843462,-0.00724528613643491,-0.0025589807866868283,-0.0023662491026037813,0.0007320302526682206,0.028627983696183523,0.0068119234496509485,-0.03320569867415772,0.022443618847177382,0.001577575912403417,0.002367492885645147,-0.03287988059131248,0.0071955598113929405,-0.008981378421477844,0.017201159249885106,0.008212107852184201,0.01489894700798496,-0.0067149325957750255,-0.03292827696946351,0.017438268476871844,0.007566298825084552,-0.005951156296356796,-0.010027159473026646,-0.015941004163534372,-0.031725658857024525,-0.02118966616427436,-0.0012620204299603197,0.028970352131276453,0.008156972534473119,0.028886018027426,-0.018176817200802452,0.022620269765612475,-0.00749039668231223,0.026393925939956677,0.022111113076687804,0.0006365304848989126,0.002420945939991526,0.02191382581772113,-0.014323758918982823,-0.038932395961245876,0.014704733931979385,0.03922419038669533,-0.03413130364138628,0.003773565125342603,-0.021278777873766707,-0.005220361231167102,-0.01800043453304371,0.015748579913026205,-0.009813312291153222,-0.003471257433599802,-0.019507859316557734,0.013192066760115993,-0.009177726767624872,-0.006810741054187665,-0.0013607688462631152,-0.026131730183389056,-0.000375165947095068,-0.02901412340720507,-0.003925857726517357,-0.003955574612184355,-0.007206555396922156,-0.003596932827566438,-0.012139642479837743,0.009193740509622593,-6.150214107585015e-05,-0.008487040985943304,-0.004126074751389479,-0.012187093383211056,-0.0022950844184756293,-0.005640628313966284,-0.03242940219488644,0.029655790549217007,-0.008009673541778528,-0.01208588854817082,0.0054077715194241986,-0.03760648489861365,-0.007161097963745036,0.005514000603267177,-0.004764999690192342,0.0011484352140766784,-0.008000757482133464,-0.006634345819245671,-0.0007355777320359074,0.00272797547891661,-0.019714994683151785,0.0050194444225547,0.005351605706166729,-0.011139579995126726,-0.010314559056859324,0.0021027851824265958,0.020930897386529104,0.019573688216967835,-0.014979595739869995,-0.009756764955673574,-0.01012620334379683,0.006847781164035629,-0.002908363041112589,0.005708018486504803,0.022374961359214598,0.0037704893885052966,0.00706481764959197,0.005974719275349072,-0.014093105891693995,-0.003185868290928239,-0.004685709587368391,-0.0097135273028114,0.02662445279158802,0.009503249332383152,-0.04902313166322964,-0.015387820083621866,-0.0024858451562565454,-0.0008069006312304446,-0.01559729863501561,-0.006678720388763084,-0.007867083106249357,-0.009257662884880325,0.01057491253981681,-0.0017088584461590157,-0.011005913669655209,-0.006090420704607939,-0.0008460703945473288,-0.020565887695366377,-0.010668562186169139,0.010147794782335176,0.017235268141997127,-0.04303049725246187,0.043562775803925015,-0.011705994851152084,0.014135866835211525,-0.02480403520866971,0.012436006586344932,0.0004607587407880375,-0.0014416984281305986,-0.005401825635269781,-0.004552233556652971,0.013261657999272836,-0.013584616680790253,-0.004590410001747566,-0.0071069725250144595,-0.02943522741709405,0.0016834232966915076,-0.0007002427509865148,-0.008659545123266374,-0.024623568071759683,-0.006290407546177663,-0.0029363308164708306,-0.0001836290818970289,0.0009261236616607651,-0.021595322775941887,0.018394981990827005,0.014279637205689972,0.01421525161715091,0.008411539305710604,0.023713336109904178,0.01317972922938046,0.020314232962172826,0.005890517965149172,0.0026280588270235447,0.011416535915156437,-0.012642744619594463,-0.004067673885220933,0.003736742873204187,-0.01058491860023264,-0.04400887726936783,-0.010506093888068502,-0.01337140124978653,0.015484821038440068,-0.034353187794326064,-0.007701187787970525,0.015907296143546933,-0.023668022282306574,-0.002768291529543013,-0.006473647091070105,-0.01723043329168079,9.138179660268218e-06,-0.00893576414386454,-0.027128996561786797,-0.006177052445789465,-0.013580076584977346,0.01070989234844979,4.066286868374917e-05,-0.011174064522241615,0.001938997174850802,0.01895946176525527,-0.013006847488714992,-0.010197238125799061,-0.0011523996269018964,0.0003449530409004204,0.0015315444674347653,-0.015213578941115158,0.0009028219956010953,-0.011879605670662189,-0.007971932609632047,0.008918504623990457,-0.0074634918764444344,0.0057899169524150505,-0.0035237730248503726,0.001423675239957398,0.0013130081709505712,0.006171860429725078,0.007108292870280342,-0.007590239374157056,0.01638923345721482,0.005864888257307292,0.00938317738295862,0.009797776854338065,-0.004837293007299179,-0.000699275012267144,0.0007712155970742692,0.0028026404973439272,0.016931448972464763,0.018525132332956513,0.03454638376146276,0.01836438989246917,0.016878735945000674,-0.0006433763819605283,-0.008311781841512331,0.0002564754086225399,-0.002744070746915663,-0.01000340395870071,-0.002356341159295596,0.004401979030078171,0.0005740518320292587,0.009108039360435421,0.006271004839309523,0.004425117829605293,0.012754004046235815,-0.000944531404741345,0.000907504272313891,0.014748387306970269,0.00974751670066012,-0.014882743548319078,0.0014021626985889807,0.015594043601837467,0.004988020342438297,0.012492284128921359,-0.014870404743423105,0.004726766478848072,-0.019848406537946218,0.007406110051447348,-0.011881482789828444,0.014472517463740706,-0.006468294244697201,0.0016044083545189332,0.0031411877427508983,0.00021568702034596775,-0.015014752328521213,0.00762985952158187,-0.004626556263886344,0.024867835149861017,-0.002266955182572081,0.002588516248788832,-0.002906008604123171,0.017635981051193232,0.015402148263948019,0.006544760231607418,0.010815592820841203,-0.008411536319784764,-0.009094827214879211,0.013376961479700125,-0.008226082580160313,-0.0026563530226908134,-0.015165391812380238,-0.0035445276455243354,0.004474948379878912,-0.00047480264860052883,-0.014932805336569264,0.00825279102801428,0.0019819268670638952,-0.025262416830391855,-0.010744565219517261,-0.003292552013951681,-0.005190133720498468,0.0017481362493606883,0.01091185544554144,-0.000686315942586931,-0.0008056388848113828,0.013691643594286897,0.016155253765989985,-0.003013074052265844,0.016310469967288965,-0.017450374146317917,0.015767575709975407,0.004914526116182018,-0.008366334965498354,-0.0049188436158513,0.0014018636080987857,0.013421476894981079,0.00881037429646507,0.003061032226314199,-0.003762041521835979,0.0010031502819666215,-0.01204565183776874,-0.004007482218980328,-0.008540200518701267,-0.0036138826514101703,0.0044020720241428404,-0.0032921792717213435,-0.017816236129520057,0.010735528216387293,-0.00028293510006058644,0.0041188336088579264,-0.007259706183571944,-0.0027448907690286106,-0.003141723787219934,0.014005480430290578,-0.01255790733966923,0.008570350810913672,-0.0011186674477433383,0.006725757396090602,-0.006501891840355731,-0.016936484700285963,0.008798737939487641,-0.004135173024147403,0.00437660560579427,0.00664617594381952,-0.017727650747345027,-0.005414279781236374,-0.0024104003932080486,0.00534762629395936,0.005671711942476706,0.007473989985654268,-0.0025030726859001464,0.013253724127836194,0.00014216348392814333,-0.0008403080560101235,-0.005068209236416282,-0.011470559160808849,-0.00034609262793743024,0.0024827995332412913,0.002641370838883569,0.02163423256495787,0.0029220934495145425,0.003616483935220172,-0.01311573868123247,-0.00262883974701677,0.00017545268483707188,0.004623390695485494,-0.002142565184146154,0.0033030470297474145,-0.010041943360042896,0.011145994426940538,0.010124289494100396,-0.011544294231444515,-0.015254282215017128,-0.006918083413001891,0.0013486027262680496,-0.009079824028092789,0.0013566269198487643,0.007225608162735906,0.009445456416559611,0.010798552462962305,-0.014939899926427365,-0.020205082599103644,0.004616221424919328,-0.00807110151215549,-0.008000057522342603,-0.011210898608841864,-0.0068804879109374715,0.004904581258148721,-0.015079544536154352,-0.014203639232256211,0.00942620077248649,0.00557865602555463,-0.017671608002457935,-0.019262397176153113,0.0026738414213759477,0.007396389444178775,0.019406548501314763,0.00545296571569525,0.005255515134948557,-0.0037370392457570494,-0.0006873572847202507,-0.005477381312508796,0.010371642278724693,0.0024482007834312055,0.009271412431183429,0.0017614138436426088,-0.010695956451078313,-0.0015751969313153918,0.009333482792549828,0.0023229217453124337,-0.018631068666942724,0.009185047480162219,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.4369834611201394,0.4074668567473395,0.5914894168858145,0.6070978948896089,0.5385180887136972,0.5337911879488262,0.4394119462508901,0.13913185909304657,0.19854590205072645,-0.10136287246000618,-0.15036695780445797,-0.29207594290803474,-0.5884696869013799,-0.47095054713819406,-0.6544282905426339,-0.598705015718762,-0.7953314440293845,-0.5454842384509246,-0.7062564821800321,-0.20051025873806427,-0.05640707981685043,0.01654645050325261,0.2765574222331422,0.24849080995011194,0.3854251567761595,0.3561382749933942,0.44932992684411305,0.2273047436842327,0.2998233328005213,0.21899598598801273,0.1516603668567169,-0.15597611266086073,-0.17349495560518988,-0.14454042049820448,-0.2304359686475469,-0.041268237825143717,-0.3858690616182332,0.13036128179550044,0.09944701423551999,0.10689212194138227,0.40106283106517726,0.4599568783274657,0.44348579032992647,0.5765743228361684,0.43858567865628934,0.5362020078343219,0.4003010536555932,0.10078257863152676,-0.08424862625279302,-0.02686102014283941,-0.34578580929935837,-0.3366943626540111,-0.4810930970486392,-0.702958013045135,-0.8700920992764583,-0.6672361319496071,-0.5984639979230271,-0.47449449315710135,-0.4269949358726132,-0.3329389813088936,-0.060192808917731724,0.10992163259919557,0.2633525500747564,0.35990486680619876,0.49156100478825415,0.642237472005226,0.5874091797141776,0.5305746388896275,0.3309800817055658,0.20873287707446062,0.23599954734464718,0.2663758980240125,-0.16174720545027563,-0.24366013544930898,-0.14736811909783765,-0.3163812796908196,-0.22119847056759928,-0.1992814856377373,-0.1548582254535795,-0.056895188215949244,0.012479841692618732,0.10509625832299663,0.2984452470912128,0.26525902459922746,0.3637411049251504,0.2030800237115832,0.35842574303383024,0.22507482550159547,0.025475147720116165,-0.18125503342852547,-0.18152685636147453,-0.18659670649169982,-0.4009323137671088,-0.540768990240323,-0.7773521051230996,-0.6207214855563012,-0.8941825032795225,-0.6653239598130153,-0.513339398763116,-0.23256429105203688,-0.062282050824793767,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]</script>
+<script>/* OMEF-2X Stage-62/RPC100 browser port — finite 747-real state. 
+   Mathematical source: uploaded omef_core_reference.py, omef_piqh_port.py, 
+   omef_full_rpc100.py and omef62_bridge.py. No original calibrated T0.
+   Here all numerical controls act inside RHS; view controls never do. */
+(function(root){ 'use strict';
+const NS=24, NB=216, NR=62, NL=101, D=747, DS=2*Math.PI/NS, H=.8, DV=H**3;
+const Q=0,P=72,PHI=144,PI=360,PR=576,PII=580,TH=584,PORT=685;
+const TPI=Math.PI*2;
+const defaults={tension:.35,quartic_s:.16,wave_speed:.68,mass_b_sq:.60,quartic_b:.12,kappa:.45,alpha:.40,ell:.8,eta:.24,xi:.45,g:.55, damping_s:0,damping_b:0,pump:0,p0:1,
+  rpcGamma:.17,mix:.35,xi_string:.6,zeta:.25,omega0:.3,a_log:.15,b_arg:.12,mu:.25,log_scale:3,
+  gate:.25,interaction:.32,relaxation:.47,source_gain:.18,multiscale_drive:.28,network_gain:.025,mobility:.19,
+  quantumHarmonic:0,harmonicFloor:.03,visGain:1,visPort:1,visPhase:1,visBulk:1};
+const coords=new Float64Array(NB*3), left=new Float64Array(NB), right=new Float64Array(NB), lapNeighbors=Array.from({length:NB},()=>[]);
+for(let x=0;x<6;x++)for(let y=0;y<6;y++)for(let z=0;z<6;z++){
+  const i=(x*6+y)*6+z;
+  coords[3*i]=(x-2.5)*H;coords[3*i+1]=(y-2.5)*H;coords[3*i+2]=(z-2.5)*H;
+  if(x===0)left[i]=1/36;if(x===5)right[i]=1/36;
+  for(const [a,dx,dy,dz] of [[0,1,0,0],[0,-1,0,0],[1,0,1,0],[1,0,-1,0],[2,0,0,1],[2,0,0,-1]]){
+    const nx=x+dx,ny=y+dy,nz=z+dz;
+    if(nx>=0&&nx<6&&ny>=0&&ny<6&&nz>=0&&nz<6)lapNeighbors[i].push((nx*6+ny)*6+nz);
+  }
+}
+const bModes=new Float64Array(NR*NB),sModes=new Float64Array(NR*NS*3), phasesW=new Float64Array(NL), branchIdx=new Int16Array(NR);
+for(let j=0;j<NR;j++){
+  const n=j+1, fx=Math.floor(n/36),fy=Math.floor(n/6)%6,fz=n%6;
+  let norm=0;
+  for(let x=0;x<6;x++)for(let y=0;y<6;y++)for(let z=0;z<6;z++){
+    let node=(x*6+y)*6+z;
+    let v=Math.cos(Math.PI*(x+.5)*fx/6)*Math.cos(Math.PI*(y+.5)*fy/6)*Math.cos(Math.PI*(z+.5)*fz/6);
+    bModes[j*NB+node]=v;norm+=v*v;
+  }
+  norm=Math.sqrt(norm);
+  for(let a=0;a<NB;a++)bModes[j*NB+a]/=norm;
+  const axis=j%3, band=Math.floor(j/6)%10+1;
+  for(let i=0;i<NS;i++){
+    const sig=TPI*i/NS;
+    const wave=j>=60 ? 1:Math.floor(j/3)%2===0 ? Math.cos(band*sig):Math.sin(band*sig);
+    sModes[j*(NS*3)+3*i+axis]=wave/NS;
+  }
+  branchIdx[j]=(j*37+3)%100;
+}
+for(let i=0;i<100;i++)phasesW[i]=Math.pow(.5,i+1);
+phasesW[100]=Math.pow(.5,100);
+// 15 unique Hermitian nonidentity two-qubit Pauli operators.
+const I=[[1,0],[0,0],[0,0],[1,0]], X=[[0,0],[1,0],[1,0],[0,0]], Y=[[0,0],[0,-1],[0,1],[0,0]], Z=[[1,0],[0,0],[0,0],[-1,0]];
+function kron(A,B){const mr=new Float64Array(16),mi=new Float64Array(16);for(let a=0;a<2;a++)for(let b=0;b<2;b++)for(let c=0;c<2;c++)for(let d=0;d<2;d++){
+ let i=(2*a+c)*4+2*b+d,ii=2*a+b,jj=2*c+d;
+ const ar=A[ii][0],ai=A[ii][1],br=B[jj][0],bi=B[jj][1];mr[i]=ar*br-ai*bi;mi[i]=ar*bi+ai*br;
+}return {r:mr,i:mi};}
+const pauli2=[I,X,Y,Z],ops=[];
+for(let a=0;a<4;a++)for(let b=0;b<4;b++)if(a+b>0)ops.push(kron(pauli2[a],pauli2[b]));
+const ZA=ops[11], ZB=ops[2], XX=ops[4], ZZ=ops[14];
+function matExpectation(state,m){
+  let real=0,imag=0;
+  for(let a=0;a<4;a++){
+    const ur=state[PR+a],ui=state[PII+a];
+    for(let b=0;b<4;b++){
+      const mr=m.r[a*4+b],mi=m.i[a*4+b],vr=state[PR+b],vi=state[PII+b];
+      const rr=mr*vr-mi*vi,ii=mr*vi+mi*vr;
+      real+=ur*rr+ui*ii;imag+=ur*ii-ui*rr;
+    }
+  }
+  return real;
+}
+function matAddMatrix(Hr,Hi,m,s){for(let i=0;i<16;i++){Hr[i]+=s*m.r[i];Hi[i]+=s*m.i[i];}}
+function matPsiRhs(state,Hr,Hi,d){
+ for(let a=0;a<4;a++){
+   let real=0,imag=0;
+   for(let b=0;b<4;b++){
+     const i=4*a+b,br=state[PR+b],bi=state[PII+b];
+     real+=Hr[i]*br-Hi[i]*bi;imag+=Hr[i]*bi+Hi[i]*br;
+   }
+   d[PR+a]+=imag;d[PII+a]-=real;
+ }
+}
+function lin3min(matrix){
+  // min eigenvalue of symmetric 3x3 covariance, Jacobi iterations
+  const A=matrix.slice();
+  for(let t=0;t<12;t++){
+    let p=0,q=1,max=Math.abs(A[1]);
+    for(const [u,v] of [[0,2],[1,2]]){const f=Math.abs(A[u*3+v]);if(f>max){p=u;q=v;max=f;}}
+    if(max<1e-14)break;
+    const app=A[p*3+p],aqq=A[q*3+q],apq=A[p*3+q];
+    const angle=.5*Math.atan2(2*apq,aqq-app),co=Math.cos(angle),si=Math.sin(angle);
+    // rotation R where R[p,p]=c,R[p,q]=s,R[q,p]=-s,R[q,q]=c; choose sign only eigenvalues relevant
+    const old=A.slice();
+    for(let k=0;k<3;k++){
+      const akp=old[k*3+p],akq=old[k*3+q];
+      A[k*3+p]=co*akp-si*akq;A[k*3+q]=si*akp+co*akq;
+    }
+    const temp=A.slice();
+    for(let k=0;k<3;k++){
+      const apk=temp[p*3+k],aqk=temp[q*3+k];
+      A[p*3+k]=co*apk-si*aqk;A[q*3+k]=si*apk+co*aqk;
+    }
+  }
+  return Math.min(A[0],A[4],A[8]);
+}
+function proxyReadouts(s,bulkLap,aa,bb,expZa,expZb){
+  // Faithful proxies for EXPANDED_STATUS from uploaded omef62_bridge.py;
+  // no original E15-H block-specific state equations are invented.
+  let qSq=0,pSq=0,phiSq=0,piSq=0,gradSq=0,qz=0,psum=0;
+  let mean=[0,0,0],pmean=[0,0,0];
+  for(let a=0;a<NS;a++)for(let k=0;k<3;k++){
+    const ix=3*a+k,q=s[Q+ix],p=s[P+ix];qSq+=q*q;pSq+=p*p;mean[k]+=q;
+    const diff=s[Q+3*((a+1)%NS)+k]-q;gradSq+=diff*diff;
+  }
+  mean=mean.map(x=>x/NS);
+  for(let a=0;a<NB;a++){phiSq+=s[PHI+a]**2;piSq+=s[PI+a]**2;}
+  const qNorm=Math.sqrt(qSq/(NS*3)),pNorm=Math.sqrt(pSq/(NS*3)),phiNorm=Math.sqrt(phiSq/NB),piNorm=Math.sqrt(piSq/NB);
+  const qcent = new Float64Array(NS*3), G=new Float64Array(9),B=new Float64Array(9);
+  for(let a=0;a<NS;a++)for(let j=0;j<3;j++){
+    qcent[3*a+j]=s[Q+3*a+j]-mean[j];
+  }
+  for(let j=0;j<3;j++)for(let k=0;k<3;k++){
+    let sum=0,b=0;
+    for(let a=0;a<NS;a++){
+      sum+=qcent[3*a+j]*qcent[3*a+k];
+      b+=qcent[3*a+j]*s[P+3*a+k]-s[P+3*a+j]*qcent[3*a+k];
+    }
+    G[j*3+k]=sum/NS+(j===k?1e-3:0);B[j*3+k]=b;
+  }
+  const normarr=(a)=>Math.sqrt(a.reduce((sum,x)=>sum+x*x,0)/a.length);
+  const Bnorm=normarr(Array.from(B));
+  let fourQ=[], fourP=[];
+  for(let k=0;k<=NS/2;k++){
+    const qr=[],pr=[];
+    for(let c=0;c<3;c++){
+      let x=0,y=0,vx=0,vy=0;
+      for(let a=0;a<NS;a++){
+        const ang=TPI*k*a/NS,co=Math.cos(ang),si=-Math.sin(ang);
+        const q=s[Q+3*a+c],p=s[P+3*a+c];
+        x+=q*co;y+=q*si;vx+=p*co;vy+=p*si;
+      }
+      qr.push(x,y);pr.push(vx,vy);
+    }
+    fourQ.push(qr);fourP.push(pr);
+  }
+  const fftnorm=(min,max,subtract=false)=>{
+    let sum=0,num=0;
+    for(let k=min;k<max;k++)for(let j=0;j<6;j+=2){
+      const ar=fourQ[k][j]-(subtract?fourP[k][j]:0),ai=fourQ[k][j+1]-(subtract?fourP[k][j+1]:0);
+      sum+=ar*ar+ai*ai;num++;
+    }
+    return Math.sqrt(sum/num);
+  };
+  let nablaPhi=0;for(let a=0;a<NB;a++)nablaPhi+=bulkLap[a]*bulkLap[a];nablaPhi=Math.sqrt(nablaPhi/NB);
+  let sumMetric=0;for(let a=0;a<NB;a++)sumMetric+=s[PHI+a]*s[PHI+a];sumMetric/=NB;
+  const flux=(()=>{let f=0;for(let a=0;a<NB;a++)f+=(left[a]-right[a])*bulkLap[a];return f;})();
+  const purity=(()=>{let norm=0;for(let j=0;j<4;j++)norm+=s[PR+j]**2+s[PII+j]**2;return norm*norm;})();
+  const ent=qubitEntropy(s);
+  const mNorm=Math.sqrt(mean.reduce((x,y)=>x+y*y,0)/3);
+  const evenSample=[];for(let a=0;a<NS;a+=Math.max(1,Math.floor(NS/4)))for(let j=0;j<3;j++)evenSample.push(s[Q+a*3+j]);
+  const pSample=[];for(let a=0;a<NS;a+=Math.max(1,Math.floor(NS/4)))for(let j=0;j<3;j++)pSample.push(s[P+a*3+j]);
+  const raw=[
+    qNorm,pNorm,Math.exp(.3*qNorm),.35,fftnorm(1,13),fftnorm(1,13,true),Math.exp(.1*phiNorm),0,0,
+    mNorm,(aa+bb)*.5 /* override mean phi below */,Bnorm,lin3min(G),normarr(evenSample),normarr(pSample),
+    Math.sqrt(gradSq/(NS*3)) + Math.abs(.5-.5),
+    phiNorm,1+phiNorm,sumMetric,nablaPhi,Math.hypot(aa,bb),expZa,aa*aa+bb*bb,purity,ent,
+    nablaPhi,2*ent,Math.abs(aa-bb),Math.abs(flux),fftnorm(1,4),piNorm*.01
+  ];
+  let phiMean=0;for(let a=0;a<NB;a++)phiMean+=s[PHI+a];raw[10]=phiMean/NB;
+  return Float64Array.from(raw,x=>Math.tanh(x));
+}
+function qubitEntropy(s){
+  // For pure two-qubit state: eigenvalues of rho_A from |det(Psi)|² / ||psi||⁴.
+  let n=0;for(let a=0;a<4;a++)n+=s[PR+a]**2+s[PII+a]**2;
+  let ar=s[PR],ai=s[PII],br=s[PR+1],bi=s[PII+1],cr=s[PR+2],ci=s[PII+2],dr=s[PR+3],di=s[PII+3];
+  let rr=ar*dr-ai*di-br*cr+bi*ci,ii=ar*di+ai*dr-br*ci-bi*cr;
+  const det=(rr*rr+ii*ii)/Math.max(1e-30,n*n),disc=Math.sqrt(Math.max(0,1-4*det)),la=(1+disc)/2,lb=(1-disc)/2;
+  return -(la>1e-15?la*Math.log(la):0)-(lb>1e-15?lb*Math.log(lb):0);
+}
+function diagnostics(s,params=defaults){
+  let q2=0,p2=0,b2=0,port2=0,qubit2=0,bulkMean=0;
+  for(let j=0;j<72;j++){q2+=s[Q+j]*s[Q+j];p2+=s[P+j]*s[P+j];}
+  for(let j=0;j<NB;j++){b2+=s[PHI+j]*s[PHI+j];bulkMean+=s[PHI+j];}
+  for(let j=0;j<NR;j++)port2+=s[PORT+j]*s[PORT+j];
+  for(let j=0;j<4;j++)qubit2+=s[PR+j]**2+s[PII+j]**2;
+  const rpc=port100(s,params);
+  return {stringRMS:Math.sqrt(q2/72),velocityRMS:Math.sqrt(p2/72),bulkRMS:Math.sqrt(b2/NB),bulkMean:bulkMean/NB,portRMS:Math.sqrt(port2/NR),qubitNorm:qubit2,qubitEntropy:qubitEntropy(s),conditionalCoherence:rpc.C,globalCoherence:rpc.globalC,complexLogReal:rpc.realLog,complexLogImag:rpc.imagLog,phaseLevels:rpc.localC};
+}
+function port100(s,cfg){
+  const Aa=new Float64Array(NL),Ab=new Float64Array(NL),localC=new Float64Array(100),dC=new Float64Array(NL);
+  Aa[100]=Math.cos(s[TH+100]);Ab[100]=Math.sin(s[TH+100]);
+  for(let j=99;j>=0;j--){
+    Aa[j]=.5*(Math.cos(s[TH+j])+Aa[j+1]);
+    Ab[j]=.5*(Math.sin(s[TH+j])+Ab[j+1]);
+    localC[j]=Aa[j]**2+Ab[j]**2;
+  }
+  let mean=0;for(let j=0;j<100;j++)mean+=localC[j];mean/=100;
+  const globalC=Aa[0]**2+Ab[0]**2,C=(1-cfg.mix)*globalC+cfg.mix*mean;
+  let carryR=0,carryI=0;
+  for(let j=0;j<100;j++){
+    const w=cfg.mix/100+(j===0?1-cfg.mix:0);
+    carryR=.5*(carryR+w*Aa[j]);carryI=.5*(carryI-w*Ab[j]);
+    const th=s[TH+j],expR=Math.cos(th),expI=Math.sin(th);
+    dC[j]=-2*(expR*carryI+expI*carryR);
+  }
+  {const th=s[TH+100];dC[100]=-2*(Math.cos(th)*carryI+Math.sin(th)*carryR);}
+  let wa=0,wb=0,z=0;
+  for(let a=0;a<NB;a++){wa+=left[a]*s[PHI+a];wb+=right[a]*s[PHI+a];}
+  for(let i=0;i<NS;i++)z+=s[Q+3*i+2];z/=NS;
+  const zz=matExpectation(s,ZZ);
+  const S=wa-wb+cfg.xi_string*z+cfg.eta*cfg.zeta*zz;
+  const zr=1+wa/cfg.log_scale,zi=wb/cfg.log_scale;
+  const realLog=.5*Math.log(zr*zr+zi*zi+1e-18),imagLog=Math.atan2(zi,zr);
+  const denom=new Float64Array(NL),dPhase=new Float64Array(NL);
+  for(let j=0;j<NL;j++){
+    const level=j+1;
+    denom[j]=(1-cfg.mix)*phasesW[j]+cfg.mix/200;
+    const omega=cfg.omega0*Math.sqrt(level);
+    const aa=cfg.a_log*(level/101-.5),bb=cfg.b_arg*((level%3)-1);
+    const grad=-cfg.rpcGamma*S*dC[j];
+    dPhase[j]=omega+aa*realLog+bb*imagLog-cfg.mu*grad/denom[j];
+  }
+  return {C,globalC,localC,dC,S,realLog,imagLog,dPhase,denom,wa,wb};
+}
+function rhs(s,cfg={}){
+  const p={...defaults,...cfg};const d=new Float64Array(D);
+  // Phase0 forward bulk canonical Neumann graph operator
+  const lg=new Float64Array(NB),weights=new Float64Array(NS*NB),delta=new Float64Array(NS),grad=new Float64Array(NS*3),bulkSource=new Float64Array(NB);
+  for(let a=0;a<NB;a++){
+    let lap=0;const v=s[PHI+a];for(const b of lapNeighbors[a])lap+=(v-s[PHI+b])/(H*H);lg[a]=lap;
+  }
+  let wa=0,wb=0;
+  for(let a=0;a<NB;a++){wa+=left[a]*s[PHI+a];wb+=right[a]*s[PHI+a];}
+  for(let i=0;i<NS;i++){
+    // Normalized moving Gaussian interpolation includes derivative of normalization.
+    let max=-1e300;
+    const x=s[Q+3*i],y=s[Q+3*i+1],z=s[Q+3*i+2];
+    for(let a=0;a<NB;a++){
+      const dx=coords[3*a]-x,dy=coords[3*a+1]-y,dz=coords[3*a+2]-z;
+      const e=-(dx*dx+dy*dy+dz*dz)/(2*p.ell*p.ell);
+      weights[i*NB+a]=e;if(e>max)max=e;
+    }
+    let sum=0;for(let a=0;a<NB;a++){let w=Math.exp(weights[i*NB+a]-max);weights[i*NB+a]=w;sum+=w;}
+    let obs=0;for(let a=0;a<NB;a++){const w=weights[i*NB+a]/sum;weights[i*NB+a]=w;obs+=w*s[PHI+a];}
+    delta[i]=obs-p.alpha*z;
+    for(let a=0;a<NB;a++){
+      const w=weights[i*NB+a];bulkSource[a]+=w*delta[i];
+      const coeff=w*(s[PHI+a]-obs)/(p.ell*p.ell);
+      for(let k=0;k<3;k++)grad[3*i+k]+=coeff*coords[3*a+k];
+    }
+  }
+  for(let i=0;i<NS;i++){
+    const prev=3*((i+NS-1)%NS),next=3*((i+1)%NS),now=3*i;
+    const r2=s[Q+now]**2+s[Q+now+1]**2+s[Q+now+2]**2;
+    const v2=s[P+now]**2+s[P+now+1]**2+s[P+now+2]**2;
+    for(let k=0;k<3;k++){
+      const v=s[P+now+k];
+      d[Q+now+k]=v;
+      d[P+now+k]=p.tension*(s[Q+prev+k]+s[Q+next+k]-2*s[Q+now+k])/(DS*DS)
+        -p.quartic_s*r2*s[Q+now+k]-p.kappa*delta[i]*(grad[now+k]-(k===2?p.alpha:0))
+        +(-p.damping_s+p.pump*(1-v2/(p.p0*p.p0)))*v;
+    }
+  }
+  const za=matExpectation(s,ZA),zb=matExpectation(s,ZB);
+  for(let a=0;a<NB;a++){
+    const v=s[PHI+a];
+    d[PHI+a]=s[PI+a];
+    d[PI+a]=-p.wave_speed*p.wave_speed*lg[a]-p.mass_b_sq*v-p.quartic_b*v*v*v
+      -p.kappa*(DS/DV)*bulkSource[a]-(p.eta*p.xi/DV)*(left[a]*za+right[a]*zb)-p.damping_b*s[PI+a];
+  }
+  const Hr=new Float64Array(16),Hi=new Float64Array(16);
+  matAddMatrix(Hr,Hi,ZA,p.xi*wa);matAddMatrix(Hr,Hi,ZB,p.xi*wb);matAddMatrix(Hr,Hi,XX,p.g);
+  const rpc=port100(s,p);
+  for(let i=0;i<NS;i++)d[P+3*i+2]+=p.rpcGamma*rpc.C*p.xi_string/(NS*DS);
+  for(let a=0;a<NB;a++)d[PI+a]+=p.rpcGamma*rpc.C*(left[a]-right[a])/DV;
+  matAddMatrix(Hr,Hi,ZZ,-p.rpcGamma*p.zeta*rpc.C);
+  for(let j=0;j<NL;j++)d[TH+j]=rpc.dPhase[j];
+  if(p.gate!==0){
+    const cX=p.gate*p.interaction,portsMean=(()=>{let ss=0;for(let i=0;i<NR;i++)ss+=Math.tanh(s[PORT+i]);return ss/NR;})();
+    const signals=new Float64Array(NR),weighted=new Float64Array(NR),quantExp=new Float64Array(15);
+    for(let j=0;j<15;j++)quantExp[j]=matExpectation(s,ops[j]);
+    let sumSignal=0;
+    for(let i=0;i<NR;i++){
+      let spatial=0,string=0;
+      for(let a=0;a<NB;a++)spatial+=bModes[i*NB+a]*s[PHI+a];
+      for(let j=0;j<NS*3;j++)string+=sModes[i*(NS*3)+j]*s[Q+j];
+      signals[i]=spatial+p.xi_string*string+p.eta*p.zeta*quantExp[i%15];
+      weighted[i]=Math.tanh(s[PORT+i])/NR;
+      sumSignal+=weighted[i]*signals[i];
+    }
+    for(let a=0;a<NB;a++){
+      let total=0;for(let i=0;i<NR;i++)total+=weighted[i]*bModes[i*NB+a];
+      d[PI+a]+=cX*rpc.C*total/DV;
+    }
+    for(let j=0;j<NS*3;j++){
+      let total=0;for(let i=0;i<NR;i++)total+=weighted[i]*sModes[i*(NS*3)+j];
+      d[P+j]+=cX*rpc.C*p.xi_string*total/DS;
+    }
+    for(let i=0;i<NR;i++)matAddMatrix(Hr,Hi,ops[i%15],-cX*rpc.C*p.zeta*weighted[i]);
+    for(let j=0;j<NL;j++){
+      const dgrad=-cX*sumSignal*rpc.dC[j];
+      d[TH+j]-=p.mobility*dgrad/rpc.denom[j];
+      d[TH+j]+=p.gate*.03*portsMean*Math.sin(s[TH+j]+j*.13);
+    }
+    const signalsExpanded=proxyReadouts(s,lg,wa,wb,za,zb);
+    for(let i=0;i<NR;i++){
+      const curr=s[PORT+i],prev=s[PORT+(i+NR-1)%NR],next=s[PORT+(i+1)%NR];
+      const drive=2*rpc.localC[branchIdx[i]]-1;
+      const ia=(2*i)%NL,ib=(2*i+1)%NL;
+      const phaseDrive=Math.sin(s[TH+ia]-s[TH+ib]);
+      const src=i<31?0:signalsExpanded[i-31]; // no legacy source snapshot
+      const gradH=-cX*rpc.C*(1-Math.tanh(curr)**2)*signals[i]/NR;
+      d[PORT+i]=p.gate*(-p.relaxation*curr+p.source_gain*src+p.multiscale_drive*drive+.07*phaseDrive+p.network_gain*(prev+next-2*curr))-p.mobility*gradH;
+    }
+  }
+  // Separately labeled earlier user-designed extension, disabled by default.
+  // The extended source does not contain this actuator.
+  if(p.quantumHarmonic!==0){
+    const xerr=(1-matExpectation(s,XX))*.5,zerr=(1-matExpectation(s,ZZ))*.5;
+    let qp=0,vp=0;for(let j=0;j<72;j++){qp+=s[Q+j]**2;vp+=s[P+j]**2;}
+    qp/=72;vp/=72;
+    const h=(2*qp*vp/(qp+vp+1e-12))+p.harmonicFloor;
+    const qterm=(xerr*xerr+zerr*zerr)/h;
+    const g=.06*p.quantumHarmonic*Math.tanh(.18*qterm);
+    for(let i=0;i<NS;i++)d[P+3*i+2]+=g*Math.sin(TPI*i/NS)*(xerr-zerr+.15);
+  }
+  matPsiRhs(s,Hr,Hi,d);
+  return d;
+}
+function rk4(s,h,cfg){
+  const a=rhs(s,cfg),v=new Float64Array(D),b=new Float64Array(D),c=new Float64Array(D);
+  for(let i=0;i<D;i++)v[i]=s[i]+h/2*a[i];
+  b.set(rhs(v,cfg));for(let i=0;i<D;i++)v[i]=s[i]+h/2*b[i];
+  c.set(rhs(v,cfg));for(let i=0;i<D;i++)v[i]=s[i]+h*c[i];
+  const d=rhs(v,cfg),ret=new Float64Array(D);
+  for(let i=0;i<D;i++)ret[i]=s[i]+h*(a[i]+2*b[i]+2*c[i]+d[i])/6;
+  return ret;
+}
+function finite(s){for(let i=0;i<s.length;i++)if(!Number.isFinite(s[i]))return false;return true;}
+const lib={rhs,rk4,diagnostics,qubitEntropy,defaults,layout:{Q,P,PHI,PI,PR,PII,TH,PORT,D,NS,NB,NR,NL},helpers:{phasesW,bModes,sModes,coords,ops,left,right,port100},finite};
+if(typeof module!=='undefined'&&module.exports)module.exports=lib;
+if(root)root.OMEFEngine=lib;
+})(typeof window!=='undefined'?window:null);
 </script>
-<div id="runtimeNotice" hidden style="position:fixed;z-index:99;left:12px;bottom:10px;max-width:min(92vw,450px);pointer-events:none;color:#d7f5fc;background:#1a2f39df;border:1px solid #466c7b;border-radius:8px;padding:7px 11px;font:11px system-ui"></div>
-<script>
-(()=>{'use strict';
-try{
-const bootStatus=document.getElementById('status');if(bootStatus)bootStatus.textContent='BUILDING SCULPTURE';
-const canvas = document.getElementById('stage');
-const ctx = canvas.getContext('2d');
-const stageWrap = document.getElementById('stageWrap');
-const statusEl = document.getElementById('status');
-const modeText = document.getElementById('modeText');
-const mathEl = document.getElementById('mathReadout');
-const groupsEl = document.getElementById('groups');
-const presetRow = document.getElementById('presetRow');
-const runBtn = document.getElementById('runBtn');
-const refBtn = document.getElementById('refBtn');
-const exploreBtn = document.getElementById('exploreBtn');
-const randomBtn = document.getElementById('randomBtn');
-
-const R=34, N=196;
-const q = Array.from({length:R},()=>new Float32Array(N));
-const v = Array.from({length:R},()=>new Float32Array(N));
-const q2= Array.from({length:R},()=>new Float32Array(N));
-const v2= Array.from({length:R},()=>new Float32Array(N));
-const tmp=Array.from({length:R},()=>new Float32Array(N));
-const tmp2=Array.from({length:R},()=>new Float32Array(N));
-const phi = new Float32Array(R);
-const phi2 = new Float32Array(R);
-let anchorQ, anchorV, anchorPhi, anchorSteps=0, baselineQ, baselineV, baselinePhi;
-let steps=0, running=false, exploring=false, previewDelta=0, lastVel=0, seed=20261120;
-// The animation loop is never stopped by a numerical or renderer exception.
-let solverSafeties=0, renderFaults=0, playFaults=0, lastFrameError='', frameTimestamp=0, lastPaint=0;
-let lastInputAt=0, deferredEquation=false, pendingEquationAt=0, lastReportedSteps=0;
-function noteIssue(message){
-  lastFrameError=String(message).slice(0,150);
-  const el=document.getElementById('runtimeNotice');
-  if(el){el.hidden=false;el.textContent=lastFrameError;}
-}
-
-let dragState=null, W=300, H=300, DPR=1;
-// View-only touch transform. These controls deliberately do not edit OMEF state.
-const view={sx:1,sy:1,x:0,y:0,freeStretch:false};
-// Store gesture zoom for Expanded inspection only. The adjusting preview always
-// returns to a complete, fitted silhouette, with no lost/cropped sections.
-const inspectView={sx:1,sy:1,x:0,y:0,freeStretch:false};
-function isExpanded(){return document.getElementById('app').classList.contains('full')}
-function saveInspectView(){inspectView.sx=view.sx;inspectView.sy=view.sy;inspectView.x=view.x;inspectView.y=view.y;inspectView.freeStretch=view.freeStretch;}
-function restoreInspectView(){Object.assign(view,inspectView);}
-function fitAdjustmentView(){if(isExpanded())return; view.sx=1;view.sy=1;view.x=0;view.y=0;view.freeStretch=false;syncViewButtons();}
-const pointers=new Map();
-let touchGesture=null, lastTapTime=-1, lastTapPos=null;
-let stretchBtn=null, resetBtn=null;
-function viewStats(){return {scaleX:view.sx,scaleY:view.sy,panX:view.x,panY:view.y,freeStretch:view.freeStretch,pointers:pointers.size};}
-function resetView(){view.sx=1;view.sy=1;view.x=0;view.y=0;view.freeStretch=false;if(isExpanded())saveInspectView();syncViewButtons();draw();}
-function syncViewButtons(){
-  if(stretchBtn){stretchBtn.textContent=view.freeStretch?'Stretch: ON':'Stretch: OFF';stretchBtn.classList.toggle('active',view.freeStretch);}
-  if(resetBtn)resetBtn.textContent='Reset view';
-}
-function localPoint(p){const b=stageWrap.getBoundingClientRect();return {x:p.x-b.left,y:p.y-b.top};}
-function twoData(){const arr=Array.from(pointers.values()),a=localPoint(arr[0]),b=localPoint(arr[1]);return {center:{x:(a.x+b.x)/2,y:(a.y+b.y)/2},dx:b.x-a.x,dy:b.y-a.y,dist:Math.max(1,Math.hypot(b.x-a.x,b.y-a.y))};}
-function startTouchGesture(){
-  if(pointers.size===2){
-    const d=twoData(),base={...view};
-    touchGesture={kind:'two',init:d,base,anchorX:(d.center.x-base.x)/base.sx,anchorY:(d.center.y-base.y)/base.sy};
-    dragState=null;
-  }else if(pointers.size===1){
-    const p=Array.from(pointers.values())[0];
-    touchGesture={kind:'one',x:p.x,y:p.y,yaw:P.yaw,tilt:P.tilt};
-  }else{touchGesture=null;dragState=null;}
-}
-function moveTouchGesture(){
-  if(!touchGesture)return;
-  if(touchGesture.kind==='two'&&pointers.size>=2){
-    const d=twoData(),g=touchGesture,distRatio=d.dist/g.init.dist;
-    let rx=distRatio,ry=distRatio;
-    if(view.freeStretch){
-      rx=Math.abs(g.init.dx)>24? Math.abs(d.dx)/Math.abs(g.init.dx):1;
-      ry=Math.abs(g.init.dy)>24? Math.abs(d.dy)/Math.abs(g.init.dy):1;
-    }
-    view.sx=clip(g.base.sx*rx,.35,7.5);
-    view.sy=clip(g.base.sy*ry,.35,7.5);
-    view.x=d.center.x-view.sx*g.anchorX;
-    view.y=d.center.y-view.sy*g.anchorY;
-    // Bound panning to prevent losing the entire artwork outside the viewport.
-    view.x=clip(view.x,-W*6,W*6);
-    view.y=clip(view.y,-H*6,H*6);
-    if(isExpanded())saveInspectView();
-    draw();
-  }else if(touchGesture.kind==='one' && pointers.size===1){
-    const p=Array.from(pointers.values())[0];
-    P.yaw=clip(touchGesture.yaw+(p.x-touchGesture.x)*.006,-2.4,2.4);
-    P.tilt=clip(touchGesture.tilt+(p.y-touchGesture.y)*.004,-1.1,1.1);
-    for(const key of ['yaw','tilt'])if(inputs[key]){
-      inputs[key].value=P[key];inputs[key].parentElement.querySelector('.val').textContent=formatVal(P[key]);
-    }
-    if(!running)draw();
-  }
-}
-
-// The artwork lives in an aspect-ratio-locked virtual viewport. Expand
-// grows only the black canvas, NEVER the vertical geometry independently.
-let compactW=0, compactH=0;
-let artW=300, artH=300, artX=0, artY=0;
-function updateArtFrame(){
-  const expanded=isExpanded();
-  if(!expanded){
-    compactW=W; compactH=H;
-    // Keep all artwork below the toolbar and above the bottom status strip.
-    // Presets are now in the panel, never on top of the sculpture.
-    const top=(H>=245?55:43), bottom=(H>=245?22:17);
-    artW=Math.max(20,W-16); artH=Math.max(20,H-top-bottom);
-    artX=8; artY=top;
-    return;
-  }
-  // A black letterbox in expanded view is deliberate: the work never gets
-  // vertically stretched by a taller phone screen.
-  const factor=Math.min(1, W/Math.max(1,compactW), H/Math.max(1,compactH));
-  artW=compactW*factor; artH=Math.max(20,compactH-77)*factor;
-  artX=Math.round((W-artW)/2); artY=Math.round((H-artH)/2);
-}
-const TWO=Math.PI*2;
-function rng(){seed ^= seed<<13; seed ^= seed>>>17; seed ^= seed<<5; return (seed>>>0)/4294967296;}
-function clip(x,a,b){return x<a?a:x>b?b:x}
-function lerp(a,b,t){return a+(b-a)*t}
-function mod(i,m){i%=m; return i<0?i+m:i}
-
-const spec = [
-  {group:'Dynamics', items:[
-    ['speed','Speed',0.2,3.5,1.2,0.01,'Multiplier for solver steps per frame'],
-    ['damping','Damping',0.000,0.12,0.022,0.001,'Global dissipation'],
-    ['pump','Energy pump',0,0.22,0.08,0.001,'Active feedback that replenishes motion'],
-    ['pumpTarget','Pump target',0.02,0.95,0.36,0.01,'Target RMS velocity for pump regulation'],
-    ['drive','Time drive',0,1.6,0.55,0.01,'Temporal forcing amplitude'],
-    ['continuity','Continuity drive',0,0.5,0.16,0.005,'Genuine low-amplitude time forcing; set 0 to allow natural rest'],
-    ['driveFreq','Drive frequency',0,4.0,1.18,0.01,'Time frequency of external drive'],
-    ['beat','Beat mismatch',0,3.5,1.35,0.01,'Secondary forcing frequency mismatch'],
-    ['feedback','Local feedback',0,1.6,0.48,0.01,'Field dependent temporal forcing'],
-    ['tempo','Clock scale',0.2,2.4,1.0,0.01,'Global temporal rate']
-  ]},
-  {group:'Spatial operators', items:[
-    ['tension','Tension',0,3.5,1.22,0.01,'Second derivative along each ribbon'],
-    ['biharm','Biharmonic',0,0.18,0.038,0.001,'Fourth derivative smoothing or sharpening'],
-    ['advection','Advection',-0.55,0.55,0.10,0.001,'First derivative drift along x'],
-    ['dispersion','Dispersion',-0.42,0.42,0.066,0.001,'Third derivative dispersive twist'],
-    ['mixX','Mixed derivative',-0.22,0.22,0.042,0.001,'x-derivative modulated by neighboring ribbons'],
-    ['shear','Ribbon shear',-0.30,0.30,0.07,0.001,'Cross-ribbon phase skew'],
-    ['neighbor','Neighbor coupling',0,2.2,0.94,0.01,'Second difference across ribbons'],
-    ['longCouple','Long coupling',0,1.4,0.42,0.01,'Two-ribbon distance coupling'],
-    ['anisotropy','Anisotropy',-1.2,1.2,0.18,0.01,'Biases left/right and top/bottom propagation']
-  ]},
-  {group:'Complex log', items:[
-    ['logForce','Imaginary log force',-1.1,1.1,0.55,0.01,'Im log(z) feeds directly into acceleration; negative values invert the effect'],
-    ['logCouple','Log neighbor coupling',-1.2,1.2,0.28,0.01,'Im log of cross-ribbon differences changes reciprocal coupling'],
-    ['logCurve','Log curvature',-1.2,1.2,0.34,0.01,'Im log of spatial curvature changes the restoring force'],
-    ['logPhase','Log phase feedback',-1.5,1.5,0.46,0.01,'Complex log argument changes oscillator phase evolution'],
-    ['logMagnitude','Real-log feedback',-0.8,0.8,0.10,0.01,'Real part of complex log also modifies the force'],
-    ['logAlpha','Real sensitivity',0,1.9,0.80,0.01,'How strongly real q enters z'],
-    ['logBeta','Imaginary sensitivity',0,2.5,0.85,0.01,'How strongly velocity and coupling enter Im z'],
-    ['logOffset','Real offset',0.08,2.2,1.12,0.01,'Move the complex input toward the negative real axis and branch cut']
-  ]},
-  {group:'Nonlinearity', items:[
-    ['cubic','Cubic force',0,2.6,0.78,0.01,'Odd nonlinear restoring force'],
-    ['quintic','Quintic force',0,0.80,0.11,0.005,'Higher-order envelope control'],
-    ['exp','Exponent',1.2,5.4,2.7,0.01,'Power in the odd nonlinearity'],
-    ['saturate','Saturation',0,1.5,0.33,0.01,'Damps the nonlinear growth at large amplitude'],
-    ['curvatureDrive','Curvature drive',0,1.6,0.42,0.01,'Inject energy from local curvature'],
-    ['velDiff','Velocity diffusion',0,1.4,0.24,0.01,'Cross-ribbon smoothing of velocity'],
-    ['phaseLock','Phase lock',0,1.7,0.45,0.01,'Tends neighboring ribbon oscillators toward coherence'],
-    ['phaseSlip','Phase slip',0,1.2,0.25,0.01,'Breaks synchronization for richer regimes']
-  ]},
-  {group:'Heterogeneity', items:[
-    ['heteroAmp','Heterogeneity',0,2.6,0.90,0.01,'Spatially varying stiffness field'],
-    ['heteroFreq','Hetero frequency',0.1,6.0,2.1,0.01,'Frequency of the static modulation field'],
-    ['crossMod','Cross modulation',0,1.7,0.52,0.01,'Lets neighboring ribbons modulate each other'],
-    ['resonance','Resonance',0,1.8,0.44,0.01,'Strength of narrow-band resonant response'],
-    ['fold','Fold bias',-1.3,1.3,0.05,0.01,'Tilts upper versus lower layers'],
-    ['symmetry','Symmetry break',-1.4,1.4,0.16,0.01,'Biases even and odd ribbons differently'],
-    ['macro','Macro warp',0,1.9,0.55,0.01,'Slow large-scale bending field']
-  ]},
-  {group:'Geometry', items:[
-    ['previewSteps','Preview horizon',8,160,34,1,'Solver horizon used in still mode'],
-    ['amplitude','Vertical amplitude',0.25,3.4,1.40,0.01,'Maps field values to screen height'],
-    ['ribbonGap','Ribbon gap',0.45,2.4,1.05,0.01,'Distance between layered filaments'],
-    ['xSpread','X spread',0.55,2.3,1.00,0.01,'Horizontal scaling'],
-    ['yCompress','Y compression',0.3,2.3,1.00,0.01,'Vertical compression'],
-    ['perspective','Perspective',0.1,2.5,1.05,0.01,'Depth magnification'],
-    ['tilt','Tilt',-1.1,1.1,0.72,0.01,'Camera tilt'],
-    ['yaw','Yaw',-2.4,2.4,-0.20,0.01,'Camera rotation'],
-    ['roll','Roll',-1.2,1.2,0.02,0.01,'Camera roll'],
-    ['zoom','Zoom',0.55,1.75,1.08,0.01,'View scaling']
-  ]},
-  {group:'Silk material', items:[
-    ['materialHue','Hue rotation',-180,180,0,1,'Shift the rainbow colors without changing the equations'],
-    ['materialBright','Brightness',0.5,1.6,1,0.01,'Fine material luminance, keeping the black background'],
-    ['materialContrast','Contrast',0.6,1.6,1,0.01,'Change color separation and filament clarity'],
-    ['materialSaturate','Saturation',0.5,1.6,1,0.01,'Alter rainbow color intensity'],
-    ['materialMotion','Warp response',0,2.5,1,0.01,'Scale motion arising from the computed OMEF state']
-  ]},
-  {group:'Rendering', items:[
-    ['foldArc','Wing arch',0.25,1.8,1.02,0.01,'Height of the two structural arches'],
-    ['foldFan','Filament fan',0.3,1.85,1.0,0.01,'How widely the neighboring fibers spread'],
-    ['foldCross','Ribbon crossing',0,2.2,1.02,0.01,'How the two sheets weave through each other'],
-    ['foldWave','Wave response',0,2.0,0.88,0.01,'How strongly the OMEF field sculpts the folded fibers'],
-    ['foldDensity','Fiber count',0.45,2.2,1.25,0.01,'Filaments per arch surface'],
-    ['silkWidth','Silk ribbon width',0.08,0.90,0.64,0.01,'True transverse spread of the measured field'],
-    ['silkTwist','Ribbon twist',-2.0,3.0,1.05,0.01,'Turns the ribbon cross-section in 3D'],
-    ['silkPinch','Center pinch',0,0.96,0.64,0.01,'Controls the narrow waist near the center'],
-    ['silkResponse','Field sculpture response',0,2.2,0.37,0.01,'How strongly the OMEF equations deform the ribbon'],
-    ['density','Line density',0.25,2.0,1.25,0.01,'How many filaments are drawn'],
-    ['thickness','Thickness',0.2,2.6,0.85,0.01,'Stroke thickness'],
-    ['glow','Glow',0,1.7,0.24,0.01,'Outer luminous halo'],
-    ['alpha','Alpha',0.05,0.95,0.48,0.01,'Line transparency'],
-    ['hueSpin','Hue spin',0,2.2,1.00,0.01,'How quickly color cycles'],
-    ['depthHue','Depth hue',0,1.5,0.55,0.01,'Hue changes with depth'],
-    ['curvHue','Curvature hue',0,2.2,1.08,0.01,'Hue changes with curvature'],
-    ['contrast','Contrast',0.2,2.0,1.08,0.01,'Depth/brightness contrast'],
-    ['trail','Trails',0,1.0,0.0,0.01,'Frame persistence while running']
-  ]}
-];
-const P = Object.fromEntries(spec.flatMap(g=>g.items.map(i=>[i[0],i[4]])));
-const inputs = {};
-const presets = {
-  'Serene': {damping:.028,pump:.03,drive:.24,tension:.8,biharm:.022,neighbor:.6,cubic:.42,quintic:.06,fold:.0,amplitude:1.05,density:0.8,glow:0.6,alpha:0.22,curvHue:0.55,phaseSlip:.10},
-  'Storm': {damping:.018,pump:.14,drive:.86,driveFreq:1.64,beat:2.28,feedback:.82,tension:1.46,biharm:.051,dispersion:.12,neighbor:1.25,cubic:.98,quintic:.13,curvatureDrive:.74,phaseSlip:.48,macro:.95,amplitude:1.65,density:1.35,glow:1.1,alpha:.25},
-  'Lattice': {damping:.026,pump:.06,drive:.35,feedback:.22,tension:1.25,biharm:.012,neighbor:1.52,longCouple:.76,phaseLock:1.05,phaseSlip:.05,heteroAmp:.55,symmetry:0,fold:0,amplitude:1.15,density:1.05},
-  'Folded': {damping:.024,pump:.09,drive:.56,feedback:.4,tension:.95,biharm:.065,dispersion:.08,mixX:.09,shear:.12,cubic:.72,quintic:.18,fold:.72,symmetry:.34,macro:1.2,amplitude:1.8,ribbonGap:1.2,glow:1.0},
-  'Prismatic': {damping:.02,pump:.10,drive:.62,driveFreq:1.0,beat:1.4,tension:1.0,neighbor:.88,cubic:.7,quintic:.12,phaseLock:.38,phaseSlip:.34,amplitude:1.45,hueSpin:1.45,depthHue:.88,curvHue:1.55,glow:1.25,density:1.4},
-  'Complex tide': {logForce:.73,logCouple:.48,logCurve:.62,logPhase:.76,logMagnitude:.16,logAlpha:1.05,logBeta:1.52,logOffset:.92,drive:.55,tension:1.10,neighbor:1.15,amplitude:1.45},
-  'Branch folds': {logForce:.46,logCouple:-.58,logCurve:.79,logPhase:1.05,logMagnitude:.12,logAlpha:1.72,logBeta:1.45,logOffset:.30,drive:.62,neighbor:1.02,amplitude:1.48}
+<script>/* OMEF Studio 15 — one solver clock; every graphics channel is a readout of solved state.
+   Silk is a camera/measurement embedding, not the dynamical state equations.
+   The observable gain is display-only and explicitly labeled. */
+(function(){'use strict';
+const E=window.OMEFEngine;
+const el=id=>document.getElementById(id);
+if(!E)throw new Error('Native OMEF solver failed to load');
+const l=E.layout, {Q,P,PHI,PI,PR,PII,TH,PORT,NS,NB,NR,NL}=l;const TPI=Math.PI*2;
+const canvas=el('art'),ctx=canvas.getContext('2d',{alpha:false});
+const stage=el('stage'),panel=el('panel'),status=el('status'),sub=el('substatus'),tabstrip=el('tabs'),sliders=el('sliders');
+const startSeed=Float64Array.from(JSON.parse(el('seed747').textContent));
+let S=new Float64Array(startSeed),base=new Float64Array(startSeed),fixed=new Float64Array(startSeed),baseline=new Float64Array(startSeed);
+let refParams={...E.defaults},params={...E.defaults},playing=false,expanded=false,view='Silk',tab='Core',currentDelta=0,stepCount=0,needRender=true;
+let W=390,H=350,DPR=1,touchPts=new Map(),touchStart=null,dragStart=null;
+let camera={zoom:1,stretchX:1,stretchY:1,dx:0,dy:0,yaw:0.15,tilt:0.0},isStretch=false;
+let visual={fiberCount:94,thickness:.60,glow:.55,visualGain:6,portGain:26,phaseGain:1.35,bulkGain:16,quantumGain:2.2,seedFrame:0};
+let horizon=32,runSpeed=1,lag=0,renderMode='original',future=null,recomputeTicket=0;
+const configs={
+ Core:[
+ ['tension','String tension',0.05,1.25,.01,'Closed-string Laplacian'],
+ ['quartic_s','String quartic',0,1.3,.01,'Confining nonlinear potential'],
+ ['wave_speed','Bulk wave speed',.1,1.45,.01,'Bulk graph propagation'],
+ ['mass_b_sq','Bulk mass²',0,1.8,.01,'Bulk restoring force'],
+ ['quartic_b','Bulk quartic',0,1.25,.01,'Nonlinear bulk response'],
+ ['kappa','String ↔ bulk',0,1.5,.01,'Reciprocal Gaussian coupling'],
+ ['ell','Sampling length',.25,1.8,.01,'Moving 3-D interpolation kernel'],
+ ['alpha','Embedding contrast',-1,1,.01,'String-to-bulk displacement reference'],
+ ['eta','Quantum backreaction',0,1.8,.01,'Quantum force on bulk'],
+ ['xi','Qubit boundary read',0,1.5,.01,'Distinct boundary-face coupling'],
+ ['g','Entangling XX',0,2.5,.01,'Two-qubit Hamiltonian'],
+ ['pump','String activity pump',0,0.8,.01,'Optional native pump actuator'],
+ ['damping_s','String damping',0,.4,.005,'Native dissipation'],
+ ['damping_b','Bulk damping',0,.4,.005,'Native dissipation']
+ ],
+ Phases:[
+ ['rpcGamma','RPC ↔ core strength',0,1.3,.01,'Coherence Hamiltonian coupling'],
+ ['mix','Local/global mix',0,1,.01,'Weights all 100 conditional scales'],
+ ['omega0','Phase clock',.01,1.0,.01,'Dyadic phase frequency'],
+ ['mu','Phase mobility',0,1.3,.01,'Gradient-driven phase response'],
+ ['a_log','Real log term',-2,2,.01,'Re log boundary signal'],
+ ['b_arg','Imaginary log term',-3,3,.01,'Arg boundary complex log'],
+ ['log_scale','Complex-log scale',.4,8,.05,'Complex boundary normalization'],
+ ['xi_string','String ↔ phases',0,2.0,.01,'Worldsheet mean response'],
+ ['zeta','Quantum ↔ phases',0,1.2,.01,'Qubit ZZ correlation feedback']
+ ],
+ Ports:[
+ ['gate','62-port gate',0,1,.01,'0 = exact RPC-only recovery'],
+ ['interaction','Bridge energy',0,2,.01,'Strength of single shared coupling energy'],
+ ['relaxation','Port relaxation',0,1.4,.01,'Adaptive port decay'],
+ ['source_gain','Proxy drive',0,1.0,.01,'Measured expanded-block readouts'],
+ ['multiscale_drive','100-level drive',0,1.3,.01,'Local conditional coherence'],
+ ['network_gain','Port network',0,.25,.005,'Cyclic port diffusion'],
+ ['mobility','Port mobility',0,.75,.01,'Shared energy gradient response']
+ ],
+ Quantum:[
+ ['quantumHarmonic','Q²/H experimental',0,2,.01,'User-proposed term; OFF in uploaded source'],
+ ['harmonicFloor','Harmonic floor',.005,.4,.005,'Positive denominator regularizer']
+ ],
+ Display:[
+ ['fiberCount','Filament density',24,180,2,'Source-sampled threads; view only'],
+ ['visualGain','String display gain',.5,18,.25,'Amplifies measured q(t) geometry'],
+ ['portGain','Port visibility',0,120,2,'Magnifies small computed port displacements'],
+ ['phaseGain','Phase visibility',0,8,.1,'Magnifies solved phase offsets'],
+ ['bulkGain','Bulk visibility',0,80,1,'Magnifies interpolated bulk field'],
+ ['quantumGain','Qubit visibility',0,10,.1,'Entanglement readout to strand spacing'],
+ ['thickness','Thread thickness',.25,1.8,.05,'Drawing only'],
+ ['glow','Bloom',0,1.8,.05,'Optical halo only']
+ ],
+ Compare:[
+ ['horizon','Still horizon',8,100,4,'RK4 steps from one stored initial state'],
+ ['runSpeed','Play speed',1,4,1,'RK4 steps per animation tick']
+ ]
 };
-
+const viewDefs=[['Silk','String + all sectors'],['Bulk','3-D bulk field'],['Phase','100 levels + tail'],['Ports','62 bridge coordinates'],['Qubit','Boundary interference']];
+const allMath=new Set(['Core','Phases','Ports','Quantum']);
+function reportError(e){playing=false;el('play').textContent='Play';status.textContent='ERROR';status.style.color='#ffc2b5';el('error').hidden=false;el('error').textContent=String(e?.stack||e).slice(0,450);console.error('OMEF',e);}
+window.addEventListener('error',ev=>reportError(ev.error||ev.message));
+window.addEventListener('unhandledrejection',ev=>reportError(ev.reason));
+function fmt(x){return Math.abs(x)<.01?x.toFixed(4):Math.abs(x)<1?x.toFixed(3):x.toFixed(2)}
+function updateDiagnostics(){
+ const d=E.diagnostics(S,params);
+ status.textContent=`${playing?'LIVE':'STILL'} · ${stepCount} · C ${d.conditionalCoherence.toFixed(3)}`;
+ sub.textContent=`ψ² ${d.qubitNorm.toFixed(6)}  ·  ports ${d.portRMS.toFixed(4)}  ·  Sᴬ ${d.qubitEntropy.toFixed(4)}  ·  Δ ${currentDelta.toExponential(1)}`;
+ el('readouts').textContent=`Native Phase-0 × 100-level RPC × 62-port bridge · ${l.D} real coordinates. Q²/H extension ${params.quantumHarmonic===0?'OFF':'ON (extra actuator)'}. Gate ${params.gate.toFixed(2)}.`;
+}
 function resize(){
-  const r = stageWrap.getBoundingClientRect();
-  DPR = Math.min(window.devicePixelRatio || 1, 1.5);
-  W = Math.max(50,r.width); H = Math.max(50,r.height);
-  canvas.width = Math.round(W*DPR); canvas.height = Math.round(H*DPR);
-  ctx.setTransform(DPR,0,0,DPR,0,0);
-  updateArtFrame();
-  if(anchorQ && baselineQ) draw();
+ const rect=stage.getBoundingClientRect();W=Math.max(40,rect.width);H=Math.max(40,rect.height);DPR=Math.min(window.devicePixelRatio||1,1.65);
+ canvas.width=Math.round(W*DPR);canvas.height=Math.round(H*DPR);ctx.setTransform(DPR,0,0,DPR,0,0);needRender=true;
+ if(S)draw();
 }
-window.addEventListener('resize', resize);
-if(typeof ResizeObserver!=="undefined") new ResizeObserver(resize).observe(stageWrap);
-
-function clearState(){
-  for(let r=0;r<R;r++){
-    q[r].fill(0); v[r].fill(0); q2[r].fill(0); v2[r].fill(0);
-    phi[r]=0; phi2[r]=0;
+const RO=window.ResizeObserver; if(RO)new RO(resize).observe(stage);window.addEventListener('resize',resize);
+function artBox(){
+ const aspect=1.48;const w=Math.min(W,H*aspect),h=w/aspect;
+ return {x:(W-w)/2,y:(H-h)/2,w,h};
+}
+function qAt(u){
+ // Periodic Catmull-Rom interpolation of actual computed closed string.
+ const v=((u%1)+1)%1*NS,i=Math.floor(v),t=v-i;
+ const a=(i+NS-1)%NS,b=i,c=(i+1)%NS,d=(i+2)%NS;
+ const out=[];
+ for(let k=0;k<3;k++){
+  const A=S[Q+3*a+k],B=S[Q+3*b+k],C=S[Q+3*c+k],D=S[Q+3*d+k];
+  out.push(.5*((2*B)+(-A+C)*t+(2*A-5*B+4*C-D)*t*t+(-A+3*B-3*C+D)*t*t*t));
+ }
+ return out;
+}
+function obsAt(u,w,m){
+ const i=Math.min(NR-1,Math.max(0,Math.floor((w*.5+.5)*(NR-1))));
+ const j=Math.min(99,Math.floor(((u*97+i)%100+100)%100));
+ const port=Math.tanh(S[PORT+i]);
+ const phase=S[TH+j];
+ const a=Math.floor(((u+.05)%1)*NB);
+ const bulk=S[PHI+a];
+ const qqr=S[PR],qqi=S[PII],qbR=S[PR+3],qbI=S[PII+3];
+ const entropy=E.qubitEntropy(S);
+ // Every channel is measured from the solved native state.
+ return {port,phase,bulk,entropy,qubit:Math.hypot(qqr,qqi)-Math.hypot(qbR,qbI)};
+}
+function xyz(u,w){
+ const q=qAt(u),prev=qAt(u-.001),next=qAt(u+.001);
+ const tang=[next[0]-prev[0],next[1]-prev[1],next[2]-prev[2]];
+ let tr=Math.hypot(...tang)||1;for(let k=0;k<3;k++)tang[k]/=tr;
+ let n=[-tang[1],tang[0],.3],nl=Math.hypot(...n)||1;n=n.map(x=>x/nl);
+ const b=[tang[1]*n[2]-tang[2]*n[1],tang[2]*n[0]-tang[0]*n[2],tang[0]*n[1]-tang[1]*n[0]];
+ const o=obsAt(u,w);
+ const portStrength=Math.tanh(visual.portGain*o.port*.1);
+ const phaseStrength=Math.sin(o.phase+TPI*u);
+ const bulkStrength=Math.tanh(visual.bulkGain*o.bulk);
+ const quantumStrength=Math.tanh(visual.quantumGain*o.entropy);
+ let sc=visual.visualGain;
+ let cross=.34*w*(1+.22*quantumStrength)+.09*portStrength+.05*phaseStrength*visual.phaseGain;
+ let zdepth=.13*w+.06*bulkStrength+.025*o.qubit*visual.quantumGain;
+ let coords=[sc*q[0]+n[0]*cross+b[0]*zdepth,sc*q[1]+n[1]*cross+b[1]*zdepth,sc*q[2]+n[2]*cross+b[2]*zdepth];
+ if(view==='Bulk'){
+  coords=[coords[0]+.35*bulkStrength,coords[1]+bulkStrength*.28,coords[2]+.22*bulkStrength];
+ }else if(view==='Phase'){
+  coords=[coords[0]+.14*phaseStrength*visual.phaseGain,coords[1]+.20*Math.cos(o.phase)*visual.phaseGain,coords[2]+.1*phaseStrength];
+ }else if(view==='Ports'){
+  coords=[coords[0]+.22*portStrength,coords[1]+.28*portStrength,coords[2]+.08*portStrength];
+ }else if(view==='Qubit'){
+  coords=[coords[0]+.08*quantumStrength,coords[1]+w*.25*quantumStrength,coords[2]+.30*o.qubit*visual.quantumGain];
+ }
+ return coords;
+}
+function proj(vec){
+ const ya=camera.yaw,ty=camera.tilt,cy=Math.cos(ya),sy=Math.sin(ya),ct=Math.cos(ty),st=Math.sin(ty);
+ let X=cy*vec[0]+sy*vec[2],Z=-sy*vec[0]+cy*vec[2],Y=ct*vec[1]-st*Z;
+ let z=st*vec[1]+ct*Z;
+ return [X*camera.stretchX,Y*camera.stretchY,z];
+}
+function pathDraw(){
+ const ab=artBox();
+ // Constant nominal scale, never stretched to fill expanded canvas.
+ const size=Math.min(ab.w/2.9,ab.h/2.55)*camera.zoom;
+ const curves=[];
+ const number=Math.round(visual.fiberCount);
+ let minX=1e20,maxX=-1e20,minY=1e20,maxY=-1e20;
+ for(let k=0;k<number;k++){
+  const w=-1+2*k/Math.max(1,number-1),arr=[];let depth=0;
+  for(let t=0;t<=172;t++){
+    const u=t/172;const p=proj(xyz(u,w));arr.push(p);depth+=p[2];
+    minX=Math.min(minX,p[0]);maxX=Math.max(maxX,p[0]);minY=Math.min(minY,p[1]);maxY=Math.max(maxY,p[1]);
   }
-}
-function initialize(seedJolt=0){
-  clearState(); steps=0;
-  for(let r=0;r<R;r++){
-    const basePhase = TWO*r/R;
-    phi[r] = basePhase*.45 + (rng()-.5)*0.08;
-    for(let i=0;i<N;i++){
-      const x = i/N*TWO;
-      const field = 0.32*Math.sin(1.7*x + basePhase) + 0.18*Math.sin(3.3*x - basePhase*1.2) + 0.08*Math.cos(6.8*x + r*0.17);
-      q[r][i] = field + seedJolt*(rng()-.5)*0.12;
-      v[r][i] = 0.05*Math.sin(2.2*x + r*0.2) + seedJolt*(rng()-.5)*0.02;
-    }
-  }
-  captureAnchor();
-  computeBaseline();
-}
-function clone2D(arr){ return arr.map(a=>new Float32Array(a)); }
-function captureAnchor(){
-  anchorQ = clone2D(q); anchorV = clone2D(v); anchorPhi = new Float32Array(phi); anchorSteps = steps;
-}
-function restoreAnchor(){
-  for(let r=0;r<R;r++){ q[r].set(anchorQ[r]); v[r].set(anchorV[r]); phi[r]=anchorPhi[r]; }
-  steps = anchorSteps;
-}
-function computeBaseline(){
-  restoreAnchor();
-  const horizon = Math.max(1, Math.round(P.previewSteps));
-  for(let k=0;k<horizon;k++) step(0.032);
-  baselineQ = clone2D(q); baselineV = clone2D(v); baselinePhi = new Float32Array(phi);
-  restoreAnchor(); previewDelta = 0;
-}
-function fieldAt(arr,r,i){ return arr[mod(r,R)][mod(i,N)] }
-function hetero(r,i){
-  const x=i/N*TWO, y=r/R*TWO;
-  return P.heteroAmp*(0.45*Math.sin(P.heteroFreq*x + .7*Math.cos(y)) + 0.3*Math.cos((P.heteroFreq*0.6+1.0)*y - 0.8*Math.sin(x)));
-}
-function step(dt){
-  const dt2 = dt*P.tempo;
-  let velSum=0;
-  // phase evolution per ribbon
-  for(let r=0;r<R;r++){
-    const ph=phi[r], phL=phi[mod(r-1,R)], phR=phi[mod(r+1,R)], qMid=q[r][(steps+r*13)%N];
-    // Principal complex logarithm: Im log(a + i b) = atan2(b,a).
-    // q and velocity both enter this phase feedback, rather than a renderer trick.
-    const sampleI=(steps+r*13)%N;
-    const phaseArg=Math.atan2(P.logBeta*v[r][sampleI], P.logOffset+P.logAlpha*Math.tanh(qMid));
-    const dph = 0.18 + P.phaseLock*(Math.sin(phL-ph)+Math.sin(phR-ph)) - P.phaseSlip*Math.sin(2.7*ph + 0.4*r) + 0.12*P.feedback*qMid + P.logPhase*phaseArg;
-    // Wrap the angular coordinate: periodic observables are unchanged by 2π.
-    const nextPhi=ph+dt2*dph;
-    phi2[r] = Number.isFinite(nextPhi) ? Math.atan2(Math.sin(nextPhi),Math.cos(nextPhi)) : 0;
-    if(!Number.isFinite(nextPhi))solverSafeties++;
-  }
-  for(let r=0;r<R;r++){
-    const rr = q[r], vv = v[r], nr = q2[r], nv = v2[r];
-    const qU = q[mod(r-1,R)], qD = q[mod(r+1,R)], qUU = q[mod(r-2,R)], qDD = q[mod(r+2,R)];
-    const vU = v[mod(r-1,R)], vD = v[mod(r+1,R)];
-    const basePhase = phi[r], clock = steps*dt2;
-    for(let i=0;i<N;i++){
-      const qm2=rr[mod(i-2,N)], qm1=rr[mod(i-1,N)], q0=rr[i], qp1=rr[mod(i+1,N)], qp2=rr[mod(i+2,N)];
-      const lap = qp1 - 2*q0 + qm1;
-      const bih = qm2 - 4*qm1 + 6*q0 - 4*qp1 + qp2;
-      const d1 = 0.5*(qp1 - qm1);
-      const d3 = 0.5*(qp2 - 2*qp1 + 2*qm1 - qm2);
-      const across = qD[i] - 2*q0 + qU[i];
-      const longAcross = qDD[i] - 2*q0 + qUU[i];
-      const mix = 0.25*((qD[mod(i+1,N)]-qD[mod(i-1,N)]) - (qU[mod(i+1,N)]-qU[mod(i-1,N)]));
-      const velAcross = vD[i] - 2*vv[i] + vU[i];
-      const amp = Math.abs(q0);
-      const sign = q0===0?0:Math.sign(q0);
-      const non = -P.cubic*sign*Math.pow(amp,P.exp)/(1 + P.saturate*amp*amp);
-      const quint = -P.quintic*q0*q0*q0*q0*q0;
-      const het = hetero(r,i);
-      const symBias = P.symmetry*((r&1)?1:-1)*0.08;
-      const x = i/N*TWO; const y = r/R*TWO;
-      const drive = P.drive*(Math.sin(P.driveFreq*clock + x*(1+0.35*P.anisotropy) + basePhase) + 0.65*Math.sin((P.driveFreq+P.beat)*clock - 1.4*x + .8*y));
-      // Explicit perpetual low-level excitation for the Play instrument.
-      // This is a force term, never a renderer animation. Zero restores the damped study.
-      const continuityForce=P.continuity*(Math.sin(.77*clock+.62*x+.2*y)+.43*Math.sin(1.31*clock-1.44*x+.63*y));
-      const macro = P.macro*(0.55*Math.sin(0.21*clock + 0.8*x + 2.0*y) + 0.4*Math.cos(0.13*clock - 1.2*x + 0.5*y));
-      const curvature = P.curvatureDrive*lap*Math.tanh(0.8+Math.abs(q0));
-      const reson = P.resonance*Math.sin(2.3*clock + 5*x + y)*Math.exp(-3*Math.abs(q0));
-      const feedbackDrive = P.feedback*(0.45*Math.tanh(q0) + 0.25*Math.tanh(across));
-      // z = a + i*b. Principal complex log(z) = 1/2 ln(a²+b²) + i atan2(b,a).
-      // Offsetting the real part ensures tunable distance to z=0; log modulus
-      // is epsilon-regularized while the genuine principal argument is retained.
-      const logRe = P.logOffset + P.logAlpha*Math.tanh(q0);
-      const logIm = P.logBeta*(vv[i] + 0.24*across);
-      const imaginaryLog = Math.atan2(logIm,logRe);
-      const realLog = 0.5*Math.log(Math.max(1e-8,logRe*logRe+logIm*logIm));
-      const coupledLog = Math.atan2(P.logBeta*across, P.logOffset+P.logAlpha*Math.tanh(d1));
-      const curvedLog = Math.atan2(P.logBeta*lap, P.logOffset+P.logAlpha*Math.tanh(d3));
-      const complexLogForce = P.logForce*imaginaryLog + P.logCouple*coupledLog + P.logCurve*curvedLog
-                              + P.logMagnitude*realLog*Math.tanh(q0);
-      const accel =
-        P.tension*lap - P.biharm*bih + P.advection*d1 + P.dispersion*d3 + P.mixX*mix + P.neighbor*across + P.longCouple*longAcross + P.shear*(qD[mod(i+1,N)]-qU[mod(i+1,N)] - qD[mod(i-1,N)] + qU[mod(i-1,N)])*0.25
-        + non + quint + curvature + drive + continuityForce + reson + feedbackDrive + macro + het + symBias + complexLogForce + P.crossMod*(qU[i]*qD[i]-q0*q0)*0.08 + P.fold*(r/(R-1)-0.5);
-      const vel = vv[i];
-      const localPump = P.pump*(P.pumpTarget*P.pumpTarget - vel*vel)*vel;
-      const damp = P.damping*vel;
-      // Semi-implicit Euler is stable for oscillatory modes that explicit
-      // position-first Euler can feed with artificial energy.
-      const rawV=vel+dt2*(accel-damp+localPump+P.velDiff*velAcross);
-      const nextV=Number.isFinite(rawV)?clip(rawV,-3.2,3.2):0;
-      let nextQ=q0+dt2*nextV;
-      // A clearly labeled numerical safety envelope, not a new OMEF force.
-      // Prevent nonfinite fields during parameter sweeps; do not toggle Play.
-      if(!Number.isFinite(nextQ)){nextQ=0;solverSafeties++;}
-      if(Math.abs(nextQ)>12){
-        nextQ=clip(nextQ,-12,12);
-        // Remove outward energy at the computational boundary.
-        nv[i]=(nextQ>0&&nextV>0)||(nextQ<0&&nextV<0)?nextV*.5:nextV;
-        solverSafeties++;
-      }else nv[i]=nextV;
-      nr[i]=nextQ;
-      velSum+=nv[i]*nv[i];
-    }
-  }
-  for(let r=0;r<R;r++){
-    q[r].set(q2[r]); v[r].set(v2[r]); phi[r]=phi2[r];
-  }
-  lastVel = Math.sqrt(velSum/(R*N));
-  steps++;
-}
-function calcDelta(){
-  let s=0;
-  for(let r=0;r<R;r++){
-    const a=q[r], b=baselineQ[r];
-    for(let i=0;i<N;i++){
-      const d=a[i]-b[i]; s += d*d;
-    }
-  }
-  previewDelta = Math.sqrt(s/(R*N));
-}
-function recomputeStill(){
-  if(running) return;
-  restoreAnchor();
-  const horizon = Math.max(1, Math.round(P.previewSteps));
-  for(let k=0;k<horizon;k++) step(0.032);
-  calcDelta();
-  draw();
-}
-
-function project(x,y,z){
-  const cy=Math.cos(P.yaw), sy=Math.sin(P.yaw);
-  let X=cy*x+sy*z, Z=-sy*x+cy*z, Y=y;
-  const ct=Math.cos(P.tilt), st=Math.sin(P.tilt);
-  let Y2=ct*Y-st*Z, Z2=st*Y+ct*Z, X2=X;
-  const cr=Math.cos(P.roll), sr=Math.sin(P.roll);
-  let X3=cr*X2-sr*Y2, Y3=sr*X2+cr*Y2;
-  let perspective=P.zoom*3.4/(3.4+P.perspective*(Z2+0.3));
-  perspective=clip(perspective,.36,2.2);
-  return [artX+artW*.50+X3*perspective*artW*.46,
-          artY+artH*.52-Y3*perspective*artH*.42,Z2];
-}
-function renderBg(){
-  // Always clear in untransformed screen coordinates: pinch/zoom must not
-  // transform the black background or leave stale borders behind.
-  ctx.save();
-  ctx.setTransform(DPR,0,0,DPR,0,0);
-  if(running && P.trail>0.01) ctx.fillStyle=`rgba(0,0,0,${clip(1-P.trail*.93,.07,1)})`;
-  else ctx.fillStyle='#000';
-  ctx.fillRect(0,0,W,H);
-  ctx.restore();
-}
-
-// SILK RIBBON VIEW — the geometry is a smooth observation of the evolved
-// OMEF ribbon fields q[r][i]. A twisted 3-D embedding supplies coordinates,
-// not an independently evolving animation.
-const silkNodes = [
-  [ 0.00, -0.01, 0.00], [ 0.92, 0.34, 0.04], [ 1.60, 0.39, 0.08],
-  [ 1.73, -0.12, 0.10], [ 1.20,-0.51,-0.04], [ 0.25,-0.71,-0.08],
-  [-0.92,-0.75,-0.01], [-1.57,-0.47, 0.03], [-1.35,-0.05, 0.04],
-  [-1.64, 0.53, 0.04], [-1.28, 0.85, 0.08], [-1.25, 0.25, 0.02],
-  [-0.60,-0.06, 0.02]
-];
-const silkHue = [185,213,255,293,333,350,378,415,431,420,458,508,545];
-function cr(a,b,c,d,t){
-  const t2=t*t,t3=t2*t;
-  return 0.5*((2*b)+(-a+c)*t+(2*a-5*b+4*c-d)*t2+(-a+3*b-3*c+d)*t3);
-}
-function silkCenter(u){
-  const m=silkNodes.length;
-  const x=clip(u,0,0.999999)*m;
-  const j=Math.floor(x),f=x-j;
-  const a=silkNodes[mod(j-1,m)],b=silkNodes[j],c=silkNodes[(j+1)%m],d=silkNodes[(j+2)%m];
-  return [cr(a[0],b[0],c[0],d[0],f),cr(a[1],b[1],c[1],d[1],f),cr(a[2],b[2],c[2],d[2],f)];
-}
-function silkHueAt(u){
-  const x=clip(u,0,0.99999)*(silkHue.length-1),k=Math.floor(x),f=x-k;
-  return silkHue[k] + (silkHue[k+1]-silkHue[k])*f;
-}
-const silkSmooth=new Float32Array(R*N);
-function updateSilkSmooth(){
-  // Spatial Gaussian-like low-pass over the *evolved* simulated state,
-  // preserving the same structures while avoiding aliasing into the strands.
-  const w=[1,3,5,7,5,3,1], norm=25*25;
-  for(let r=0;r<R;r++)for(let i=0;i<N;i++){
-    let sum=0;
-    for(let a=-3;a<=3;a++){
-      const qa=q[mod(r+a,R)],wa=w[a+3];
-      for(let b=-3;b<=3;b++)sum+=wa*w[b+3]*qa[mod(i+b,N)];
-    }
-    silkSmooth[r*N+i]=sum/norm;
-  }
-}
-function silkSample(rf,u){
-  const rn=clip(rf,0,1)*(R-1),r0=Math.floor(rn),r1=Math.min(R-1,r0+1),rt=rn-r0;
-  const x=clip(u,0,1)*(N-1),i=Math.floor(x),j=Math.min(N-1,i+1),t=x-i;
-  const low=lerp(silkSmooth[r0*N+i],silkSmooth[r0*N+j],t);
-  const high=lerp(silkSmooth[r1*N+i],silkSmooth[r1*N+j],t);
-  return lerp(low,high,rt);
-}
-function silkPoint(u,w){
-  const cen=silkCenter(u),prev=silkCenter(mod(u-.0009,1)),next=silkCenter(mod(u+.0009,1));
-  let tx=next[0]-prev[0],ty=next[1]-prev[1],ll=Math.hypot(tx,ty)||1;
-  tx/=ll;ty/=ll;
-  const nx=-ty,ny=tx;
-  const rf=w*.5+.5,field=silkSample(rf,u),fieldCenter=silkSample(.5,u);
-  const wave=Math.tanh(field*.75),common=Math.tanh(fieldCenter*.8);
-  const waveScale=P.amplitude*P.silkResponse;
-  // A turning ribbon: a half-twist controls the cross-section orientation.
-  const theta=Math.PI*(P.silkTwist*u+.35) + .22*Math.tanh(phi[Math.min(R-1,Math.floor(rf*(R-1)))]);
-  const pinch=clip(1-P.silkPinch*Math.exp(-Math.pow(Math.min(u,1-u)/.072,2)),.09,1);
-  const width=P.silkWidth*pinch*(.9+.12*Math.sin(3*Math.PI*u));
-  const bent=(w*width*Math.cos(theta));
-  const x=cen[0]+nx*bent + .036*waveScale*wave*nx;
-  const y=cen[1]+ny*bent + .14*waveScale*common + .11*waveScale*(wave-common);
-  const z=cen[2]+w*width*.95*Math.sin(theta) + .065*waveScale*wave;
-  // Rotate the numerically deformed spatial embedding using the camera.
-  const cy=Math.cos(P.yaw*.60),sy=Math.sin(P.yaw*.60);
-  const xx=cy*x+sy*z,zz=-sy*x+cy*z;
-  const tilt=P.tilt-.25,ct=Math.cos(tilt),st=Math.sin(tilt);
-  const yy=ct*y-st*zz, depth=st*y+ct*zz;
-  const roll=P.roll,rc=Math.cos(roll),rs=Math.sin(roll);
-  const ox=rc*xx-rs*yy,oy=rs*xx+rc*yy;
-  const scale=Math.min(artW/5.10,artH/3.55)*P.zoom*P.xSpread*1.04;
-  const per=clip(1/(1+depth*.13*P.perspective),.76,1.25);
-  return [artX+artW*.50+ox*scale*per,artY+artH*.51-oy*scale*per,depth];
-}
-function drawComputed(){
-  if(W<5||H<5)return;
-  renderBg();
-  updateSilkSmooth();
-  const strands=Math.max(running?40:54,Math.min(running?105:175,Math.round(artW*(running?.11:.20)*P.density))); 
-  const points=running?106:226;
-  const segs=running?11:20;
-  const alpha=clip(P.alpha*.56,.08,.44);
-  ctx.lineCap='butt';ctx.lineJoin='round';
-  // Calculate all ribbons first, and paint rear to front for coherent depth.
-  const bands=[];
-  for(let r=0;r<strands;r++){
-    const w=-1+2*r/(strands-1),pts=[];
-    let depth=0;
-    for(let j=0;j<points;j++){
-      const u=j/(points-1),p=silkPoint(u,w);
-      pts.push(p);
-      depth+=p[2];
-    }
-    bands.push({w,pts,depth:depth/points,index:r});
-  }
-  bands.sort((a,b)=>a.depth-b.depth);
-  for(const band of bands){
-    // 20 subtly blended color arcs, each covering a smooth portion of
-    // the evolving 3-D ribbon. No decorative strokes unrelated to fields.
-    const w=band.w,pts=band.pts,weight=(.6+.4*(w+1)/2);
-    for(let segment=0;segment<segs;segment++){
-      const first=Math.round(segment*(points-1)/segs);
-      const last=Math.min(points-1,Math.round((segment+1)*(points-1)/segs));
-      const u=(segment+.5)/segs;
-      const hueFor=(uu)=>(silkHueAt(uu)*P.hueSpin+P.depthHue*w*24+P.curvHue*.65*Math.tanh(silkSample((w+1)/2,uu)));
-      const luminance=(uu)=>clip(59+7*P.contrast*weight+5*Math.cos(w*2.4+uu*9),43,78);
-      // A continuous gradient between segment endpoints eliminates color seams.
-      const p0=pts[first],p1=pts[last];
-      const grad=ctx.createLinearGradient(p0[0],p0[1],p1[0]+.001,p1[1]+.001);
-      for(const [f,uu] of [[0,first/(points-1)],[1,last/(points-1)]]){
-        const hue=((hueFor(uu)%360)+360)%360;
-        grad.addColorStop(f,`hsl(${hue.toFixed(1)} 97% ${luminance(uu).toFixed(1)}%)`);
+  curves.push({w,arr,depth:depth/173,k});
+ }
+ const viewCX=(minX+maxX)/2,viewCY=(minY+maxY)/2;
+ const needScale=Math.min(ab.w*.83/Math.max(.1,maxX-minX),ab.h*.81/Math.max(.1,maxY-minY));
+ // Fit is uniform: never distort aspect; soft only when user has not manually zoomed.
+ const f= camera.zoom===1 ? Math.min(size,needScale) : size;
+ curves.sort((a,b)=>a.depth-b.depth);
+ for(const curve of curves){
+  const k=curve.k,arr=curve.arr;
+  for(let s=0;s<15;s++){
+    const first=Math.floor(s*172/15),last=Math.min(172,Math.ceil((s+1)*172/15));
+    const u=(s+.5)/15,o=obsAt(u,curve.w);
+    const hue=((205+260*u+115*k/number+14*Math.sin(o.phase)+80*Math.tanh(visual.portGain*o.port*.1))%360+360)%360;
+    const a=.38+.26*Math.abs(curve.w),light=55+12*Math.sin(u*7+k*.04);
+    const draw=()=>{
+      ctx.beginPath();for(let i=first;i<=last;i++){
+        const p=arr[i];const px=ab.x+ab.w/2+(p[0]-viewCX)*f+camera.dx;
+        const py=ab.y+ab.h/2-(p[1]-viewCY)*f+camera.dy;
+        if(i===first)ctx.moveTo(px,py);else ctx.lineTo(px,py);
       }
-      ctx.strokeStyle=grad;
-      const lineA=alpha*(.7+.3*weight);
-      const trace=()=>{
-        ctx.beginPath();ctx.moveTo(pts[first][0],pts[first][1]);
-        for(let k=first+1;k<=last;k++)ctx.lineTo(pts[k][0],pts[k][1]);
-        ctx.stroke();
-      };
-      if(P.glow>.65){
-        ctx.globalAlpha=lineA*.035*P.glow;
-        ctx.lineWidth=1.6+P.thickness*.8;
-        trace();
-      }
-      ctx.globalAlpha=lineA;
-      ctx.lineWidth=.26+.37*P.thickness;
-      trace();
-    }
+      ctx.stroke();
+    };
+    ctx.strokeStyle=`hsl(${hue.toFixed(0)} 93% ${light.toFixed(0)}%)`;
+    if(visual.glow>0){ctx.lineWidth=2.3*visual.thickness;ctx.globalAlpha=visual.glow*.04;draw();}
+    ctx.lineWidth=Math.max(.25,visual.thickness*.77);ctx.globalAlpha=a;draw();
   }
-  ctx.shadowBlur=0;ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
-}
-
-
-// FLOATING FOLDS — a reference-guided geometric embedding, not a baked image.
-// Coordinates are smoothly deformed by the *evolved* q[r][i] and phi[r]
-// (including the existing real/imaginary logarithmic forces).
-const foldPalette=[71,92,149,184,209,239,277,309,326];
-function foldHue(t){
-  const a=clip(t,0,.99999)*(foldPalette.length-1);
-  const j=a|0;return lerp(foldPalette[j],foldPalette[j+1],a-j);
-}
-function foldPoint(t,w,sheet){
-  // Two connected, open wave sheets: arch, central saddle, and raised wing.
-  // This is a view-only embedding; no independent motion is generated here.
-  const s=t;
-  const arch=Math.exp(-Math.pow((s-.27)/.255,2));
-  const wing=Math.exp(-Math.pow((s-.83)/.255,2));
-  const saddle=Math.exp(-Math.pow((s-.56)/.145,2));
-  const pinch=(1-.77*Math.exp(-Math.pow((s-.535)/.11,2)));
-  const side=(sheet===0?-1:1);
-  const tShift=sheet===0?-.11:.11;
-  const transverse=P.foldFan*(.50+.28*arch+.26*wing)*pinch*w;
-  // At the crossing, the transverse direction rotates from y to depth.
-  const spin=(1.18+P.foldCross*1.05)*Math.PI*s+side*.23;
-  const flared=transverse*Math.cos(spin);
-  const x0=3.6*(s-.50)+(sheet===0?-.06:.06)+.14*w*Math.sin(Math.PI*s);
-  const y0= -0.25 + P.foldArc*(.79*arch+.65*wing-.36*saddle) + .20*side*saddle;
-  // The second sheet diverges at the right; their intersection remains open.
-  const y=y0+flared+ .24*(sheet===1?wing:-arch)*w;
-  const z=.20*side*saddle+transverse*Math.sin(spin)*1.10 + .11*side*wing;
-  const rf=clip((w+1)/2,0,1);
-  const source=silkSample(rf,s);
-  const neighboring=silkSample(1-rf,s);
-  const center=silkSample(.5,s);
-  const deform=P.foldWave*P.silkResponse*P.amplitude;
-  const wave=Math.tanh(source*1.15);
-  const common=Math.tanh(center);
-  const exchange=Math.tanh(source-neighboring);
-  // Local field affects all three spatial coordinates (not merely color).
-  const xx=x0+deform*(.070*exchange+.030*wave);
-  const yy=y+deform*(.16*wave+.09*common);
-  const zz=z+deform*(.09*exchange+.025*wave);
-  const cy=Math.cos(P.yaw*.55),sy=Math.sin(P.yaw*.55);
-  const X=cy*xx+sy*zz,Z=-sy*xx+cy*zz;
-  const ct=Math.cos(P.tilt-.64),st=Math.sin(P.tilt-.64);
-  const Y=ct*yy-st*Z, depth=st*yy+ct*Z;
-  const rc=Math.cos(P.roll),rs=Math.sin(P.roll);
-  const outX=rc*X-rs*Y, outY=rs*X+rc*Y;
-  const base=Math.min(artW/4.55,artH/2.9)*P.zoom*P.xSpread;
-  const persp=clip(1/(1+depth*.12*P.perspective),.79,1.18);
-  return [artX+artW*.5+outX*base*persp,
-    artY+artH*.53-outY*base*persp*P.yCompress,depth];
-}
-function drawFolds(){
-  renderBg(); updateSilkSmooth();
-  const total=Math.max(running?38:72,Math.min(running?100:210,Math.round((running?55:83)*P.foldDensity*P.density)));
-  const samples=running?86:170;
-  const bands=[];
-  for(let sheet=0;sheet<2;sheet++)for(let i=0;i<total;i++){
-    const w=-1+2*i/(total-1),pts=[];let z=0;
-    for(let j=0;j<samples;j++){
-      const t=j/(samples-1),p=foldPoint(t,w,sheet);
-      pts.push(p);z+=p[2];
-    }
-    bands.push({sheet,w,pts,depth:z/samples});
-  }
-  bands.sort((a,b)=>a.depth-b.depth);
-  ctx.lineCap='round';ctx.lineJoin='round';
-  const al=clip(.31+P.alpha*.38,.12,.77);
-  // Layered strokes: subtle bloom for luminous silk without obscuring gaps.
-  for(const band of bands){
-    const {sheet,w,pts}=band;
-    for(let part=0;part<9;part++){
-      const first=Math.round(part*(samples-1)/9);
-      const last=Math.round((part+1)*(samples-1)/9);
-      const s=(part+.5)/9;
-      const h0=foldHue(clip((w+1)/2,0,1));
-      const hue=((h0*P.hueSpin + P.depthHue*sheet*15 + P.curvHue*14*Math.tanh(silkSample((w+1)/2,s)))%360+360)%360;
-      const intensity=clip(61+5*P.contrast+7*Math.sin(w*1.6+s*2),37,84);
-      const tr=(w+1)/2;
-      const color=`hsl(${hue.toFixed(1)} 94% ${intensity.toFixed(1)}%)`;
-      const path=()=>{
-        ctx.beginPath();ctx.moveTo(pts[first][0],pts[first][1]);
-        for(let j=first+1;j<=last;j++)ctx.lineTo(pts[j][0],pts[j][1]);
-        ctx.stroke();
-      };
-      ctx.strokeStyle=color;
-      // minimal halo (important to preserve individually resolved strands)
-      if(P.glow>.5 && part%2===0){
-        ctx.globalAlpha=al*.055*P.glow;
-        ctx.lineWidth=1.25+P.thickness*.5;path();
-      }
-      ctx.globalAlpha=al*(.65+.35*tr);
-      ctx.lineWidth=.32+.39*P.thickness;
-      path();
-    }
-  }
-  ctx.globalAlpha=1;ctx.shadowBlur=0;
-}
-
-// SOURCE-ACCURATE RENDERING. The user's image supplies the original fine
-// filament material; the OMEF numerical state supplies a differentiable
-// warp to it. This is explicitly a texture-based visualization rather than
-// a claim that the model generated the original reference artwork.
-let renderVariant='folds',referenceMode=false,referenceReady=false;
-const referenceImage=new Image();
-referenceImage.onload=()=>{referenceReady=true;if(baselineQ)draw();};
-referenceImage.onerror=()=>{referenceReady=false;if(baselineQ)draw();};
-referenceImage.src=document.getElementById('fallbackPreview').src;
-function fieldDisplacement(u){
-  const idx=clip(Math.floor(u*(N-1)),0,N-1);
-  const rows=[4,10,16,22,30];let dy=0,dx=0;
-  // Spatial averaging is a *measurement filter*. It prevents numerical
-  // high-frequency modes from tearing the supplied fine artwork into strips.
-  for(let j=0;j<rows.length;j++){
-    const r=rows[j];let sum=0,wsum=0;
-    for(let k=-18;k<=18;k+=2){
-      const ii=clip(idx+k,0,N-1),weight=.5+.5*Math.cos(Math.PI*k/20);
-      const base=baselineQ?.[r]?.[ii]??q[r][ii];
-      sum+=weight*(q[r][ii]-base);wsum+=weight;
-    }
-    const d=sum/(wsum||1);
-    dy+=d*Math.sin(.8+j*1.1+u*3.7);
-    dx+=d*Math.cos(j*.64+u*5.1);
-  }
-  return [dy*.44,dx*.29];
-}
-function drawReference(){
-  if(!referenceReady){drawComputed();return;}
-  renderBg();
-  const ar=referenceImage.width/referenceImage.height;
-  const pw=Math.min(artW*.96,artH*.96*ar),ph=pw/ar;
-  const widthScale=P.zoom/1.08;
-  const hScale=clip(P.yCompress,.4,2.4);
-  let actualW=pw*widthScale,actualH=ph*hScale;
-  if(!isExpanded()){
-    // All of the current stretched artwork must fit in the preview, even
-    // if a Geometry slider has increased width, height, or zoom.
-    const scale=Math.min(1,artW*.965/Math.max(1,actualW),artH*.965/Math.max(1,actualH));
-    actualW*=scale; actualH*=scale;
-  }
-  const x0=artX+(artW-actualW)*.5;
-  const y0=artY+(artH-actualH)*.5;
-  const isIdentity=!running && previewDelta<1e-9;
-  // An identity operation preserves the supplied source material exactly.
-  if(isIdentity){
-    ctx.drawImage(referenceImage,x0,y0,actualW,actualH);
-  }else{
-    const columns=Math.max(110,Math.min(500,Math.ceil(actualW*1.05)));
-    const sourceW=referenceImage.width,sourceH=referenceImage.height;
-    const gain=clip(P.silkResponse*P.materialMotion*P.amplitude,0,4.5);
-    for(let c=0;c<columns;c++){
-      const u=(c+.5)/columns;
-      const delta=fieldDisplacement(u);
-      const srcX=c*sourceW/columns,srcWidth=sourceW/columns;
-      const destX=x0+c*actualW/columns;
-      const offsetY=clip(24*gain*Math.tanh(delta[0]*1.5),-actualH*.055,actualH*.055);
-      const offsetX=clip(18*gain*Math.tanh(delta[1]*1.4),-sourceW*.018,sourceW*.018);
-      ctx.drawImage(referenceImage,
-        clip(srcX+offsetX,0,sourceW-srcWidth),0,srcWidth,sourceH,
-        destX,y0+offsetY,actualW/columns+.3,actualH);
-    }
-  }
-  ctx.globalAlpha=1;
+ }
+ ctx.globalAlpha=1;
 }
 function draw(){
-  // The artwork is always rerendered at device resolution, even when zoomed.
-  // OMEF differential equations and the letterboxed art viewport are unchanged.
-  canvas.style.filter=referenceMode?`hue-rotate(${P.materialHue}deg) brightness(${P.materialBright}) contrast(${P.materialContrast}) saturate(${P.materialSaturate})`:'none';
-  ctx.save();
-  ctx.setTransform(DPR,0,0,DPR,0,0);
-  ctx.translate(view.x,view.y);
-  ctx.scale(view.sx,view.sy);
-  if(renderVariant==='reference')drawReference();else if(renderVariant==='classic')drawComputed();else drawFolds();
-  ctx.restore();
+ if(!ctx||!W||!H)return;
+ ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
+ pathDraw();
+ needRender=false;
 }
-function updateEquation(){
-  mathEl.textContent=`q̈ = ${P.tension.toFixed(2)}·Δₓq − ${P.biharm.toFixed(3)}·Δₓ⁴q + ${P.neighbor.toFixed(2)}·Δᵣq + ${P.mixX.toFixed(3)}·∂ₓΔᵣq
-− ${P.cubic.toFixed(2)}·sgn(q)|q|^${P.exp.toFixed(2)}/(1+${P.saturate.toFixed(2)}q²) − ${P.quintic.toFixed(2)}q⁵
-+ driving(t,x,r) + continuity(t,x,r) + coupling(q,Δᵣq) + feedback(q) − ${P.damping.toFixed(3)}·q̇
-+ ${P.pump.toFixed(3)}·(${P.pumpTarget.toFixed(2)}²−q̇²)q̇ + remaining operators
-
-Complex logarithm:
-z = ${P.logOffset.toFixed(2)} + ${P.logAlpha.toFixed(2)}·tanh(q) + i·${P.logBeta.toFixed(2)}·(q̇+0.24·Δᵣq)
-log(z) = ½ ln(Re(z)²+Im(z)²) + i atan2(Im(z),Re(z))
-F_log = ${P.logForce.toFixed(2)}·Im log(z) + ${P.logCouple.toFixed(2)}·Im log(z_neighbor) + ${P.logCurve.toFixed(2)}·Im log(z_curvature) + ${P.logMagnitude.toFixed(2)}·Re log(z)·tanh(q)
-φ̇ includes ${P.logPhase.toFixed(2)}·Im log(z_phase)
-
-The principal argument has a branch cut on the negative real axis. The log modulus is regularized near zero.`;
+function updateInputs(tabName){
+ tab=tabName;for(const b of tabstrip.children)b.classList.toggle('active',b.dataset.name===tab);
+ sliders.replaceChildren();
+ for(const [key,label,min,max,step,explain] of configs[tab]){
+  const v = key in params?params[key]:key in visual?visual[key]:key==='horizon'?horizon:runSpeed;
+  const outer=document.createElement('label');outer.className='control';outer.dataset.param=key;
+  const header=document.createElement('div');header.className='clabel';header.innerHTML=`<span>${label}</span><strong>${fmt(v)}</strong>`;
+  const input=document.createElement('input');input.type='range';input.min=min;input.max=max;input.step=step;input.value=v;input.dataset.param=key;
+  const small=document.createElement('small');small.textContent=explain;
+  outer.append(header,input,small);
+  input.addEventListener('input',()=>{
+    let val=Number(input.value);header.querySelector('strong').textContent=fmt(val);
+    if(key==='horizon'){horizon=val;if(!playing)queueRecompute();}
+    else if(key==='runSpeed'){runSpeed=val;}
+    else if(key in visual){visual[key]=val;needRender=true;if(!playing)draw();}
+    else {params[key]=val;if(!playing)queueRecompute();}
+    updateDiagnostics();
+  });
+  sliders.append(outer);
+ }
 }
-function updateUI(force=false){
-  const activity=lastVel<0.012?'QUIET':'ACTIVE';
-  statusEl.textContent=`${running?'PLAY '+activity:'STILL'} · ${steps} steps · v ${lastVel.toFixed(3)}${solverSafeties?' · guard '+solverSafeties:''}`;
-  modeText.textContent=running?'LIVE DYNAMICS':'STILL REFERENCE';
-  runBtn.classList.toggle('active',running);
-  runBtn.textContent=running?'Pause':'Play';
-  exploreBtn.classList.toggle('active',exploring);
-  if(force)updateEquation();
+for(const name of Object.keys(configs)){
+ const b=document.createElement('button');b.textContent=name;b.dataset.name=name;b.className='tab';b.onclick=()=>updateInputs(name);tabstrip.append(b);
 }
-let frames=0;
-function animate(time=0){
-  // Always reschedule, even after a costly or failed frame.
-  try{
-    if(exploring){
-      autoMorph();
-      if(!running && frames%5===0)recomputeStill();
-    }
-    if(running){
-      // Bounded simulation work per animation callback prevents input starvation.
-      const count=Math.max(1,Math.min(3,Math.round(P.speed*1.4)));
-      for(let i=0;i<count;i++)step(.032);
-      if(!Number.isFinite(lastVel)){
-        // Retain Play. The solver has per-coordinate nonfinite protection.
-        playFaults++;
-        lastVel=0;
-        noteIssue('Solver recovered a nonfinite observable — playback continues');
-      }
-      // 24-ish FPS is intentionally less costly than continuous 60 FPS redraw.
-      // On touch input, redraw immediately; elsewhere keep solver advancing.
-      const interval=window.matchMedia?.('(max-width: 700px)').matches?42:30;
-      if(!lastPaint || time-lastPaint>interval){draw();lastPaint=time;}
-      previewDelta=0;
-    }
-    if(++frames%7===0 || (running && steps-lastReportedSteps>=36)){
-      updateUI();lastReportedSteps=steps;
-    }
-    if(deferredEquation && time-pendingEquationAt>110){updateEquation();deferredEquation=false;}
-  }catch(e){
-    renderFaults++;
-    noteIssue('Render/playback recovered: '+(e&&e.message||e));
-    // The instrument should not remain dead because a single canvas draw failed.
-    console.error('OMEF frame recovery',e);
-  }finally{
-    requestAnimationFrame(animate);
-  }
+const vrow=el('viewrow');for(const [name,detail] of viewDefs){const b=document.createElement('button');b.className='chip';b.dataset.view=name;b.textContent=name;b.title=detail;b.onclick=()=>{view=name;for(const c of vrow.children)c.classList.toggle('active',c.dataset.view===name);draw();};vrow.append(b);}
+vrow.firstElementChild.classList.add('active');
+function solved(s,p,steps){let out=new Float64Array(s);for(let i=0;i<steps;i++){out=E.rk4(out,.004,p);if(!E.finite(out))throw new Error('Nonfinite solver state at preview step '+i);}return out;}
+function queueRecompute(){
+ const ticket=++recomputeTicket;
+ el('calc').textContent='Computing source equations…';
+ // single animation coalesces rapid slider input; never falsely reports completion.
+ requestAnimationFrame(()=>{if(ticket!==recomputeTicket||playing)return;try{
+  S=solved(base,params,horizon);stepCount=horizon;
+  if(!baseline||!E.finite(baseline)) baseline=solved(base,refParams,horizon);
+  let norm=0;for(let j=0;j<l.D;j++)norm+=(S[j]-baseline[j])**2;
+  currentDelta=Math.sqrt(norm/l.D);el('calc').textContent=`Source solver · ${l.D} coordinates · Δ ${currentDelta.toExponential(2)}`;
+  updateDiagnostics();draw();
+ }catch(e){reportError(e);}});
 }
-
-let autoTargets={};
-function reseedTargets(){
-  const keys = ['tension','biharm','neighbor','cubic','exp','drive','driveFreq','beat','feedback','heteroAmp','macro','phaseLock','phaseSlip','fold','amplitude','density','glow','depthHue','curvHue','logForce','logCouple','logCurve','logPhase','logAlpha','logBeta','logOffset'];
-  for(const k of keys){
-    const item = spec.flatMap(g=>g.items).find(i=>i[0]===k); if(!item) continue;
-    autoTargets[k] = item[1] ? null : null;
-  }
-  for(const group of spec) for(const item of group.items){
-    const [k,,min,max] = item;
-    if(k in autoTargets) autoTargets[k] = min + rng()*(max-min);
-  }
+function start(){playing=!playing;el('play').textContent=playing?'Pause':'Play';el('play').classList.toggle('active',playing);
+ if(!playing){base=new Float64Array(S);refParams={...params};baseline=solved(base,refParams,horizon);S=new Float64Array(baseline);stepCount=horizon;currentDelta=0;draw();}
+ updateDiagnostics();
 }
-function autoMorph(){
-  if(!Object.keys(autoTargets).length) reseedTargets();
-  let settled = 0, total = 0;
-  for(const [k,target] of Object.entries(autoTargets)){
-    total++;
-    P[k] = lerp(P[k], target, 0.006);
-    if(Math.abs(P[k]-target)<0.015) settled++;
-    if(inputs[k]){ inputs[k].value = P[k]; inputs[k].parentElement.querySelector('.val').textContent = formatVal(P[k]); }
-  }
-  if(settled > total*0.85) reseedTargets();
-}
-function formatVal(v){ return Math.abs(v)>=100 ? v.toFixed(0) : Math.abs(v)>=10 ? v.toFixed(1) : v.toFixed(3).replace(/0+$/,'').replace(/\.$/,''); }
-let activeGroup='Dynamics';
-function updateRenderTabs(){
-  for(const el of document.querySelectorAll('.tabBtn,.tabPage')){
-    const name=el.dataset.group||el.dataset.name;
-    const hide=(name==='Rendering'&&referenceMode)||(name==='Silk material'&&!referenceMode);
-    el.style.display=hide?'none':'';
-  }
-  if((referenceMode&&activeGroup==='Rendering')||(!referenceMode&&activeGroup==='Silk material'))activateGroup('Complex log');
-}
-function activateGroup(name){
-  activeGroup=name;
-  document.querySelectorAll('.tabPage').forEach(el=>el.classList.toggle('selected',el.dataset.name===name));
-  document.querySelectorAll('.tabBtn').forEach(el=>el.classList.toggle('selected',el.dataset.group===name));
-  groupsEl.scrollTop=0;
-}
-function addControls(){
-  const tabBar=document.getElementById('tabs');
-  for(const group of spec){
-    const btn=document.createElement('button');btn.className='tabBtn';
-    btn.textContent=group.group;btn.dataset.group=group.group;
-    btn.onclick=()=>activateGroup(group.group);tabBar.appendChild(btn);
-    const section=document.createElement('section');section.className='tabPage';section.dataset.name=group.group;
-    section.innerHTML=`<div class="sectionLabel">${group.group} <span>${group.items.length} parameters</span></div><div class="grid"></div>`;
-    const grid=section.querySelector('.grid');
-    for(const item of group.items){
-      const [key,label,min,max,def,step,desc]=item;
-      const card=document.createElement('label');card.className='control';
-      card.innerHTML=`<header><span class="name">${label}</span><output class="val">${formatVal(def)}</output></header><input type="range" min="${min}" max="${max}" step="${step}" value="${def}" aria-label="${label}"><small>${desc}</small>`;
-      const input=card.querySelector('input');inputs[key]=input;
-      input.addEventListener('input',()=>{
-        // Every adjustment starts with the full sculpture visible.
-        if(!running)fitAdjustmentView();
-        P[key]=Number(input.value);card.querySelector('.val').textContent=formatVal(P[key]);
-        deferredEquation=true;pendingEquationAt=performance.now();lastInputAt=pendingEquationAt;
-        if(!running){
-          if(['amplitude','ribbonGap','xSpread','yCompress','perspective','tilt','yaw','roll','zoom','density','thickness','glow','alpha','hueSpin','depthHue','curvHue','contrast','trail','foldArc','foldFan','foldCross','foldWave','foldDensity','silkWidth','silkTwist','silkPinch','silkResponse','materialHue','materialBright','materialContrast','materialSaturate','materialMotion'].includes(key))draw();
-          else requestStill();
-        }
-      });
-      grid.appendChild(card);
-    }
-    groupsEl.appendChild(section);
-  }
-  const eq=document.createElement('button');eq.className='tabBtn';eq.textContent='Equation';eq.dataset.group='Equation';
-  eq.onclick=()=>activateGroup('Equation');tabBar.appendChild(eq);
-  const page=document.createElement('section');page.className='tabPage';page.dataset.name='Equation';
-  page.innerHTML='<div class="sectionLabel">Equation inspector <span>LIVE MODEL</span></div><p class="description">These terms are computed in the numerical solver. The artwork is a measurement of the simulated field, not an independently animated preset.</p>';
-  page.appendChild(mathEl);groupsEl.appendChild(page);
-  activateGroup(activeGroup);updateRenderTabs();updateEquation();
-}
-let pendingStill=false;
-function requestStill(){if(pendingStill)return;pendingStill=true;requestAnimationFrame(()=>{pendingStill=false;recomputeStill();updateUI();});}
-function addPresets(){
-  stretchBtn=document.createElement('button');stretchBtn.className='preset';stretchBtn.title='Off: proportional two-finger zoom. On: independently stretch horizontal and vertical dimensions.';
-  stretchBtn.onclick=()=>{
-    view.freeStretch=!view.freeStretch;
-    if(!view.freeStretch){
-      // Return to a single uniform scale around the viewport center.
-      const scale=Math.sqrt(view.sx*view.sy),cx=W*.5,cy=H*.5;
-      const anchorX=(cx-view.x)/view.sx,anchorY=(cy-view.y)/view.sy;
-      view.sx=scale;view.sy=scale;view.x=cx-scale*anchorX;view.y=cy-scale*anchorY;
-    }
-    syncViewButtons();draw();
-  };
-  resetBtn=document.createElement('button');resetBtn.className='preset';resetBtn.onclick=()=>{resetView();fitAdjustmentView();draw();};
-  presetRow.appendChild(stretchBtn);presetRow.appendChild(resetBtn);syncViewButtons();
-  const viewButton=document.createElement('button');viewButton.className='preset active';viewButton.textContent='View: Floating folds';
-  viewButton.onclick=()=>{
-    renderVariant=renderVariant==='folds'?'classic':renderVariant==='classic'?'reference':'folds';
-    referenceMode=(renderVariant==='reference');
-    viewButton.textContent=renderVariant==='folds'?'View: Floating folds':renderVariant==='classic'?'View: Classic fibers':'View: Reference silk';
-    viewButton.classList.toggle('active',renderVariant==='folds');updateRenderTabs();draw();
-  };
-  presetRow.appendChild(viewButton);
-  let active='';
-  function setActive(name){ active=name; [...presetRow.children].filter(b=>b!==viewButton).forEach(b=>b.classList.toggle('active', b.textContent===name)); }
-  for(const [name,vals] of Object.entries(presets)){
-    const b=document.createElement('button'); b.className='preset'; b.textContent=name;
-    b.onclick=()=>{ applyValues(vals); setActive(name); };
-    presetRow.appendChild(b);
-  }
-  const rnd=document.createElement('button');rnd.className='preset';rnd.textContent='Surprise';rnd.onclick=()=>{randomizeInteresting();setActive('')};presetRow.appendChild(rnd);setActive('');
-}
-function applyValues(vals){
-  fitAdjustmentView();
-  for(const [k,val] of Object.entries(vals)){
-    P[k]=val;
-    if(inputs[k]){ inputs[k].value = val; inputs[k].parentElement.querySelector('.val').textContent = formatVal(val); }
-  }
-  updateEquation();if(!running) requestStill(); else updateUI(true);
-}
-function randomizeInteresting(){
-  const keys = ['tension','biharm','dispersion','mixX','neighbor','longCouple','cubic','quintic','exp','feedback','drive','driveFreq','beat','phaseLock','phaseSlip','heteroAmp','macro','fold','symmetry','amplitude','density','glow','depthHue','curvHue','logForce','logCouple','logCurve','logPhase','logAlpha','logBeta','logOffset'];
-  for(const key of keys){
-    const item = spec.flatMap(g=>g.items).find(i=>i[0]===key); if(!item) continue;
-    const [,,min,max,,,] = item;
-    let t = (rng()+rng()+rng())/3; // bias center
-    const val = min + t*(max-min);
-    P[key]=val;
-    if(inputs[key]){ inputs[key].value=val; inputs[key].parentElement.querySelector('.val').textContent = formatVal(val); }
-  }
-  updateEquation();if(!running) requestStill(); else updateUI(true);
-}
-
-runBtn.onclick = ()=>{
-  running = !running;
-  if(!running){ captureAnchor(); computeBaseline(); recomputeStill(); } else { previewDelta=0; lastPaint=0; }
-  updateUI();
-};
-refBtn.onclick = ()=>{ running=false; captureAnchor(); computeBaseline(); recomputeStill(); updateUI(); };
-exploreBtn.onclick = ()=>{ exploring=!exploring; if(exploring){running=true;reseedTargets();} updateUI(true); };
-randomBtn.onclick = ()=>{ randomizeInteresting(); };
-
-// Real two-pointer gestures, independent of the OMEF simulation timestep.
-// One finger preserves the earlier orbit action; two fingers zoom and pan.
-canvas.addEventListener('pointerdown',e=>{
-  e.preventDefault();
-  pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
-  try{canvas.setPointerCapture(e.pointerId);}catch(_){}
-  startTouchGesture();
+function reference(){playing=false;el('play').textContent='Play';el('play').classList.remove('active');base=new Float64Array(S);refParams={...params};baseline=solved(base,refParams,horizon);S=new Float64Array(baseline);stepCount=horizon;currentDelta=0;draw();updateDiagnostics();}
+function restart(){playing=false;el('play').textContent='Play';el('play').classList.remove('active');base=new Float64Array(startSeed);refParams={...params};baseline=solved(base,refParams,horizon);S=new Float64Array(baseline);stepCount=horizon;currentDelta=0;draw();updateDiagnostics();}
+el('play').onclick=start;el('ref').onclick=reference;el('reset').onclick=restart;
+function resetView(){camera={zoom:1,stretchX:1,stretchY:1,dx:0,dy:0,yaw:.15,tilt:0};draw();}
+el('resetView').onclick=resetView;
+el('expand').onclick=()=>{expanded=!expanded;el('app').classList.toggle('full',expanded);el('expand').textContent=expanded?'Adjust':'Expand';requestAnimationFrame(resize);};
+el('stretch').onclick=()=>{isStretch=!isStretch;el('stretch').classList.toggle('active',isStretch);};
+function points(){return Array.from(touchPts.values())}
+function distance(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
+canvas.addEventListener('pointerdown',ev=>{
+ canvas.setPointerCapture(ev.pointerId);touchPts.set(ev.pointerId,{x:ev.clientX,y:ev.clientY});
+ if(touchPts.size===1)dragStart={x:ev.clientX,y:ev.clientY,...camera};
+ else if(touchPts.size===2){const [a,b]=points();touchStart={a,b,zoom:camera.zoom,stretchX:camera.stretchX,stretchY:camera.stretchY,dx:camera.dx,dy:camera.dy,centerX:(a.x+b.x)/2,centerY:(a.y+b.y)/2};dragStart=null;}
 });
-canvas.addEventListener('pointermove',e=>{
-  if(!pointers.has(e.pointerId))return;
-  e.preventDefault();
-  pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
-  moveTouchGesture();
+canvas.addEventListener('pointermove',ev=>{
+ if(!touchPts.has(ev.pointerId))return;touchPts.set(ev.pointerId,{x:ev.clientX,y:ev.clientY});
+ if(touchPts.size===1&&dragStart){camera.dx=dragStart.dx+(ev.clientX-dragStart.x);camera.dy=dragStart.dy+(ev.clientY-dragStart.y);}
+ else if(touchPts.size===2&&touchStart){const [a,b]=points();
+  const startDist=Math.max(10,distance(touchStart.a,touchStart.b)),factor=distance(a,b)/startDist;
+  if(isStretch){const sx=Math.max(.2,Math.abs(touchStart.b.x-touchStart.a.x));const sy=Math.max(.2,Math.abs(touchStart.b.y-touchStart.a.y));camera.stretchX=Math.min(4,Math.max(.25,touchStart.stretchX*Math.abs(a.x-b.x)/Math.max(18,sx)));camera.stretchY=Math.min(4,Math.max(.25,touchStart.stretchY*Math.abs(a.y-b.y)/Math.max(18,sy)));}
+  else camera.zoom=Math.min(5,Math.max(.45,touchStart.zoom*factor));
+  camera.dx=touchStart.dx+((a.x+b.x)/2-touchStart.centerX);camera.dy=touchStart.dy+((a.y+b.y)/2-touchStart.centerY);
+ }
+ draw();
 });
-function endPointer(e){
-  if(!pointers.has(e.pointerId))return;
-  pointers.delete(e.pointerId);
-  try{if(canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);}catch(_){}
-  startTouchGesture();
+function drop(ev){touchPts.delete(ev.pointerId);if(touchPts.size<2)touchStart=null;dragStart=null;}
+canvas.addEventListener('pointerup',drop);canvas.addEventListener('pointercancel',drop);
+let lastFrame=0;
+function animate(t){
+ try{
+  if(playing){
+   const count=Math.max(1,Math.min(4,Math.floor(runSpeed)));
+   for(let i=0;i<count;i++){
+    const next=E.rk4(S,.004,params);
+    if(!E.finite(next))throw new Error('Numerical error at step '+stepCount+'; playback stopped, state retained');
+    S=next;stepCount++;
+   }
+   draw();
+   if(stepCount%10===0)updateDiagnostics();
+  }else if(needRender)draw();
+ }catch(e){reportError(e);}
+ requestAnimationFrame(animate);
 }
-canvas.addEventListener('pointerup',endPointer);
-canvas.addEventListener('pointercancel',endPointer);
-canvas.addEventListener('lostpointercapture',endPointer);
-// Keep iOS Safari from treating a gesture over the sculpture as a page zoom.
-for(const name of ['gesturestart','gesturechange','gestureend','touchmove'])
-  canvas.addEventListener(name,e=>{if(e.cancelable)e.preventDefault();},{passive:false});
-canvas.addEventListener('wheel',e=>{
-  e.preventDefault();
-  const b=stageWrap.getBoundingClientRect(),x=e.clientX-b.left,y=e.clientY-b.top;
-  const next=clip(view.sx*Math.exp(-e.deltaY*.002),.35,7.5);
-  const ratio=next/view.sx;
-  view.x=x-(x-view.x)*ratio;view.y=y-(y-view.y)*ratio;
-  view.sx=next;view.sy=clip(view.sy*ratio,.35,7.5);
-  draw();
-},{passive:false});
-
-addControls(); addPresets(); activateGroup('Complex log'); resize(); initialize(0.5); recomputeStill(); updateUI(true);
-const fullBtn=document.getElementById('expandBtn');
-fullBtn.onclick=()=>{
-  const app=document.getElementById('app');
-  const on=!app.classList.contains('full');
-  if(on){
-    // Start expanded inspection with a full fit; the user can then pinch.
-    Object.assign(view,{sx:1,sy:1,x:0,y:0,freeStretch:false});
-    app.classList.add('full');
-  }else{
-    saveInspectView();
-    app.classList.remove('full');
-    fitAdjustmentView();
-  }
-  fullBtn.textContent=on?'Adjust':'Expand';
-  resize();draw();
-};
-window.__omefTest={
-  view:()=>viewStats(),
-  resetView:()=>resetView(),
-  stretch:(on)=>{view.freeStretch=!!on;syncViewButtons();draw();},
-  stats:()=>({steps,vel:lastVel,delta:previewDelta,running,solverSafeties,renderFaults,playFaults,lastFrameError,pixels:W*H,art:{x:artX,y:artY,width:artW,height:artH},expanded:document.getElementById('app').classList.contains('full')}),
-  guardReport:()=>({solverSafeties,renderFaults,playFaults,lastFrameError}),
-  isPlaying:()=>running,
-  advance:(n=1)=>{for(let i=0;i<n;i++)step(.032);draw();},
-  parameter:(k,value)=>{if(!(k in P))throw Error('bad key');P[k]=value;if(inputs[k]){inputs[k].value=value;inputs[k].parentElement.querySelector('.val').textContent=formatVal(value);}if(!running)recomputeStill();},
-  snapshot:()=>Array.from(q[0]).slice(0,32),
-  renderMode:()=>renderVariant,
-  summary:()=>({maxq:Math.max(...q.map(a=>Math.max(...a.map(x=>Math.abs(x))))), rmsV:lastVel, fieldsFinite:q.every(a=>a.every(Number.isFinite)), referenceMode,referenceReady, logTerms:{logForce:P.logForce,logCouple:P.logCouple,logCurve:P.logCurve,logPhase:P.logPhase,logAlpha:P.logAlpha,logBeta:P.logBeta,logOffset:P.logOffset}}),
-  keys:()=>Object.keys(P)
-};
-requestAnimationFrame(animate);
-const fallback=document.getElementById('fallbackPreview');
-if(fallback)fallback.style.display='none';
-window.__omefBootReady=true;
-const watchdog=document.getElementById('bootWatchdog');if(watchdog)watchdog.style.display='none';
-}catch(err){
-  window.__omefBootError=String(err&&err.stack||err);
-  const status=document.getElementById('status');if(status)status.textContent='STARTUP ERROR';
-  const watch=document.getElementById('bootWatchdog');if(watch){watch.style.display='block';watch.textContent='Startup failed: '+String(err&&err.message||err).slice(0,180);}
-  console.error('OMEF boot failure',err);
+function init(){
+ if(!E.finite(startSeed)||startSeed.length!==l.D)throw new Error('Invalid source initial vector');
+ resize();updateInputs('Core');
+ // Native reference is computed before first presentation. Avoid endless INITIALIZING state.
+ baseline=solved(base,refParams,horizon);S=new Float64Array(baseline);stepCount=horizon;
+ currentDelta=0;updateDiagnostics();draw();el('boot').hidden=true;window.__omefBootReady=true;
+ window.__omefTest={
+  getState:()=>Array.from(S),advance:n=>{for(let i=0;i<n;i++){S=E.rk4(S,.004,params);stepCount++;}draw();updateDiagnostics();},
+  setParam:(k,val)=>{if(!(k in params))throw Error('Unknown parameter '+k);params[k]=val;if(!playing)queueRecompute();},
+  diagnostic:()=>E.diagnostics(S,params),getStatus:()=>({playing,stepCount,view,horizon,delta:currentDelta,ready:window.__omefBootReady,params:{...params}}),
+  setView:v=>{view=v;draw();},fit:resetView
+ };
+ requestAnimationFrame(animate);
 }
+try{init();}catch(err){reportError(err)}
 })();
 </script></body></html>
