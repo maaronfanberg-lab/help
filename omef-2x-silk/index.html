@@ -43,13 +43,25 @@
 @media(min-width:720px){#app{max-width:850px;margin:0 auto;border-inline:1px solid #222}.grid{grid-template-columns:repeat(3,minmax(0,1fr))}#stageWrap{height:48dvh}}
 @media(max-width:490px){.identity span{display:none}.identity{letter-spacing:.09em}.topbar{gap:5px;left:10px;right:10px}.iconbtn{padding:8px 9px}}
 @media(max-height:610px){#stageWrap{min-height:195px;height:40dvh}.control{min-height:90px}}
+
+/* Studio 08: fixed, unobstructed artwork preview above scrolling adjustments */
+#stageWrap{height:44dvh;min-height:260px;max-height:52dvh}
+#stageWrap::before{height:54px}
+#status{bottom:5px;left:10px;z-index:2;opacity:.75;padding:3px 6px;font-size:9px}
+#gestureHint{display:none}
+#app.full #gestureHint{display:block}
+#panel>.presetRow{position:relative;bottom:auto;left:auto;right:auto;z-index:1;flex:0 0 auto;min-height:42px;padding:6px 9px 7px;border-bottom:1px solid var(--line);background:#0e1117}
+#panel>.presetRow .preset{padding:6px 10px}
+#panelTitle{flex:0 0 auto}
+@media(max-height:610px){#stageWrap{height:43dvh;min-height:180px;max-height:50dvh}}
+#app.full #stageWrap{height:100dvh;max-height:none;min-height:0}
 </style></head><body><div id="app"><div id="stageWrap">
 <canvas id="stage" aria-label="Numerically integrated rainbow filament sculpture"></canvas>
 <div class="topbar"><div class="identity">OMEF <span>SILK / TOUCH</span></div><button class="iconbtn" id="runBtn">Play</button><button class="iconbtn" id="refBtn">Set ref</button><button class="iconbtn" id="exploreBtn">Explore</button><button class="iconbtn" id="expandBtn" aria-label="Expand sculpture without stretching">Expand</button></div>
 <div id="gestureHint" aria-hidden="true">One finger: rotate · Two fingers: zoom · Stretch mode: reshape</div>
 <div id="status">INITIALIZING</div>
-<div id="presetRow" class="presetRow"></div></div>
-<div id="panel"><div class="panelTitle"><div><strong>Instrument controls</strong><small>Your image material, deformed by the OMEF equations</small></div><span id="modeText">STILL REFERENCE</span></div><nav class="tabs" id="tabs"></nav><div id="groups"><div id="mathReadout"></div></div></div>
+</div>
+<div id="panel"><div class="panelTitle"><div><strong>Instrument controls</strong><small>Complete sculpture above · always fitted while adjusting</small></div><span id="modeText">STILL REFERENCE</span></div><div id="presetRow" class="presetRow"></div><nav class="tabs" id="tabs"></nav><div id="groups"><div id="mathReadout"></div></div></div>
 <button id="randomBtn" style="position:absolute;left:-1000px;width:1px;height:1px" aria-hidden="true">Random</button>
 <script>
 (()=>{'use strict';
@@ -80,11 +92,18 @@ let steps=0, running=false, exploring=false, previewDelta=0, lastVel=0, seed=202
 let dragState=null, W=300, H=300, DPR=1;
 // View-only touch transform. These controls deliberately do not edit OMEF state.
 const view={sx:1,sy:1,x:0,y:0,freeStretch:false};
+// Store gesture zoom for Expanded inspection only. The adjusting preview always
+// returns to a complete, fitted silhouette, with no lost/cropped sections.
+const inspectView={sx:1,sy:1,x:0,y:0,freeStretch:false};
+function isExpanded(){return document.getElementById('app').classList.contains('full')}
+function saveInspectView(){inspectView.sx=view.sx;inspectView.sy=view.sy;inspectView.x=view.x;inspectView.y=view.y;inspectView.freeStretch=view.freeStretch;}
+function restoreInspectView(){Object.assign(view,inspectView);}
+function fitAdjustmentView(){if(isExpanded())return; view.sx=1;view.sy=1;view.x=0;view.y=0;view.freeStretch=false;syncViewButtons();}
 const pointers=new Map();
 let touchGesture=null, lastTapTime=-1, lastTapPos=null;
 let stretchBtn=null, resetBtn=null;
 function viewStats(){return {scaleX:view.sx,scaleY:view.sy,panX:view.x,panY:view.y,freeStretch:view.freeStretch,pointers:pointers.size};}
-function resetView(){view.sx=1;view.sy=1;view.x=0;view.y=0;view.freeStretch=false;syncViewButtons();draw();}
+function resetView(){view.sx=1;view.sy=1;view.x=0;view.y=0;view.freeStretch=false;if(isExpanded())saveInspectView();syncViewButtons();draw();}
 function syncViewButtons(){
   if(stretchBtn){stretchBtn.textContent=view.freeStretch?'Stretch: ON':'Stretch: OFF';stretchBtn.classList.toggle('active',view.freeStretch);}
   if(resetBtn)resetBtn.textContent='Reset view';
@@ -117,6 +136,7 @@ function moveTouchGesture(){
     // Bound panning to prevent losing the entire artwork outside the viewport.
     view.x=clip(view.x,-W*6,W*6);
     view.y=clip(view.y,-H*6,H*6);
+    if(isExpanded())saveInspectView();
     draw();
   }else if(touchGesture.kind==='one' && pointers.size===1){
     const p=Array.from(pointers.values())[0];
@@ -134,19 +154,21 @@ function moveTouchGesture(){
 let compactW=0, compactH=0;
 let artW=300, artH=300, artX=0, artY=0;
 function updateArtFrame(){
-  const expanded=document.getElementById('app').classList.contains('full');
-  if(!expanded || !compactW || !compactH){
+  const expanded=isExpanded();
+  if(!expanded){
     compactW=W; compactH=H;
-    artW=W; artH=H; artX=0; artY=0;
+    // Keep all artwork below the toolbar and above the bottom status strip.
+    // Presets are now in the panel, never on top of the sculpture.
+    const top=(H>=245?55:43), bottom=(H>=245?22:17);
+    artW=Math.max(20,W-16); artH=Math.max(20,H-top-bottom);
+    artX=8; artY=top;
     return;
   }
-  // Preserve physical sculpture size on entering full view. If the phone
-  // rotates and the available dimensions shrink, uniformly fit it.
-  const factor=Math.min(1, W/compactW, H/compactH);
-  artW=compactW*factor;
-  artH=compactH*factor;
-  artX=Math.round((W-artW)/2);
-  artY=Math.round((H-artH)/2);
+  // A black letterbox in expanded view is deliberate: the work never gets
+  // vertically stretched by a taller phone screen.
+  const factor=Math.min(1, W/Math.max(1,compactW), H/Math.max(1,compactH));
+  artW=compactW*factor; artH=Math.max(20,compactH-77)*factor;
+  artX=Math.round((W-artW)/2); artY=Math.round((H-artH)/2);
 }
 const TWO=Math.PI*2;
 function rng(){seed ^= seed<<13; seed ^= seed>>>17; seed ^= seed<<5; return (seed>>>0)/4294967296;}
@@ -588,14 +610,18 @@ function drawReference(){
   if(!referenceReady){drawComputed();return;}
   renderBg();
   const ar=referenceImage.width/referenceImage.height;
-  const pw=Math.min(artW,artH*ar),ph=pw/ar;
-  const ox=artX+(artW-pw)*.5,oy=artY+(artH-ph)*.5;
+  const pw=Math.min(artW*.96,artH*.96*ar),ph=pw/ar;
   const widthScale=P.zoom/1.08;
-  const actualW=pw*widthScale;
-  const x0=ox+(pw-actualW)*.5;
-  const hScale=P.yCompress;
-  const actualH=ph*clip(hScale,.4,2.4);
-  const y0=oy+(ph-actualH)*.5;
+  const hScale=clip(P.yCompress,.4,2.4);
+  let actualW=pw*widthScale,actualH=ph*hScale;
+  if(!isExpanded()){
+    // All of the current stretched artwork must fit in the preview, even
+    // if a Geometry slider has increased width, height, or zoom.
+    const scale=Math.min(1,artW*.965/Math.max(1,actualW),artH*.965/Math.max(1,actualH));
+    actualW*=scale; actualH*=scale;
+  }
+  const x0=artX+(artW-actualW)*.5;
+  const y0=artY+(artH-actualH)*.5;
   const isIdentity=!running && previewDelta<1e-9;
   // An identity operation preserves the supplied source material exactly.
   if(isIdentity){
@@ -722,6 +748,8 @@ function addControls(){
       card.innerHTML=`<header><span class="name">${label}</span><output class="val">${formatVal(def)}</output></header><input type="range" min="${min}" max="${max}" step="${step}" value="${def}" aria-label="${label}"><small>${desc}</small>`;
       const input=card.querySelector('input');inputs[key]=input;
       input.addEventListener('input',()=>{
+        // Every adjustment starts with the full sculpture visible.
+        fitAdjustmentView();
         P[key]=Number(input.value);card.querySelector('.val').textContent=formatVal(P[key]);
         updateEquation();
         if(!running){
@@ -754,7 +782,7 @@ function addPresets(){
     }
     syncViewButtons();draw();
   };
-  resetBtn=document.createElement('button');resetBtn.className='preset';resetBtn.onclick=resetView;
+  resetBtn=document.createElement('button');resetBtn.className='preset';resetBtn.onclick=()=>{resetView();fitAdjustmentView();draw();};
   presetRow.appendChild(stretchBtn);presetRow.appendChild(resetBtn);syncViewButtons();
   const viewButton=document.createElement('button');viewButton.className='preset active';viewButton.textContent='View: Reference silk';
   viewButton.onclick=()=>{referenceMode=!referenceMode;viewButton.textContent=referenceMode?'View: Reference silk':'View: Computed fibers';viewButton.classList.toggle('active',referenceMode);updateRenderTabs();draw();};
@@ -769,6 +797,7 @@ function addPresets(){
   const rnd=document.createElement('button');rnd.className='preset';rnd.textContent='Surprise';rnd.onclick=()=>{randomizeInteresting();setActive('')};presetRow.appendChild(rnd);setActive('');
 }
 function applyValues(vals){
+  fitAdjustmentView();
   for(const [k,val] of Object.entries(vals)){
     P[k]=val;
     if(inputs[k]){ inputs[k].value = val; inputs[k].parentElement.querySelector('.val').textContent = formatVal(val); }
@@ -835,7 +864,21 @@ canvas.addEventListener('wheel',e=>{
 
 addControls(); addPresets(); activateGroup('Complex log'); resize(); initialize(0.5); recomputeStill(); updateUI(true);
 const fullBtn=document.getElementById('expandBtn');
-fullBtn.onclick=()=>{const on=document.getElementById('app').classList.toggle('full');fullBtn.textContent=on?'Close':'Expand';resize();draw()};
+fullBtn.onclick=()=>{
+  const app=document.getElementById('app');
+  const on=!app.classList.contains('full');
+  if(on){
+    // Start expanded inspection with a full fit; the user can then pinch.
+    Object.assign(view,{sx:1,sy:1,x:0,y:0,freeStretch:false});
+    app.classList.add('full');
+  }else{
+    saveInspectView();
+    app.classList.remove('full');
+    fitAdjustmentView();
+  }
+  fullBtn.textContent=on?'Adjust':'Expand';
+  resize();draw();
+};
 window.__omefTest={
   view:()=>viewStats(),
   resetView:()=>resetView(),
