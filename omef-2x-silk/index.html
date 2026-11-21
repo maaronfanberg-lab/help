@@ -11,6 +11,7 @@
 .iconbtn{background:#11161bed;color:#e5eced;border:1px solid #39414a;border-radius:10px;padding:8px 10px;font-size:11px;white-space:nowrap}
 .iconbtn.active{background:#d3efe8;color:#132825;border-color:#d3efe8}
 #status{position:absolute;left:14px;bottom:48px;font:10px ui-monospace,SFMono-Regular,monospace;letter-spacing:.03em;color:#b6ced0;background:#02050777;border-radius:7px;padding:5px 7px;pointer-events:none;white-space:nowrap}
+#gestureHint{position:absolute;right:11px;top:66px;color:#a0b8c0;background:#03080ab5;border-radius:7px;padding:5px 7px;font:9px ui-monospace,SFMono-Regular,monospace;z-index:2;pointer-events:none}#stage{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .presetRow{position:absolute;bottom:9px;left:10px;right:10px;z-index:2;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
 .presetRow::-webkit-scrollbar{display:none}
 .preset{font-size:10px;letter-spacing:.01em;color:#dae2e5;padding:7px 12px;border:1px solid #3b4045;border-radius:100px;background:#0a1015c9;white-space:nowrap}
@@ -44,7 +45,8 @@
 @media(max-height:610px){#stageWrap{min-height:195px;height:40dvh}.control{min-height:90px}}
 </style></head><body><div id="app"><div id="stageWrap">
 <canvas id="stage" aria-label="Numerically integrated rainbow filament sculpture"></canvas>
-<div class="topbar"><div class="identity">OMEF <span>SILK / 06</span></div><button class="iconbtn" id="runBtn">Play</button><button class="iconbtn" id="refBtn">Set ref</button><button class="iconbtn" id="exploreBtn">Explore</button><button class="iconbtn" id="expandBtn" aria-label="Expand sculpture without stretching">Expand</button></div>
+<div class="topbar"><div class="identity">OMEF <span>SILK / TOUCH</span></div><button class="iconbtn" id="runBtn">Play</button><button class="iconbtn" id="refBtn">Set ref</button><button class="iconbtn" id="exploreBtn">Explore</button><button class="iconbtn" id="expandBtn" aria-label="Expand sculpture without stretching">Expand</button></div>
+<div id="gestureHint" aria-hidden="true">One finger: rotate · Two fingers: zoom · Stretch mode: reshape</div>
 <div id="status">INITIALIZING</div>
 <div id="presetRow" class="presetRow"></div></div>
 <div id="panel"><div class="panelTitle"><div><strong>Instrument controls</strong><small>Your image material, deformed by the OMEF equations</small></div><span id="modeText">STILL REFERENCE</span></div><nav class="tabs" id="tabs"></nav><div id="groups"><div id="mathReadout"></div></div></div>
@@ -76,6 +78,57 @@ const phi2 = new Float32Array(R);
 let anchorQ, anchorV, anchorPhi, anchorSteps=0, baselineQ, baselineV, baselinePhi;
 let steps=0, running=false, exploring=false, previewDelta=0, lastVel=0, seed=20261120;
 let dragState=null, W=300, H=300, DPR=1;
+// View-only touch transform. These controls deliberately do not edit OMEF state.
+const view={sx:1,sy:1,x:0,y:0,freeStretch:false};
+const pointers=new Map();
+let touchGesture=null, lastTapTime=-1, lastTapPos=null;
+let stretchBtn=null, resetBtn=null;
+function viewStats(){return {scaleX:view.sx,scaleY:view.sy,panX:view.x,panY:view.y,freeStretch:view.freeStretch,pointers:pointers.size};}
+function resetView(){view.sx=1;view.sy=1;view.x=0;view.y=0;view.freeStretch=false;syncViewButtons();draw();}
+function syncViewButtons(){
+  if(stretchBtn){stretchBtn.textContent=view.freeStretch?'Stretch: ON':'Stretch: OFF';stretchBtn.classList.toggle('active',view.freeStretch);}
+  if(resetBtn)resetBtn.textContent='Reset view';
+}
+function localPoint(p){const b=stageWrap.getBoundingClientRect();return {x:p.x-b.left,y:p.y-b.top};}
+function twoData(){const arr=Array.from(pointers.values()),a=localPoint(arr[0]),b=localPoint(arr[1]);return {center:{x:(a.x+b.x)/2,y:(a.y+b.y)/2},dx:b.x-a.x,dy:b.y-a.y,dist:Math.max(1,Math.hypot(b.x-a.x,b.y-a.y))};}
+function startTouchGesture(){
+  if(pointers.size===2){
+    const d=twoData(),base={...view};
+    touchGesture={kind:'two',init:d,base,anchorX:(d.center.x-base.x)/base.sx,anchorY:(d.center.y-base.y)/base.sy};
+    dragState=null;
+  }else if(pointers.size===1){
+    const p=Array.from(pointers.values())[0];
+    touchGesture={kind:'one',x:p.x,y:p.y,yaw:P.yaw,tilt:P.tilt};
+  }else{touchGesture=null;dragState=null;}
+}
+function moveTouchGesture(){
+  if(!touchGesture)return;
+  if(touchGesture.kind==='two'&&pointers.size>=2){
+    const d=twoData(),g=touchGesture,distRatio=d.dist/g.init.dist;
+    let rx=distRatio,ry=distRatio;
+    if(view.freeStretch){
+      rx=Math.abs(g.init.dx)>24? Math.abs(d.dx)/Math.abs(g.init.dx):1;
+      ry=Math.abs(g.init.dy)>24? Math.abs(d.dy)/Math.abs(g.init.dy):1;
+    }
+    view.sx=clip(g.base.sx*rx,.35,7.5);
+    view.sy=clip(g.base.sy*ry,.35,7.5);
+    view.x=d.center.x-view.sx*g.anchorX;
+    view.y=d.center.y-view.sy*g.anchorY;
+    // Bound panning to prevent losing the entire artwork outside the viewport.
+    view.x=clip(view.x,-W*6,W*6);
+    view.y=clip(view.y,-H*6,H*6);
+    draw();
+  }else if(touchGesture.kind==='one' && pointers.size===1){
+    const p=Array.from(pointers.values())[0];
+    P.yaw=clip(touchGesture.yaw+(p.x-touchGesture.x)*.006,-2.4,2.4);
+    P.tilt=clip(touchGesture.tilt+(p.y-touchGesture.y)*.004,-1.1,1.1);
+    for(const key of ['yaw','tilt'])if(inputs[key]){
+      inputs[key].value=P[key];inputs[key].parentElement.querySelector('.val').textContent=formatVal(P[key]);
+    }
+    if(!running)draw();
+  }
+}
+
 // The artwork lives in an aspect-ratio-locked virtual viewport. Expand
 // grows only the black canvas, NEVER the vertical geometry independently.
 let compactW=0, compactH=0;
@@ -361,10 +414,14 @@ function project(x,y,z){
           artY+artH*.52-Y3*perspective*artH*.42,Z2];
 }
 function renderBg(){
-  if(running && P.trail>0.01){
-    ctx.fillStyle=`rgba(0,0,0,${clip(1-P.trail*.93,.07,1)})`;
-  } else ctx.fillStyle='#000';
+  // Always clear in untransformed screen coordinates: pinch/zoom must not
+  // transform the black background or leave stale borders behind.
+  ctx.save();
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  if(running && P.trail>0.01) ctx.fillStyle=`rgba(0,0,0,${clip(1-P.trail*.93,.07,1)})`;
+  else ctx.fillStyle='#000';
   ctx.fillRect(0,0,W,H);
+  ctx.restore();
 }
 
 // SILK RIBBON VIEW — the geometry is a smooth observation of the evolved
@@ -562,9 +619,15 @@ function drawReference(){
   ctx.globalAlpha=1;
 }
 function draw(){
-  // Filters act only on the canvas; interface controls remain crisp.
+  // The artwork is always rerendered at device resolution, even when zoomed.
+  // OMEF differential equations and the letterboxed art viewport are unchanged.
   canvas.style.filter=referenceMode?`hue-rotate(${P.materialHue}deg) brightness(${P.materialBright}) contrast(${P.materialContrast}) saturate(${P.materialSaturate})`:'none';
+  ctx.save();
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  ctx.translate(view.x,view.y);
+  ctx.scale(view.sx,view.sy);
   if(referenceMode)drawReference();else drawComputed();
+  ctx.restore();
 }
 function updateEquation(){
   mathEl.textContent=`q̈ = ${P.tension.toFixed(2)}·Δₓq − ${P.biharm.toFixed(3)}·Δₓ⁴q + ${P.neighbor.toFixed(2)}·Δᵣq + ${P.mixX.toFixed(3)}·∂ₓΔᵣq
@@ -680,6 +743,19 @@ function addControls(){
 let pendingStill=false;
 function requestStill(){if(pendingStill)return;pendingStill=true;requestAnimationFrame(()=>{pendingStill=false;recomputeStill();updateUI();});}
 function addPresets(){
+  stretchBtn=document.createElement('button');stretchBtn.className='preset';stretchBtn.title='Off: proportional two-finger zoom. On: independently stretch horizontal and vertical dimensions.';
+  stretchBtn.onclick=()=>{
+    view.freeStretch=!view.freeStretch;
+    if(!view.freeStretch){
+      // Return to a single uniform scale around the viewport center.
+      const scale=Math.sqrt(view.sx*view.sy),cx=W*.5,cy=H*.5;
+      const anchorX=(cx-view.x)/view.sx,anchorY=(cy-view.y)/view.sy;
+      view.sx=scale;view.sy=scale;view.x=cx-scale*anchorX;view.y=cy-scale*anchorY;
+    }
+    syncViewButtons();draw();
+  };
+  resetBtn=document.createElement('button');resetBtn.className='preset';resetBtn.onclick=resetView;
+  presetRow.appendChild(stretchBtn);presetRow.appendChild(resetBtn);syncViewButtons();
   const viewButton=document.createElement('button');viewButton.className='preset active';viewButton.textContent='View: Reference silk';
   viewButton.onclick=()=>{referenceMode=!referenceMode;viewButton.textContent=referenceMode?'View: Reference silk':'View: Computed fibers';viewButton.classList.toggle('active',referenceMode);updateRenderTabs();draw();};
   presetRow.appendChild(viewButton);
@@ -721,21 +797,49 @@ refBtn.onclick = ()=>{ running=false; captureAnchor(); computeBaseline(); recomp
 exploreBtn.onclick = ()=>{ exploring=!exploring; if(exploring){running=true;reseedTargets();} updateUI(true); };
 randomBtn.onclick = ()=>{ randomizeInteresting(); };
 
-canvas.addEventListener('pointerdown', e=>{ dragState={x:e.clientX, y:e.clientY, yaw:P.yaw, tilt:P.tilt}; canvas.setPointerCapture?.(e.pointerId); });
-canvas.addEventListener('pointermove', e=>{
-  if(!dragState) return;
-  P.yaw = clip(dragState.yaw + (e.clientX-dragState.x)*0.006, -2.4, 2.4);
-  P.tilt = clip(dragState.tilt + (e.clientY-dragState.y)*0.004, -1.1, 1.1);
-  if(inputs.yaw){ inputs.yaw.value=P.yaw; inputs.yaw.parentElement.querySelector('.val').textContent = formatVal(P.yaw); }
-  if(inputs.tilt){ inputs.tilt.value=P.tilt; inputs.tilt.parentElement.querySelector('.val').textContent = formatVal(P.tilt); }
-  if(!running) draw();
+// Real two-pointer gestures, independent of the OMEF simulation timestep.
+// One finger preserves the earlier orbit action; two fingers zoom and pan.
+canvas.addEventListener('pointerdown',e=>{
+  e.preventDefault();
+  pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  try{canvas.setPointerCapture(e.pointerId);}catch(_){}
+  startTouchGesture();
 });
-canvas.addEventListener('pointerup', ()=>dragState=null); canvas.addEventListener('pointercancel', ()=>dragState=null);
+canvas.addEventListener('pointermove',e=>{
+  if(!pointers.has(e.pointerId))return;
+  e.preventDefault();
+  pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  moveTouchGesture();
+});
+function endPointer(e){
+  if(!pointers.has(e.pointerId))return;
+  pointers.delete(e.pointerId);
+  try{if(canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);}catch(_){}
+  startTouchGesture();
+}
+canvas.addEventListener('pointerup',endPointer);
+canvas.addEventListener('pointercancel',endPointer);
+canvas.addEventListener('lostpointercapture',endPointer);
+// Keep iOS Safari from treating a gesture over the sculpture as a page zoom.
+for(const name of ['gesturestart','gesturechange','gestureend','touchmove'])
+  canvas.addEventListener(name,e=>{if(e.cancelable)e.preventDefault();},{passive:false});
+canvas.addEventListener('wheel',e=>{
+  e.preventDefault();
+  const b=stageWrap.getBoundingClientRect(),x=e.clientX-b.left,y=e.clientY-b.top;
+  const next=clip(view.sx*Math.exp(-e.deltaY*.002),.35,7.5);
+  const ratio=next/view.sx;
+  view.x=x-(x-view.x)*ratio;view.y=y-(y-view.y)*ratio;
+  view.sx=next;view.sy=clip(view.sy*ratio,.35,7.5);
+  draw();
+},{passive:false});
 
 addControls(); addPresets(); activateGroup('Complex log'); resize(); initialize(0.5); recomputeStill(); updateUI(true);
 const fullBtn=document.getElementById('expandBtn');
 fullBtn.onclick=()=>{const on=document.getElementById('app').classList.toggle('full');fullBtn.textContent=on?'Close':'Expand';resize();draw()};
 window.__omefTest={
+  view:()=>viewStats(),
+  resetView:()=>resetView(),
+  stretch:(on)=>{view.freeStretch=!!on;syncViewButtons();draw();},
   stats:()=>({steps,vel:lastVel,delta:previewDelta,running,pixels:W*H,art:{x:artX,y:artY,width:artW,height:artH},expanded:document.getElementById('app').classList.contains('full')}),
   advance:(n=1)=>{for(let i=0;i<n;i++)step(.032);draw();},
   parameter:(k,value)=>{if(!(k in P))throw Error('bad key');P[k]=value;if(inputs[k]){inputs[k].value=value;inputs[k].parentElement.querySelector('.val').textContent=formatVal(value);}if(!running)recomputeStill();},
