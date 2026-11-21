@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"><meta name="theme-color" content="#050608"><meta name="apple-mobile-web-app-capable" content="yes"><title>OMEF · Studio 04</title><style>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"><meta name="theme-color" content="#050608"><meta name="apple-mobile-web-app-capable" content="yes"><title>OMEF · Studio 04 · Contain Fix</title><style>
 :root{color-scheme:dark;--b:#06080b;--panel:#0e1117;--raised:#151a22;--line:#28313b;--text:#f3f4f5;--muted:#8e9aa7;--accent:#afe6dd}
 *{box-sizing:border-box}html,body{margin:0;height:100%;background:#000;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,Inter,system-ui,sans-serif}button,input{font:inherit}button{cursor:pointer;touch-action:manipulation}
 #app{position:fixed;inset:0;background:var(--b);display:flex;flex-direction:column;overflow:hidden}
@@ -44,7 +44,7 @@
 @media(max-height:610px){#stageWrap{min-height:195px;height:40dvh}.control{min-height:90px}}
 </style></head><body><div id="app"><div id="stageWrap">
 <canvas id="stage" aria-label="Numerically integrated rainbow filament sculpture"></canvas>
-<div class="topbar"><div class="identity">OMEF <span>EXPRESSION / 04</span></div><button class="iconbtn" id="runBtn">Play</button><button class="iconbtn" id="refBtn">Set ref</button><button class="iconbtn" id="exploreBtn">Explore</button><button class="iconbtn" id="expandBtn">Expand</button></div>
+<div class="topbar"><div class="identity">OMEF <span>EXPRESSION / 04</span></div><button class="iconbtn" id="runBtn">Play</button><button class="iconbtn" id="refBtn">Set ref</button><button class="iconbtn" id="exploreBtn">Explore</button><button class="iconbtn" id="expandBtn" aria-label="Expand sculpture without stretching">Expand</button></div>
 <div id="status">INITIALIZING</div>
 <div id="presetRow" class="presetRow"></div></div>
 <div id="panel"><div class="panelTitle"><div><strong>Instrument controls</strong><small>Adjust the equations while viewing the sculpture</small></div><span id="modeText">STILL REFERENCE</span></div><nav class="tabs" id="tabs"></nav><div id="groups"><div id="mathReadout"></div></div></div>
@@ -76,6 +76,25 @@ const phi2 = new Float32Array(R);
 let anchorQ, anchorV, anchorPhi, anchorSteps=0, baselineQ, baselineV, baselinePhi;
 let steps=0, running=false, exploring=false, previewDelta=0, lastVel=0, seed=20261120;
 let dragState=null, W=300, H=300, DPR=1;
+// The artwork lives in an aspect-ratio-locked virtual viewport. Expand
+// grows only the black canvas, NEVER the vertical geometry independently.
+let compactW=0, compactH=0;
+let artW=300, artH=300, artX=0, artY=0;
+function updateArtFrame(){
+  const expanded=document.getElementById('app').classList.contains('full');
+  if(!expanded || !compactW || !compactH){
+    compactW=W; compactH=H;
+    artW=W; artH=H; artX=0; artY=0;
+    return;
+  }
+  // Preserve physical sculpture size on entering full view. If the phone
+  // rotates and the available dimensions shrink, uniformly fit it.
+  const factor=Math.min(1, W/compactW, H/compactH);
+  artW=compactW*factor;
+  artH=compactH*factor;
+  artX=Math.round((W-artW)/2);
+  artY=Math.round((H-artH)/2);
+}
 const TWO=Math.PI*2;
 function rng(){seed ^= seed<<13; seed ^= seed>>>17; seed ^= seed<<5; return (seed>>>0)/4294967296;}
 function clip(x,a,b){return x<a?a:x>b?b:x}
@@ -164,6 +183,7 @@ function resize(){
   W = Math.max(50,r.width); H = Math.max(50,r.height);
   canvas.width = Math.round(W*DPR); canvas.height = Math.round(H*DPR);
   ctx.setTransform(DPR,0,0,DPR,0,0);
+  updateArtFrame();
   if(anchorQ && baselineQ) draw();
 }
 window.addEventListener('resize', resize);
@@ -299,7 +319,8 @@ function project(x,y,z){
   let X3=cr*X2-sr*Y2, Y3=sr*X2+cr*Y2;
   let perspective=P.zoom*3.4/(3.4+P.perspective*(Z2+0.3));
   perspective=clip(perspective,.36,2.2);
-  return [W*.50+X3*perspective*W*.46,H*.52-Y3*perspective*H*.42,Z2];
+  return [artX+artW*.50+X3*perspective*artW*.46,
+          artY+artH*.52-Y3*perspective*artH*.42,Z2];
 }
 function renderBg(){
   if(running && P.trail>0.01){
@@ -512,7 +533,7 @@ addControls(); addPresets(); resize(); initialize(0.5); recomputeStill(); update
 const fullBtn=document.getElementById('expandBtn');
 fullBtn.onclick=()=>{const on=document.getElementById('app').classList.toggle('full');fullBtn.textContent=on?'Close':'Expand';resize();draw()};
 window.__omefTest={
-  stats:()=>({steps,vel:lastVel,delta:previewDelta,running,pixels:W*H}),
+  stats:()=>({steps,vel:lastVel,delta:previewDelta,running,pixels:W*H,art:{x:artX,y:artY,width:artW,height:artH},expanded:document.getElementById('app').classList.contains('full')}),
   advance:(n=1)=>{for(let i=0;i<n;i++)step(.032);draw();},
   parameter:(k,value)=>{if(!(k in P))throw Error('bad key');P[k]=value;if(inputs[k]){inputs[k].value=value;inputs[k].parentElement.querySelector('.val').textContent=formatVal(value);}if(!running)recomputeStill();},
   snapshot:()=>Array.from(q[0]).slice(0,32)
