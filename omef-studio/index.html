@@ -997,7 +997,7 @@ function pathDraw(){
  const needScale=Math.min(ab.w*.83/Math.max(.1,maxX-minX),ab.h*.81/Math.max(.1,maxY-minY));
  // Fit is uniform: never distort aspect; soft only when user has not manually zoomed.
  let f= camera.zoom===1 ? Math.min(size,needScale) : size;
- if(playing&&visual.trail>0&&fitMem&&!fitMem.alt){fitMem.cx+=(viewCX-fitMem.cx)*.04;fitMem.cy+=(viewCY-fitMem.cy)*.04;fitMem.f+=(Math.min(f,fitMem.f*1.002)-fitMem.f)*.04;if(f<fitMem.f)fitMem.f=f;}else fitMem={cx:viewCX,cy:viewCY,f};
+ if(playing&&visual.trail>0&&fitMem&&!fitMem.alt&&camera.zoom===1){fitMem.cx+=(viewCX-fitMem.cx)*.04;fitMem.cy+=(viewCY-fitMem.cy)*.04;fitMem.f+=(Math.min(f,fitMem.f*1.002)-fitMem.f)*.04;if(f<fitMem.f)fitMem.f=f;}else fitMem={cx:viewCX,cy:viewCY,f};
  viewCX=fitMem.cx;viewCY=fitMem.cy;f=fitMem.f;
  // true string speed |p| at the 24 nodes, for Motion color
  const spd=new Float64Array(NS);let spMax=1e-12;for(let i=0;i<NS;i++){spd[i]=Math.hypot(S[P+3*i],S[P+3*i+1],S[P+3*i+2]);spMax=Math.max(spMax,spd[i]);}
