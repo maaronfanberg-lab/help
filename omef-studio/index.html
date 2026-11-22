@@ -907,10 +907,24 @@ function newHist(){return {buf:new Float32Array(HMAX*HSTR),n:0,head:0};}
 let hist=newHist();
 function histPush(st,h){h=h||hist;const o=h.head*HSTR,y=st.y,b=h.buf;for(let i=0;i<144;i++)b[o+i]=y[i];for(let i=0;i<100;i++)b[o+144+i]=st.z[i];for(let i=0;i<62;i++)b[o+244+i]=y[PORT+i];h.head=(h.head+1)%HMAX;if(h.n<HMAX)h.n++;}
 function hOff(k){return (((hist.head-hist.n+k)%HMAX)+HMAX)%HMAX*HSTR;}
+// Each moved control bends every view by its own true derivative fingerprint (same as Sculpture; size display-scaled).
+function bendLines(lines){
+ const CS=lastResponse?.controls||[];if(!CS.length)return lines;
+ let cx=0,cy=0,cz=0,N=0;for(const L of lines)for(const p of L.p){cx+=p[0];cy+=p[1];cz+=p[2];N++;}cx/=N;cy/=N;cz/=N;
+ let E=0;for(const L of lines)for(const p of L.p)E+=(p[0]-cx)**2+(p[1]-cy)**2+(p[2]-cz)**2;E=Math.sqrt(E/N)||1;
+ const G=FS_GAIN/Math.sqrt(Math.max(1,CS.length/4)),LN=lines.length;
+ lines.forEach((L,li)=>{const w=LN>1?-1+2*li/(LN-1):0,n=L.p.length;
+  L.p=L.p.map((p,j)=>{const u=n>1?j/(n-1):0;let R=0,D=0,tw=0;
+   for(const c of CS){const pr=c.profile,ph=(c.idx*.618034)%1;const v=((u*(1+(c.idx%3))+ph+(w+1)*.11)%1+1)%1*256,i=Math.floor(v)%256,fr=v-Math.floor(v);
+    const sig=(pr[i]*(1-fr)+pr[(i+1)%256]*fr)*c.amount,ang=ph*TPI+w*(1+c.idx%4)*.9;R+=G*sig*Math.cos(ang);D+=G*sig*Math.sin(ang);tw+=sig*(c.idx%2?1:-1);}
+   R=.75*Math.tanh(R/1.2);D=Math.tanh(D/1.2);const a=.5*tw*G/FS_GAIN,ca=Math.cos(a),sa=Math.sin(a);
+   const dx=(p[0]-cx)*(1+R),dz=(p[2]-cz)*(1+R);return [cx+dx*ca-dz*sa,cy+(p[1]-cy)*(1+.4*R)+.7*E*D,cz+dx*sa+dz*ca];});});
+ return lines;
+}
 function strokeLines(lines,tilt=0,yaw0=0){
  const ab=artBox(),ct=Math.cos(tilt),st=Math.sin(tilt),cyw=Math.cos(yaw0),syw=Math.sin(yaw0);
  const pre=v=>{const y=v[1]*ct-v[2]*st,z=v[1]*st+v[2]*ct;return [v[0]*cyw+z*syw,y,-v[0]*syw+z*cyw];};let minX=1e20,maxX=-1e20,minY=1e20,maxY=-1e20;
- const P2=lines.map(L=>L.p.map(v=>{const q=proj(pre(v));if(q[0]<minX)minX=q[0];if(q[0]>maxX)maxX=q[0];if(q[1]<minY)minY=q[1];if(q[1]>maxY)maxY=q[1];return q;}));
+ bendLines(lines);const P2=lines.map(L=>L.p.map(v=>{const q=proj(pre(v));if(q[0]<minX)minX=q[0];if(q[0]>maxX)maxX=q[0];if(q[1]<minY)minY=q[1];if(q[1]>maxY)maxY=q[1];return q;}));
  if(!(maxX>minX))return;
  let cx=(minX+maxX)/2,cy=(minY+maxY)/2,f=Math.min(ab.w*.86/Math.max(1e-9,maxX-minX),ab.h*.84/Math.max(1e-9,maxY-minY))*camera.zoom;
  if(playing&&fitMem&&fitMem.alt){fitMem.cx+=(cx-fitMem.cx)*.06;fitMem.cy+=(cy-fitMem.cy)*.06;fitMem.f+=(f-fitMem.f)*.06;if(f<fitMem.f)fitMem.f=f;}else fitMem={cx,cy,f,alt:true};
