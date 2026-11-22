@@ -662,7 +662,7 @@ const configs={
  ['runSpeed','Play speed',1,4,1,'RK4 steps per animation tick']
  ]
 };
-const viewDefs=[['Force Sculpture','Live 909-coordinate mathematical force response, optically amplified relative to reference'],['Silk','Unamplified solved string with bulk, phase, port and qubit readouts']];
+const viewDefs=[['Force Sculpture','Live 909-coordinate mathematical force response, optically amplified relative to reference'],['Trace','Paths of the 24 string points through space'],['Phase','Each string point: position against velocity'],['Silk','Unamplified solved string with bulk, phase, port and qubit readouts'],['Rings','100 Lorenz-96 modes as rings stacked through time'],['Weave','62 port values spiralling through time'],['Lattice','6×6×6 bulk field as a wire lattice']];
 const allMath=new Set(['Core','Phases','Ports','E16','Quantum']);
 const visualDestinations={portGain:'Ports',phaseGain:'Phase',bulkGain:'Bulk',quantumGain:'Qubit',legacyVisualGain:'Legacy',memVisualGain:'Memory',chaosVisualGain:'Chaos',visualGain:'Force Sculpture'};
 function reportError(e){playing=false;el('play').textContent='Play';status.textContent='ERROR';status.style.color='#ffc2b5';el('error').hidden=false;el('error').textContent=String(e?.stack||e).slice(0,450);console.error('OMEF',e);}
@@ -902,6 +902,65 @@ function drawImpact(){
  }
  ctx.restore();
 }
+const HV=new Set(['Trace','Phase','Rings','Weave']),HMAX=720,HSTR=306;
+function newHist(){return {buf:new Float32Array(HMAX*HSTR),n:0,head:0};}
+let hist=newHist();
+function histPush(st,h){h=h||hist;const o=h.head*HSTR,y=st.y,b=h.buf;for(let i=0;i<144;i++)b[o+i]=y[i];for(let i=0;i<100;i++)b[o+144+i]=st.z[i];for(let i=0;i<62;i++)b[o+244+i]=y[PORT+i];h.head=(h.head+1)%HMAX;if(h.n<HMAX)h.n++;}
+function hOff(k){return (((hist.head-hist.n+k)%HMAX)+HMAX)%HMAX*HSTR;}
+function strokeLines(lines,tilt=0,yaw0=0){
+ const ab=artBox(),ct=Math.cos(tilt),st=Math.sin(tilt),cyw=Math.cos(yaw0),syw=Math.sin(yaw0);
+ const pre=v=>{const y=v[1]*ct-v[2]*st,z=v[1]*st+v[2]*ct;return [v[0]*cyw+z*syw,y,-v[0]*syw+z*cyw];};let minX=1e20,maxX=-1e20,minY=1e20,maxY=-1e20;
+ const P2=lines.map(L=>L.p.map(v=>{const q=proj(pre(v));if(q[0]<minX)minX=q[0];if(q[0]>maxX)maxX=q[0];if(q[1]<minY)minY=q[1];if(q[1]>maxY)maxY=q[1];return q;}));
+ if(!(maxX>minX))return;
+ let cx=(minX+maxX)/2,cy=(minY+maxY)/2,f=Math.min(ab.w*.86/Math.max(1e-9,maxX-minX),ab.h*.84/Math.max(1e-9,maxY-minY))*camera.zoom;
+ if(playing&&fitMem&&fitMem.alt){fitMem.cx+=(cx-fitMem.cx)*.06;fitMem.cy+=(cy-fitMem.cy)*.06;fitMem.f+=(f-fitMem.f)*.06;if(f<fitMem.f)fitMem.f=f;}else fitMem={cx,cy,f,alt:true};
+ cx=fitMem.cx;cy=fitMem.cy;f=fitMem.f;
+ const X=p=>ab.x+ab.w/2+(p[0]-cx)*f+camera.dx,Y=p=>ab.y+ab.h/2-(p[1]-cy)*f+camera.dy;
+ lines.forEach((L,li)=>{const pts=P2[li],n=pts.length;if(n<2)return;const segs=L.segs||8;
+  for(let sg=0;sg<segs;sg++){const a0=Math.floor(sg*(n-1)/segs),a1=Math.ceil((sg+1)*(n-1)/segs);
+   const hue=typeof L.hue==='function'?L.hue((a0+a1)/2/(n-1)):L.hue,al=Math.min(1,(L.a??.8)*(L.fade?(.4+.6*(sg+1)/segs):1));
+   const path=()=>{ctx.beginPath();for(let i=a0;i<=a1;i++){const p=pts[i];if(i===a0)ctx.moveTo(X(p),Y(p));else ctx.lineTo(X(p),Y(p));}if(L.closed&&sg===segs-1)ctx.lineTo(X(pts[0]),Y(pts[0]));ctx.stroke();};
+   ctx.strokeStyle=`hsl(${(((hue%360)+360)%360).toFixed(0)} 92% ${L.light||60}%)`;
+   if(visual.glow>0){ctx.lineWidth=(2.6+Math.max(0,visual.glow-.7)*1.4)*visual.thickness;ctx.globalAlpha=Math.min(.25,visual.glow*(.05+.04*visual.glow))*al;path();}
+   ctx.lineWidth=Math.max(.4,visual.thickness*(L.w||.8));ctx.globalAlpha=al;path();}
+ });ctx.globalAlpha=1;
+}
+function altDraw(){
+ const lines=[],n=hist.n,m=visual.motion;
+ if(view==='Lattice'){
+  const g=visual.bulkGain,phi=i=>S[PHI+i],idx=(x,y,z)=>(x*6+y)*6+z;
+  const pos=(x,y,z)=>{const v=Math.tanh(g*phi(idx(x,y,z)));const px=x-2.5,py=y-2.5,pz=z-2.5,r=Math.hypot(px,py,pz)||1;return [px+1.1*v*px/r,py+1.1*v*py/r,pz+1.1*v*pz/r];};
+  for(let a=0;a<6;a++)for(let b=0;b<6;b++)for(const ax of [0,1,2]){const p=[];let mean=0;
+   for(let t=0;t<6;t++){const c=ax===0?[t,a,b]:ax===1?[a,t,b]:[a,b,t];p.push(pos(...c));mean+=Math.tanh(g*phi(idx(...c)))/6;}
+   lines.push({p,hue:200+150*mean+60*ax,a:.8,segs:1,w:1.1,light:58+14*mean});}
+  return strokeLines(lines,.5,.62);
+ }
+ if(n<2)return;
+ const T=Math.min(n,view==='Rings'?n:n),stride=Math.max(1,Math.floor(T/(view==='Rings'?54:260)));
+ if(view==='Trace'||view==='Phase'){
+  let sq=0,sp=0,cnt=0,vmax=1e-12;for(let k=0;k<n;k+=stride){const o=hOff(k);for(let j=0;j<72;j++){sq+=hist.buf[o+j]**2;sp+=hist.buf[o+72+j]**2;}cnt+=72;
+   for(let i=0;i<NS;i++)vmax=Math.max(vmax,Math.hypot(hist.buf[o+72+3*i],hist.buf[o+73+3*i],hist.buf[o+74+3*i]));}
+  const ps=Math.sqrt(sq/cnt)/Math.max(1e-12,Math.sqrt(sp/cnt));
+  for(let i=0;i<NS;i++){const p=[],spd=[];
+   for(let k=0;k<n;k+=stride){const o=hOff(k),b=hist.buf;const qx=b[o+3*i],qy=b[o+3*i+1],qz=b[o+3*i+2],vx=b[o+72+3*i],vy=b[o+73+3*i],vz=b[o+74+3*i];
+    p.push(view==='Trace'?[qx,qy,qz]:[qx+.3*qz,ps*(vx+.3*vz),qy]);spd.push(Math.hypot(vx,vy,vz)/vmax);}
+   const base=205+360*i/NS;lines.push({p,fade:true,a:1,segs:10,w:1.7,hue:u=>base+m*200*(spd[Math.min(spd.length-1,Math.round(u*(spd.length-1)))]-.5)});}
+  return strokeLines(lines);
+ }
+ if(view==='Rings'){
+  let zs=0,zz=0,c=0;for(let k=0;k<n;k+=stride){const o=hOff(k)+144;for(let j=0;j<100;j++){zs+=hist.buf[o+j];zz+=hist.buf[o+j]**2;}c+=100;}
+  const zm=zs/c,zsd=Math.sqrt(Math.max(1e-12,zz/c-zm*zm)),R0=n/stride;let r=0;
+  for(let k=0;k<n;k+=stride,r++){const o=hOff(k)+144,p=[];for(let j=0;j<100;j++){const th=TPI*j/100,rad=1+.22*(hist.buf[o+j]-zm)/zsd;p.push([rad*Math.cos(th),2.4*r/R0-1.2,rad*Math.sin(th)]);}
+   const t=r/R0;lines.push({p,closed:true,fade:false,a:.3+.65*t,segs:4,w:1.1,hue:200+170*t+m*120*Math.tanh((hist.buf[o]-zm)/zsd)});}
+  return strokeLines(lines,.8,0);
+ }
+ if(view==='Weave'){
+  const g=visual.portGain*.01,K=Math.ceil(n/stride);
+  for(let i=0;i<62;i++){const p=[];let kk=0;for(let k=0;k<n;k+=stride,kk++){const v=Math.tanh(g*hist.buf[hOff(k)+244+i]),t=kk/K,ang=TPI*i/62+t*TPI*.9,rad=.35+t*.9+.28*v;p.push([rad*Math.cos(ang),.6*v,rad*Math.sin(ang)]);}
+   lines.push({p,fade:true,a:.9,segs:8,w:1.2,hue:205+360*i/62});}
+  return strokeLines(lines,1.0,0);
+ }
+}
 let fitMem=null,spRef=0;
 function pathDraw(){
  const ab=artBox();
@@ -924,7 +983,7 @@ function pathDraw(){
  const needScale=Math.min(ab.w*.83/Math.max(.1,maxX-minX),ab.h*.81/Math.max(.1,maxY-minY));
  // Fit is uniform: never distort aspect; soft only when user has not manually zoomed.
  let f= camera.zoom===1 ? Math.min(size,needScale) : size;
- if(playing&&visual.trail>0&&fitMem){fitMem.cx+=(viewCX-fitMem.cx)*.04;fitMem.cy+=(viewCY-fitMem.cy)*.04;fitMem.f+=(Math.min(f,fitMem.f*1.002)-fitMem.f)*.04;if(f<fitMem.f)fitMem.f=f;}else fitMem={cx:viewCX,cy:viewCY,f};
+ if(playing&&visual.trail>0&&fitMem&&!fitMem.alt){fitMem.cx+=(viewCX-fitMem.cx)*.04;fitMem.cy+=(viewCY-fitMem.cy)*.04;fitMem.f+=(Math.min(f,fitMem.f*1.002)-fitMem.f)*.04;if(f<fitMem.f)fitMem.f=f;}else fitMem={cx:viewCX,cy:viewCY,f};
  viewCX=fitMem.cx;viewCY=fitMem.cy;f=fitMem.f;
  // true string speed |p| at the 24 nodes, for Motion color
  const spd=new Float64Array(NS);let spMax=1e-12;for(let i=0;i<NS;i++){spd[i]=Math.hypot(S[P+3*i],S[P+3*i+1],S[P+3*i+2]);spMax=Math.max(spMax,spd[i]);}
@@ -956,9 +1015,9 @@ function pathDraw(){
 }
 function draw(){
  if(!ctx||!W||!H)return;
- const trailOn=playing&&visual.trail>0&&view!=='Impact';
+ const trailOn=playing&&visual.trail>0&&view!=='Impact'&&!HV.has(view);
  ctx.globalAlpha=1;ctx.fillStyle=trailOn?`rgba(0,0,0,${(1-visual.trail).toFixed(3)})`:'#000';ctx.fillRect(0,0,W,H);
- if(view==='Impact')drawImpact();else pathDraw();
+ if(view==='Impact')drawImpact();else if(HV.has(view)||view==='Lattice')altDraw();else pathDraw();
  needRender=false;
 }
 
@@ -991,7 +1050,7 @@ function tapControl(input,min,max,step){
 function updateInputs(tabName){
  tab=tabName;for(const b of tabstrip.children)b.classList.toggle('active',b.dataset.name===tab);
  sliders.replaceChildren();
- const DV={visualGain:['Force Sculpture','Silk'],phaseGain:['Silk','Phase'],bulkGain:['Silk','Bulk'],quantumGain:['Silk','Qubit'],legacyVisualGain:['Legacy'],memVisualGain:['Memory'],chaosVisualGain:['Chaos']};
+ const DV={fiberCount:['Force Sculpture','Silk'],portGain:['Force Sculpture','Silk','Weave'],visualGain:['Force Sculpture','Silk'],phaseGain:['Silk'],bulkGain:['Silk','Lattice'],quantumGain:['Silk'],legacyVisualGain:['Legacy'],memVisualGain:['Memory'],chaosVisualGain:['Chaos']};
  for(const [key,label,min,max,step,explain] of configs[tab].filter(r=>tab!=='Display'||(view!=='Impact'&&(!DV[r[0]]||DV[r[0]].includes(view))))){
   const v = key in params?params[key]:key in visual?visual[key]:key==='horizon'?horizon:runSpeed;
   const outer=document.createElement('div');outer.className='control';outer.dataset.param=key;const disp=x=>tab==='Simple'?Math.round(100*(x-min)/((max-min)||1))+'%':fmt(x);if(tab==='Simple'){outer.dataset.pct='1';outer.dataset.min=min;outer.dataset.max=max;}
@@ -1022,11 +1081,11 @@ function stateDelta(a,b){let n=0;for(let j=0;j<l.D;j++)n+=(a.y[j]-b.y[j])**2;
  for(let j=0;j<62;j++)n+=(a.memory[j]-b.memory[j])**2;
  return Math.sqrt(n/R.layout.dimension);}
 function queueRecompute(){
- const ticket=++recomputeTicket;let cur=R.copy(MBase),done=0;
+ const ticket=++recomputeTicket;let cur=R.copy(MBase),done=0;const hh=newHist();
  const chunk=()=>{if(ticket!==recomputeTicket||playing)return;try{
-  const n=Math.min(30,horizon-done);for(let i=0;i<n;i++){cur=R.step(cur,.004,params);if(!R.finite(cur))throw new Error('Nonfinite OMEF E16 state at step '+(done+i));}
+  const n=Math.min(30,horizon-done);for(let i=0;i<n;i++){cur=R.step(cur,.004,params);histPush(cur,hh);if(!R.finite(cur))throw new Error('Nonfinite OMEF E16 state at step '+(done+i));}
   done+=n;if(done<horizon){requestAnimationFrame(chunk);return;}
-  setCurrent(cur);stepCount=horizon;
+  setCurrent(cur);hist=hh;stepCount=horizon;
   if(!MBaseline||!R.finite(MBaseline))MBaseline=solved(MBase,refParams,horizon);
   baseline=MBaseline.y;currentDelta=stateDelta(M,MBaseline);
   updateDiagnostics();computeImpact();draw();window.__omefSolved=(window.__omefSolved||0)+1;
@@ -1038,7 +1097,7 @@ function start(){playing=!playing;el('play').textContent=playing?'Pause':'Play';
  updateDiagnostics();
 }
 function reference(){playing=false;el('play').textContent='Play';el('play').classList.remove('active');MBase=R.copy(M);base=MBase.y;refParams={...params};MBaseline=solved(MBase,refParams,horizon);baseline=MBaseline.y;setCurrent(MBaseline);stepCount=horizon;currentDelta=0;computeImpact();draw();updateDiagnostics();}
-function restart(){playing=false;el('play').textContent='Play';el('play').classList.remove('active');MBase=R.initial();base=MBase.y;refParams={...params};MBaseline=solved(MBase,refParams,horizon);baseline=MBaseline.y;setCurrent(MBaseline);stepCount=horizon;currentDelta=0;computeImpact();draw();updateDiagnostics();}
+function restart(){playing=false;el('play').textContent='Play';el('play').classList.remove('active');MBase=R.initial();base=MBase.y;refParams={...params};MBaseline=solved(MBase,refParams,horizon);baseline=MBaseline.y;setCurrent(MBaseline);stepCount=horizon;currentDelta=0;computeImpact();draw();updateDiagnostics();queueRecompute();}
 el('play').onclick=start;el('ref').onclick=reference;el('reset').onclick=restart;
 function resetView(){camera={zoom:1,stretchX:1,stretchY:1,dx:0,dy:0,yaw:.15,tilt:0};draw();}
 el('resetView').onclick=resetView;
@@ -1079,7 +1138,7 @@ function animate(t){
    for(let i=0;i<count;i++){
     const next=R.step(M,.004,params);
     if(!R.finite(next))throw new Error('Numerical error at step '+stepCount+'; playback stopped, state retained');
-    setCurrent(next);stepCount++;
+    setCurrent(next);histPush(next);stepCount++;
    }
    if(stepCount%8===0)computeImpact();
    draw();
@@ -1094,7 +1153,7 @@ function init(){
  resize();updateInputs('Simple');
  // Native reference is computed before first presentation. Avoid endless INITIALIZING state.
  MBaseline=solved(MBase,refParams,horizon);baseline=MBaseline.y;setCurrent(MBaseline);stepCount=horizon;
- currentDelta=0;updateDiagnostics();computeImpact();draw();el('boot').hidden=true;window.__omefBootReady=true;
+ currentDelta=0;updateDiagnostics();computeImpact();draw();el('boot').hidden=true;window.__omefBootReady=true;queueRecompute();
  window.__omefTest={
   getState:()=>Array.from(S),getAux:()=>({z:Array.from(M.z),memory:Array.from(M.memory),macro:M.macroIndex,legacy:Array.from(R.legacyAt(M.macroIndex,params.memoryRho))}),advance:n=>{for(let i=0;i<n;i++){setCurrent(R.step(M,.004,params));stepCount++;}draw();updateDiagnostics();},
   setParam:(k,val)=>{if(!(k in params))throw Error('Unknown parameter '+k);params[k]=val;if(!playing)queueRecompute();},
