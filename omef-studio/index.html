@@ -566,7 +566,7 @@ let S=M.y,base=MBase.y,baseline=MBaseline.y;
 let refParams={...R.merged(),legacyGate:0},params={...R.merged(),legacyGate:0},playing=false,expanded=false,view='Force Sculpture',tab='Core',currentDelta=0,stepCount=0,needRender=true;
 let W=390,H=350,DPR=1,touchPts=new Map(),touchStart=null,dragStart=null;
 let camera={zoom:1,stretchX:1,stretchY:1,dx:0,dy:0,yaw:0.15,tilt:0.0},isStretch=false;
-let visual={fiberCount:104,thickness:.56,glow:.68,visualGain:6,portGain:250,phaseGain:1.7,bulkGain:22,quantumGain:5,legacyVisualGain:8,memVisualGain:160,chaosVisualGain:1.6,seedFrame:0};
+let visual={fiberCount:104,thickness:.56,glow:.68,visualGain:6,portGain:250,phaseGain:1.7,bulkGain:22,quantumGain:5,legacyVisualGain:8,memVisualGain:160,chaosVisualGain:1.6,seedFrame:0,trail:.82,motion:.45,spin:.2};
 let horizon=500,runSpeed=1,lag=0,renderMode='original',future=null,recomputeTicket=0;let forceBaseline=null,forceCurrent=null,lastResponse=null;const responseSections=[['STRING q̇',Q,NS*3,'y'],['STRING ṗ',P,NS*3,'y'],['BULK ϕ̇',PHI,NB,'y'],['BULK π̇',PI,NB,'y'],['QUBIT ψ̇',PR,8,'psi'],['PHASE θ̇',TH,NL,'y'],['PORT ṙ',PORT,NR,'y'],['CHAOS ż',0,100,'z'],['MEMORY ṁ',0,62,'memory']];
 const configs={
  Simple:[
@@ -580,6 +580,9 @@ const configs={
  ['gate','Openness',0,1,.01,''],
  ['fiberCount','Threads',24,180,2,''],
  ['glow','Glow',0,1.8,.05,''],
+ ['trail','Trails',0,.97,.01,''],
+ ['motion','Motion color',0,1,.01,''],
+ ['spin','Spin',0,1,.01,''],
  ['runSpeed','Speed',1,4,1,'']
  ],
  Core:[
@@ -649,7 +652,10 @@ const configs={
  ['bulkGain','Bulk visibility',0,80,1,'Magnifies interpolated bulk field'],
  ['quantumGain','Qubit magnification',0,30,.5,'Entanglement readout to strand spacing'],
  ['thickness','Thread thickness',.25,1.8,.05,'Drawing only'],
- ['glow','Bloom',0,1.8,.05,'Optical halo only']
+ ['glow','Bloom',0,1.8,.05,'Optical halo only'],
+ ['trail','Trails',0,.97,.01,'Past string positions fade instead of clearing (while playing)'],
+ ['motion','Motion color',0,1,.01,'Shifts each thread’s hue by the solved string velocity p'],
+ ['spin','Spin',0,1,.01,'Camera orbit; view only']
  ],
  Compare:[
  ['horizon','Still horizon',50,1500,50,'RK4 steps from one stored initial state'],
@@ -896,6 +902,7 @@ function drawImpact(){
  }
  ctx.restore();
 }
+let fitMem=null,spRef=0;
 function pathDraw(){
  const ab=artBox();
  viewCache.phase=view==='Phase'?E.helpers.port100(S,params).localC:null;
@@ -913,10 +920,15 @@ function pathDraw(){
   }
   curves.push({w,arr,depth:depth/173,k});
  }
- const viewCX=(minX+maxX)/2,viewCY=(minY+maxY)/2;
+ let viewCX=(minX+maxX)/2,viewCY=(minY+maxY)/2;
  const needScale=Math.min(ab.w*.83/Math.max(.1,maxX-minX),ab.h*.81/Math.max(.1,maxY-minY));
  // Fit is uniform: never distort aspect; soft only when user has not manually zoomed.
- const f= camera.zoom===1 ? Math.min(size,needScale) : size;
+ let f= camera.zoom===1 ? Math.min(size,needScale) : size;
+ if(playing&&visual.trail>0&&fitMem){fitMem.cx+=(viewCX-fitMem.cx)*.04;fitMem.cy+=(viewCY-fitMem.cy)*.04;fitMem.f+=(Math.min(f,fitMem.f*1.002)-fitMem.f)*.04;if(f<fitMem.f)fitMem.f=f;}else fitMem={cx:viewCX,cy:viewCY,f};
+ viewCX=fitMem.cx;viewCY=fitMem.cy;f=fitMem.f;
+ // true string speed |p| at the 24 nodes, for Motion color
+ const spd=new Float64Array(NS);let spMax=1e-12;for(let i=0;i<NS;i++){spd[i]=Math.hypot(S[P+3*i],S[P+3*i+1],S[P+3*i+2]);spMax=Math.max(spMax,spd[i]);}
+ let spMin=1e300;for(let i=0;i<NS;i++)spMin=Math.min(spMin,spd[i]);spRef=Math.max(1e-12,spMax-spMin);for(let i=0;i<NS;i++)spd[i]-=spMin;
  curves.sort((a,b)=>a.depth-b.depth);
  for(const curve of curves){
   const k=curve.k,arr=curve.arr;
@@ -924,7 +936,9 @@ function pathDraw(){
     const first=Math.floor(s*172/15),last=Math.min(172,Math.ceil((s+1)*172/15));
     const u=(s+.5)/15,o=obsAt(u,curve.w);
     const hue=((205+260*u+115*k/number+14*Math.sin(o.phase)+80*Math.tanh(visual.portGain*o.port*.1)+(view==='Legacy'?(R.legacyAt(M.macroIndex,params.memoryRho)[Math.min(30,Math.floor((curve.w*.5+.5)*31))]*160+ (R.legacyAt(M.macroIndex,params.memoryRho)[6]-R.legacyAt(M.macroIndex,.6)[6])*1500):0))%360+360)%360;
-    const a=.38+.26*Math.abs(curve.w),light=55+12*Math.sin(u*7+k*.04);
+    const uu=u*NS,i0=Math.floor(uu)%NS,fr=uu-Math.floor(uu),sp=Math.min(1,(spd[i0]*(1-fr)+spd[(i0+1)%NS]*fr)/spRef);
+    const m=visual.motion,hueF=((hue+m*200*(sp-.5))%360+360)%360;
+    const a=.38+.26*Math.abs(curve.w),light=55+12*Math.sin(u*7+k*.04)+m*18*(sp-.5);
     const draw=()=>{
       ctx.beginPath();for(let i=first;i<=last;i++){
         const p=arr[i];const px=ab.x+ab.w/2+(p[0]-viewCX)*f+camera.dx;
@@ -933,7 +947,7 @@ function pathDraw(){
       }
       ctx.stroke();
     };
-    ctx.strokeStyle=`hsl(${hue.toFixed(0)} 93% ${light.toFixed(0)}%)`;
+    ctx.strokeStyle=`hsl(${hueF.toFixed(0)} 93% ${light.toFixed(0)}%)`;
     if(visual.glow>0){ctx.lineWidth=(2.9+Math.max(0,visual.glow-.7)*1.4)*visual.thickness;ctx.globalAlpha=Math.min(.27,visual.glow*(.055+.04*visual.glow));draw();}
     ctx.lineWidth=Math.max(.25,visual.thickness*.77);ctx.globalAlpha=a;draw();
   }
@@ -942,7 +956,8 @@ function pathDraw(){
 }
 function draw(){
  if(!ctx||!W||!H)return;
- ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
+ const trailOn=playing&&visual.trail>0&&view!=='Impact';
+ ctx.globalAlpha=1;ctx.fillStyle=trailOn?`rgba(0,0,0,${(1-visual.trail).toFixed(3)})`:'#000';ctx.fillRect(0,0,W,H);
  if(view==='Impact')drawImpact();else pathDraw();
  needRender=false;
 }
@@ -1069,7 +1084,8 @@ function animate(t){
    if(stepCount%8===0)computeImpact();
    draw();
    if(stepCount%10===0)updateDiagnostics();
-  }else if(needRender)draw();
+  }else if(needRender||visual.spin>0)draw();
+  if(visual.spin>0)camera.yaw+=visual.spin*.012;
  }catch(e){reportError(e);}
  requestAnimationFrame(animate);
 }
