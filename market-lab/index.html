@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#101722">
+<title>Market Lab | $20 Paper Experiment</title>
+<style>
+:root{color-scheme:dark;--bg:#101722;--card:#1a2432;--line:#314052;--white:#f4f7fb;--muted:#adbece;--accent:#8ce6c8;--gold:#f5c980}
+*{box-sizing:border-box}
+body{background:radial-gradient(ellipse at 45% 0%,#203448 0%,var(--bg) 68%);color:var(--white);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;margin:0;min-height:100vh}
+main{max-width:740px;margin:auto;padding:calc(28px + env(safe-area-inset-top)) 18px calc(50px + env(safe-area-inset-bottom))}
+h1{font-size:clamp(30px,7vw,42px);line-height:1.1;letter-spacing:-.035em;margin:12px 0}
+.eyebrow{font-weight:750;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-size:11px}
+p{line-height:1.55;color:var(--muted)}
+.lead{font-size:16px;margin-bottom:24px}
+.notice{border:1px solid #64764c;background:#2b342a;border-radius:14px;padding:14px 16px;margin:20px 0;line-height:1.5;font-size:14px;color:#f9f4de}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.panel{border:1px solid var(--line);background:var(--card);border-radius:18px;padding:18px;min-width:0}
+.label{color:var(--muted);font-size:12px;line-height:1.3}
+.value{font-size:clamp(23px,6vw,35px);font-weight:720;letter-spacing:-.045em;margin:9px 0 1px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.value.accent{color:var(--accent)}
+.small{font-size:12px;color:var(--muted);margin-top:8px}
+section{margin:24px 0}
+h2{font-size:17px;margin:0 0 14px;font-weight:700}
+.chartpanel{padding:18px 15px}
+svg{width:100%;height:auto;display:block;overflow:visible}
+.legend{display:flex;flex-wrap:wrap;gap:16px;margin-top:5px;color:var(--muted);font-size:12px}
+.swatch{display:inline-block;width:16px;height:3px;vertical-align:middle;margin-right:5px}
+.mint{background:var(--accent)}.gold{background:var(--gold)}
+.row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-top:1px solid var(--line);padding:12px 0;font-size:14px}
+.row:first-child{border-top:0}.row span:first-child{color:var(--muted)}.row span:last-child{font-weight:650;text-align:right}
+footer{font-size:12px;line-height:1.65;color:var(--muted);padding-top:14px;border-top:1px solid var(--line)}
+a{color:var(--accent)}
+@media(max-width:350px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main>
+<div class="eyebrow">Autonomous research / 001</div>
+<h1>The $20 Market Lab</h1>
+<p class="lead">One automated, strictly simulated market strategy. Built to test what actually happens, not manufacture impressive-looking profits.</p>
+<div class="notice"><strong>No money is being traded.</strong> This is a paper-only experiment. The account starts with $20 in virtual cash. Real deposits and real earnings are both $0.</div>
+<div class="grid">
+<div class="panel"><div class="label">Virtual portfolio</div><div id="balance" class="value">$20.00</div><div class="small">Starting amount: $20 simulated</div></div>
+<div class="panel"><div class="label">Virtual profit or loss</div><div id="profit" class="value accent">$0.00</div><div id="return" class="small">0.00% change</div></div>
+<div class="panel"><div class="label">Real earnings</div><div class="value">$0.00</div><div class="small">No real trades or deposits</div></div>
+<div class="panel"><div class="label">Paper strategy</div><div id="position" class="value" style="font-size:24px">Cash</div><div class="small">SPY ETF or cash, no borrowing</div></div>
+</div>
+<section class="panel chartpanel"><h2>Observed results</h2>
+<svg id="graph" viewBox="0 0 620 250" role="img" aria-label="Portfolio and buy-and-hold benchmark over the actual paper observation period">
+<text x="22" y="115" fill="#adbece" font-size="18">Awaiting live paper observations</text></svg>
+<div class="legend"><span><i class="swatch mint"></i>Paper strategy</span><span><i class="swatch gold"></i>SPY buy &amp; hold comparison</span></div></section>
+<section class="panel">
+<h2>Current status</h2>
+<div class="row"><span>Market data</span><span id="status">Awaiting first run</span></div>
+<div class="row"><span>Last market session</span><span id="lastdate">—</span></div>
+<div class="row"><span>Paper sessions recorded</span><span id="sessions">0</span></div>
+<div class="row"><span>Observed maximum drawdown</span><span id="drawdown">0.00%</span></div>
+<div class="row"><span>Next session's target</span><span id="signal">—</span></div>
+<div class="row"><span>Last update (UTC)</span><span id="updated">—</span></div>
+</section>
+<footer>Rules: prior day's closing 20/50-session moving averages decide whether to hold SPY or cash. Simulated trades occur at the next session's open with 0.15% estimated slippage each trade. No hindsight performance is passed off as paper trading. Daily data: Stooq; displayed price data may be delayed. This is research, not investment advice. Automated updates depend on GitHub Actions and market data availability.</footer>
+</main>
+<script>
+(function(){
+const byId=id=>document.getElementById(id);
+const money=x=>(x<0?"−":"") + "$" + Math.abs(Number(x||0)).toFixed(2);
+const numeric=x=>Number(x||0);
+function linePath(rows,key,x0,x1,y0,y1,min,max){
+ if(rows.length===1) return "";
+ return rows.map((r,i)=>{
+  const x=x0+i*(x1-x0)/(rows.length-1);
+  const y=y1-(numeric(r[key])-min)/(max-min||1)*(y1-y0);
+  return (i?"L":"M")+x.toFixed(2)+" "+y.toFixed(2);
+ }).join(" ");
+}
+function chart(rows){
+ const svg=byId("graph"),ns="http://www.w3.org/2000/svg";
+ while(svg.firstChild)svg.removeChild(svg.firstChild);
+ if(rows.length<2){
+  const t=document.createElementNS(ns,"text");
+  t.setAttribute("x",22);t.setAttribute("y",115);
+  t.setAttribute("fill","#adbece");t.setAttribute("font-size","16");
+  t.textContent="Tracking starts after the next market session";
+  svg.appendChild(t);return;
+ }
+ const all=rows.flatMap(r=>[numeric(r.portfolio),numeric(r.benchmark)]);
+ let lo=Math.min(...all),hi=Math.max(...all);
+ const pad=Math.max((hi-lo)*.18,.12);lo-=pad;hi+=pad;
+ for(let i=0;i<3;i++){
+  const y=35+(i*90);
+  const g=document.createElementNS(ns,"line");
+  for(const [k,v] of Object.entries({x1:52,x2:600,y1:y,y2:y,stroke:"#344557","stroke-width":"1"}))g.setAttribute(k,v);
+  svg.appendChild(g);
+  const lab=document.createElementNS(ns,"text");
+  lab.setAttribute("x",0);lab.setAttribute("y",y+4);
+  lab.setAttribute("fill","#adbece");lab.setAttribute("font-size","13");
+  lab.textContent=money(hi-(y-35)/(180)*(hi-lo));svg.appendChild(lab);
+ }
+ for(const [key,color] of [["benchmark","#f5c980"],["portfolio","#8ce6c8"]]){
+  const p=document.createElementNS(ns,"path");
+  p.setAttribute("d",linePath(rows,key,52,600,35,215,lo,hi));
+  p.setAttribute("fill","none");p.setAttribute("stroke",color);
+  p.setAttribute("stroke-width","3");p.setAttribute("stroke-linecap","round");
+  svg.appendChild(p);
+ }
+ for(const [x,label,anchor] of [[52,rows[0].date,"start"],[600,rows[rows.length-1].date,"end"]]){
+  const t=document.createElementNS(ns,"text");
+  t.setAttribute("x",x);t.setAttribute("y",242);t.setAttribute("text-anchor",anchor);
+  t.setAttribute("fill","#adbece");t.setAttribute("font-size","13");
+  t.textContent=label;svg.appendChild(t);
+ }
+}
+fetch("./report.json?refresh="+Date.now(),{cache:"no-store"}).then(r=>{
+ if(!r.ok)throw new Error("No report yet");return r.json();
+}).then(d=>{
+ byId("balance").textContent=money(d.current_virtual_dollars);
+ byId("profit").textContent=money(d.virtual_profit_dollars);
+ byId("return").textContent=numeric(d.virtual_return_percent).toFixed(2)+"% change";
+ byId("position").textContent=d.current_position==="SPY"?"SPY ETF":"Cash";
+ byId("status").textContent=d.status==="ok"?"Data received":d.status==="awaiting_first_run"?"Awaiting first run":"Data temporarily unavailable";
+ byId("lastdate").textContent=d.as_of_market_date||"—";
+ byId("sessions").textContent=d.days_observed||0;
+ byId("drawdown").textContent=numeric(d.max_drawdown_percent).toFixed(2)+"%";
+ byId("signal").textContent=d.next_session_instruction||"—";
+ byId("updated").textContent=d.updated_utc?d.updated_utc.replace("T"," ").slice(0,19):"—";
+ chart(d.history||[]);
+}).catch(err=>{byId("status").textContent="Report unavailable: "+err.message;});
+})();
+</script>
+</body>
+</html>
