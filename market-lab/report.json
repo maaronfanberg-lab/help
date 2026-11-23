@@ -1,8 +1,8 @@
 {
   "title": "Market Lab \u2014 paper trading only",
-  "status": "data_unavailable",
-  "error": "Not enough valid market history (at least 55 sessions required)",
-  "updated_utc": "2026-11-23T02:02:41+00:00",
+  "status": "ok",
+  "error": null,
+  "updated_utc": "2026-11-23T02:03:27+00:00",
   "symbol": "SPY.US",
   "starting_virtual_dollars": 20.0,
   "current_virtual_dollars": 20.0,
@@ -10,13 +10,20 @@
   "virtual_return_percent": 0.0,
   "benchmark_virtual_dollars": 20.0,
   "max_drawdown_percent": 0.0,
-  "days_observed": 0,
-  "as_of_market_date": null,
+  "days_observed": 1,
+  "as_of_market_date": "2026-11-20",
   "current_position": "cash",
-  "next_session_instruction": "insufficient history",
+  "next_session_instruction": "hold cash",
   "strategy": "20/50-day simple moving average; prior-close signal executes next open",
   "estimated_slippage_each_trade_percent": 0.15,
-  "history": [],
+  "history": [
+    {
+      "date": "2026-11-20",
+      "portfolio": 20.0,
+      "benchmark": 20.0,
+      "close": 689.8099975585938
+    }
+  ],
   "trades": [],
   "real_money_invested": 0,
   "real_money_earned": 0,
