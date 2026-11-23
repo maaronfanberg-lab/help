@@ -1,0 +1,51 @@
+name: Paper Market Lab
+
+on:
+  schedule:
+    - cron: '45 23 * * 1-5'
+  workflow_dispatch:
+  push:
+    paths:
+      - 'market-lab/**'
+      - '.github/workflows/market-lab.yml'
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: paper-market-lab
+  cancel-in-progress: false
+
+jobs:
+  observe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Verify paper-only engine
+        run: python -m unittest discover -s market-lab -p 'test_*.py' -v
+
+      - name: Record actual paper observation
+        run: |
+          python market-lab/engine.py || echo "Market data not available. Report records this clearly."
+
+      - name: Persist daily virtual results and update public page
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git add -A market-lab/report.json market-lab/state.json || git add market-lab/report.json
+          if ! git diff --cached --quiet; then
+            git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'Update paper-only market observation [skip ci]'
+            git push
+            gh workflow run pages.yml --ref main
+          fi
