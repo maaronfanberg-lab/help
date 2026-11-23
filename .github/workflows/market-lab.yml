@@ -43,9 +43,22 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          git add -A market-lab/report.json market-lab/state.json || git add market-lab/report.json
+          # Persist only generated results. The engine may run while other
+          # repository files are changing, so refresh main before committing.
+          cp market-lab/report.json /tmp/paper-report.json
+          if [ -f market-lab/state.json ]; then
+            cp market-lab/state.json /tmp/paper-state.json
+          fi
+          git fetch origin main
+          git reset --hard origin/main
+          cp /tmp/paper-report.json market-lab/report.json
+          if [ -f /tmp/paper-state.json ]; then
+            cp /tmp/paper-state.json market-lab/state.json
+          fi
+          git add -A market-lab/report.json
+          if [ -f market-lab/state.json ]; then git add market-lab/state.json; fi
           if ! git diff --cached --quiet; then
             git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'Update paper-only market observation [skip ci]'
-            git push
+            git push origin HEAD:main
             gh workflow run pages.yml --ref main
           fi
