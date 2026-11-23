@@ -31,8 +31,32 @@ def target(closes):
     return average(closes[-20:]) > average(closes[-50:])
 
 
-def retrieve_prices(today=None):
-    today = today or date.today()
+def retrieve_yahoo(today):
+    """Yahoo's keyless daily chart JSON: unofficial and may rate-limit."""
+    url = ("https://query1.finance.yahoo.com/v8/finance/chart/SPY"
+           "?range=2y&interval=1d&events=history")
+    req = urllib.request.Request(url, headers={
+        "User-Agent": "Mozilla/5.0 (compatible; MarketLabPaper/1.0)",
+        "Accept": "application/json",
+    })
+    with urllib.request.urlopen(req, timeout=12) as response:
+        payload = json.loads(response.read(1_000_000))
+    chart = payload["chart"]["result"][0]
+    dates = chart["timestamp"]
+    quote = chart["indicators"]["quote"][0]
+    rows = []
+    for t, op, cl in zip(dates, quote["open"], quote["close"]):
+        if op is None or cl is None:
+            continue
+        d = datetime.fromtimestamp(t, timezone.utc).date()
+        if op > 0 and cl > 0 and d <= today:
+            rows.append({"date": d.isoformat(),
+                         "open": float(op), "close": float(cl)})
+    return rows
+
+
+def retrieve_stooq(today):
+    """Backup CSV provider, when its anti-bot controls permit access."""
     begin = today - timedelta(days=410)
     url = (f"https://stooq.com/q/d/l/?s=spy.us&i=d"
            f"&d1={begin:%Y%m%d}&d2={today:%Y%m%d}")
@@ -40,7 +64,7 @@ def retrieve_prices(today=None):
         "User-Agent": "Mozilla/5.0 (compatible; MarketLabPaper/1.0)",
         "Accept": "text/csv",
     })
-    with urllib.request.urlopen(req, timeout=20) as response:
+    with urllib.request.urlopen(req, timeout=8) as response:
         body = response.read(500_000).decode("utf-8-sig")
     rows = []
     for row in csv.DictReader(io.StringIO(body)):
@@ -53,10 +77,25 @@ def retrieve_prices(today=None):
                              "open": opening, "close": closing})
         except (ValueError, KeyError, TypeError):
             continue
-    rows.sort(key=lambda x: x["date"])
-    if len(rows) < 55:
-        raise ValueError("Not enough valid market history (at least 55 sessions required)")
     return rows
+
+
+def retrieve_prices(today=None):
+    today = today or date.today()
+    errors = []
+    for name, provider in (("Yahoo", retrieve_yahoo),
+                           ("Stooq", retrieve_stooq)):
+        try:
+            rows = provider(today)
+            rows.sort(key=lambda x: x["date"])
+            if len(rows) < 55:
+                raise ValueError("less than 55 valid price rows")
+            if (today - date.fromisoformat(rows[-1]["date"])).days > 7:
+                raise ValueError("latest bar is more than 7 days old")
+            return rows
+        except Exception as exc:
+            errors.append(name + ": " + str(exc)[:100])
+    raise RuntimeError("Both data feeds failed: " + "; ".join(errors))
 
 
 def initial_state(row, closes):
