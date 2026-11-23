@@ -1,0 +1,330 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="color-scheme" content="dark"><title>Hebrew Equation Engine</title>
+<style>
+:root{color-scheme:dark;--bg:#0b111b;--panel:#142033;--ink:#f1f6f8;--sub:#aabacb;--line:#39536a;--teal:#8be2e4}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.4}main{max-width:700px;padding:15px 13px 50px;margin:auto}h1{font-size:26px;margin:3px 0}h2{font-size:18px;margin:3px 0 13px}p{font-size:13px;color:var(--sub);margin:7px 0}.eyebrow{font-size:11px;font-weight:700;letter-spacing:.16em;color:var(--teal)}.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:15px;margin:13px 0}.head{display:flex;justify-content:space-between;align-items:center;gap:8px}.btn{background:#25465c;color:#f4fbfd;border:1px solid #568095;font-weight:650;font-size:15px;border-radius:12px;padding:12px 15px;cursor:pointer;touch-action:manipulation}.primary{background:#186c72;border-color:#60bdc2;width:100%;font-size:17px;margin-top:11px}.btn:active{background:#327f8c}.clear{font-size:12px;padding:7px 10px}textarea{font-size:27px;line-height:1.6;font-family:'Times New Roman',serif;display:block;direction:rtl;text-align:right;width:100%;min-height:130px;background:#0a1627;color:var(--ink);border:1px solid #66849a;border-radius:12px;padding:15px;resize:vertical;margin-top:8px}label{display:block;font-size:12px;color:#c5d2df;font-weight:600;margin-bottom:5px}select{font:inherit;background:#102439;color:var(--ink);border:1px solid #52758e;border-radius:10px;padding:11px;width:100%;max-width:100%}.small{font-size:11px}.note{color:#d9c394}.big{font:32px/1.7 'Times New Roman',serif;direction:rtl;text-align:center;min-height:60px;overflow-wrap:anywhere}.translate{text-align:center;color:#cce6ee;line-height:1.65;font-size:14px}.pairgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.pair{border:1px solid var(--line);border-radius:11px;background:#0c1c2c;padding:10px;min-width:0}.n{font-size:20px;font-weight:750;color:var(--teal);font-variant-numeric:tabular-nums}.word{font:25px/1.5 'Times New Roman',serif;direction:rtl}.desc{font-size:12px;color:var(--sub)}.tag{font-size:11px;color:#a1dbce}.warn{color:#f5c898}.row{display:flex;justify-content:space-between;gap:10px;align-items:center}.sliders{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:12px 0}.slider{min-width:0}input[type=range]{width:100%;accent-color:#8ee6e9;min-height:30px}summary{cursor:pointer;color:var(--teal);font-weight:700;margin-bottom:8px}.trace{font-size:12px;color:#c8d7e1;overflow-wrap:anywhere}table{width:100%;border-collapse:collapse;font-size:14px}td,th{border-bottom:1px solid #334b5e;text-align:left;padding:6px}td.he{direction:rtl;text-align:right;font:20px 'Times New Roman',serif}.pill{display:inline-block;border:1px solid #446777;background:#0d2537;border-radius:8px;padding:4px 7px;margin:3px;font-size:11px;color:#c9dfe9}#status{font-size:12px;color:#d5e9dc}#blocked{padding:10px;background:#49392b;border:1px solid #9e6746;border-radius:8px;color:#fff;font-size:13px;margin:10px 0}#blocked.ok{display:none}#output{display:none}#empty{padding:14px;text-align:center;color:var(--sub)}@media(max-width:370px){.big{font-size:27px}main{padding:9px}.card{padding:12px}}
+</style></head><body><main><header><div class="eyebrow">HEBREW → EQUATION → HEBREW</div><h1>Hebrew Equation Engine</h1><p>Enter Hebrew. Its letter values become equation inputs. The calculated numbers are matched to other Hebrew words.</p></header>
+<div id="blocked">The calculation has not started. If this message remains, the file preview is blocking JavaScript. Open the app in a regular browser.</div>
+<section class="card"><div class="head"><h2>1 · Hebrew input</h2><button class="btn clear" id="clear" type="button">Clear</button></div><textarea id="source" placeholder="הקלד כאן בעברית" aria-label="Hebrew text" spellcheck="false" autocomplete="off" autocorrect="off"></textarea><p>No words are preloaded. Hebrew vowel marks are ignored when calculating gematria.</p><label for="method">Letter-number system</label><select id="method"><option value="std">Standard gematria</option><option value="ordinal">Alphabet order 1–22</option><option value="final">Extended final letter values</option><option value="atbash">Atbash gematria</option></select><button class="btn primary" type="button" id="run">Run equation → Hebrew words</button><p id="status" role="status">Enter Hebrew and tap Run.</p></section>
+<section class="card"><div class="eyebrow">2 · OUTPUT</div><div id="empty">Your equation-generated Hebrew words will appear here.</div><div id="output" aria-live="polite"><div id="words" class="big"></div><div id="translations" class="translate"></div><p class="small note">Words are numerical substitutions, not a translation or a claim of hidden meaning.</p><div id="matches" class="pairgrid"></div></div></section>
+<section class="card"><div class="eyebrow">3 · PARAMETERS</div><p>These settings change the equation and recalculate when Hebrew is present.</p><div class="sliders"><div class="slider"><div class="row"><label for="steps">Iterations</label><b id="stepsValue">30</b></div><input id="steps" type="range" min="1" max="100" step="1" value="30"></div><div class="slider"><div class="row"><label for="coupling">Coupling</label><b id="couplingValue">100%</b></div><input id="coupling" type="range" min="0" max="300" step="5" value="100"></div><div class="slider"><div class="row"><label for="memory">Memory</label><b id="memoryValue">55%</b></div><input id="memory" type="range" min="0" max="100" step="5" value="55"></div><div class="slider"><div class="row"><label for="scale">Number scale</label><b id="scaleValue">650</b></div><input id="scale" type="range" min="200" max="1600" step="25" value="650"></div></div><label for="count">Number of output words</label><select id="count"><option value="3">3 words</option><option value="5">5 words</option><option selected value="7">7 words</option></select></section>
+<section class="card"><details><summary>Show input numbers and calculation trail</summary><div id="inputTotals" class="trace">Enter Hebrew to see input letter and word values.</div><div id="variables" class="trace"></div></details><details><summary>About this experimental equation</summary><p>The numerical engine uses a finite nine-state approximation. Input gematria values are assigned to α, γ, κ, ζ, ε and the initial states; nonlinear coupling, delayed interactions and memory evolve the states. The final magnitudes are scaled and rounded before reverse gematria. This does not solve the original infinite-dimensional fractional, spectral, geometric, and stochastic equation exactly. Matching uses a limited embedded Hebrew vocabulary; results are marked exact or nearest.</p></details></section>
+</main><script>
+'use strict';
+const ALPH='אבגדהוזחטיכלמנסעפצקרשת';
+const VALS=[1,2,3,4,5,6,7,8,9,10,20,30,40,50,60,70,80,90,100,200,300,400];
+const FIN={'ך':'כ','ם':'מ','ן':'נ','ף':'פ','ץ':'צ'};
+const FINVAL={'ך':500,'ם':600,'ן':700,'ף':800,'ץ':900};
+const gemVal=(c,method)=>{let i=ALPH.indexOf(FIN[c]||c);if(i<0)return 0;if(method==='ordinal')return i+1;if(method==='atbash')return VALS[21-i];if(method==='final')return FINVAL[c]||VALS[i];return VALS[i]};
+const splitWords=s=>(s.replace(/[\u0591-\u05C7]/g,'').replace(/\u05BE/g,' ').match(/[\u05d0-\u05ea]+/g)||[]);
+const sum=a=>a.reduce((u,v)=>u+v,0);
+function buildLex(raw){const acc=[],seen=new Set();for(const line of raw.split('\n')){const [word,meaning]=line.split('|');if(!word||!meaning||seen.has(word))continue;seen.add(word);acc.push({word,meaning});}return acc;}
+const dict=buildLex(`אב|father
+אם|mother
+בן|son
+בת|daughter
+אח|brother
+אחות|sister
+אדם|person
+אדמה|ground
+אבן|stone
+אור|light
+אורות|lights
+אש|fire
+מים|water
+ים|sea
+ימים|days; seas
+נהר|river
+נחל|stream
+מעין|spring
+באר|well
+גשם|rain
+טל|dew
+שלג|snow
+רוח|wind; spirit
+שמש|sun
+ירח|moon
+כוכב|star
+שמים|heavens
+השמים|the heavens
+ארץ|earth
+הארץ|the earth
+עולם|world
+טבע|nature
+הטבע|the nature
+מלך|king
+מלכה|queen
+מלכות|kingship
+עיר|city
+בית|house
+בתים|houses
+מקדש|sanctuary
+מקום|place
+שער|gate
+דלת|door
+דרך|way
+שביל|path
+מסע|journey
+הלך|walked
+שב|returned
+בא|came
+יצא|left
+עלה|ascended
+ירד|descended
+רץ|ran
+נתן|gave
+לקח|took
+ראה|saw
+שמע|heard
+אמר|said
+דבר|word
+דברים|words
+דיבור|speech
+קול|voice
+שם|name
+שמות|names
+אות|letter; sign
+אותיות|letters
+סימן|sign
+ספר|book
+כתב|writing
+תורה|Torah
+מצוה|commandment
+חוק|law
+משפט|justice
+צדק|righteousness
+אמת|truth
+שקר|lie
+אמונה|faith
+תקוה|hope
+אהבה|love
+שלום|peace
+חיים|life
+חי|living
+חיה|animal
+מות|death
+יום|day
+לילה|night
+בוקר|morning
+ערב|evening
+שבוע|week
+שנה|year
+עתיד|future
+עבר|past
+ראש|head
+ראשית|beginning
+בראשית|in the beginning
+סוף|end
+קץ|end
+אחרית|end
+אחד|one
+אחת|one
+שנים|two; years
+שתים|two
+שלש|three
+ארבע|four
+חמש|five
+שש|six
+שבע|seven
+שמונה|eight
+תשע|nine
+עשר|ten
+מאה|hundred
+אלף|thousand
+רב|many
+מעט|little
+גדול|great
+קטן|small
+טוב|good
+טובה|goodness
+רע|bad
+יפה|beautiful
+חן|grace
+חסד|kindness
+חסדים|kindnesses
+חכמה|wisdom
+בינה|understanding
+דעת|knowledge
+נשמה|soul
+לב|heart
+שכל|intellect
+מחשבה|thought
+זכרון|memory
+רגש|emotion
+שמחה|joy
+עצב|sadness
+כאב|pain
+צחוק|laughter
+פחד|fear
+גבורה|strength
+כח|strength
+עוז|might
+אויב|enemy
+חבר|friend
+אהוב|beloved
+אשה|woman
+איש|man
+ילד|child
+ילדה|girl
+משפחה|family
+עם|people
+עםישראל|people of Israel
+צמח|plant
+עץ|tree
+עצים|trees
+פרי|fruit
+גן|garden
+פרח|flower
+אדום|red
+כחול|blue
+לבן|white
+שחור|black
+זהב|gold
+כסף|silver
+אורח|guest
+חדר|room
+חומה|wall
+שמחה|joy
+אוכל|food
+לחם|bread
+דבש|honey
+חלב|milk
+יין|wine
+שמן|oil
+חלום|dream
+ענן|cloud
+רעם|thunder
+ברק|lightning
+ברכה|blessing
+ברוך|blessed
+ברא|created
+יצירה|creation
+בריאה|creation
+תוצאה|result
+קשר|connection
+קשרים|connections
+סדר|order
+תנועה|movement
+חלק|part
+חלקים|parts
+מרחב|space
+זמן|time
+רגע|moment
+גל|wave
+גלים|waves
+צל|shadow
+צלם|image
+צליל|sound
+ניגון|melody
+שיר|song
+שירה|poetry
+דממה|silence
+חושך|darkness
+חשך|darkness
+עבודה|work
+יד|hand
+רגל|foot
+עין|eye
+אוזן|ear
+פה|mouth
+תא|cell
+חומר|matter
+שורש|root
+שורשים|roots
+נפש|living soul
+רוחניות|spirituality
+קדוש|holy
+קדושה|holiness
+קדש|holy
+שבת|Sabbath
+משה|Moses
+אברהם|Abraham
+שרה|Sarah
+רחל|Rachel
+דוד|David
+ציון|Zion
+סיני|Sinai
+מצרים|Egypt
+ישראל|Israel`);
+function runEngine(input,method,steps,coupling,memory,readoutScale=650,count=7){
+const words=splitWords(input);if(!words.length)return null;
+const val=s=>[...s].reduce((acc,c)=>acc+gemVal(c,method),0);
+const wvals=words.map(val),lvals=[...words.join('')].map(c=>gemVal(c,method));const pool=wvals.concat(lvals);const N=9;
+const alpha=.08+(pool[0]%79)/150;
+const gamma=.6+(pool[1%pool.length]%70)/100;
+const kappa=.08+(pool[2%pool.length]%60)/200;
+const zeta=.04+(pool[3%pool.length]%25)/250;
+const epsilon=.02+(pool[4%pool.length]%80)/800;
+let state=Array.from({length:N},(_,i)=>{const p=pool[(3*i)%pool.length],q=pool[(5*i+1)%pool.length];return [ .21+.58*((p*7+13*i)%401)/401, .08+.32*((q*3+7*i)%257)/257]});
+let history=[state.map(a=>a.slice())];let terms={};const dt=.055,coup=Number(coupling)/100,mem=Number(memory)/100;const maxhist=15;
+for(let t=0;t<steps;t++){
+ const old=history[Math.max(0,history.length-1-3)];
+ const next=state.map(([a,b],i)=>{
+  const prev=state[(i+N-1)%N],nex=state[(i+1)%N];
+  const curvature=Math.hypot(...prev)-2*Math.hypot(a,b)+Math.hypot(...nex);
+  let lap=[0,0],nonlocal=[0,0],den=0;
+  for(let j=0;j<N;j++){if(i===j)continue;const d=Math.min(Math.abs(i-j),N-Math.abs(i-j));const weight=1/Math.pow(1+d,1+gamma);lap[0]+=(state[j][0]-a)*weight;lap[1]+=(state[j][1]-b)*weight;const kp=1/(1+d*d);nonlocal[0]+=old[j][0]*kp;nonlocal[1]+=old[j][1]*kp;den+=kp;}
+  const phase=alpha*(a*prev[0]+b*nex[1]); const kinetic=[lap[0]-phase*lap[1],lap[1]+phase*lap[0]];
+  const loss=zeta*(1+Math.hypot(a,b)**(1+gamma))+.15*Math.abs(curvature);
+  const forcing=epsilon*Math.sin(0.17*t+pool[i%pool.length]*.01);
+  let mRe=0,mIm=0,ws=0;
+  for(let h=1;h<=Math.min(maxhist,history.length);h++){const ww=Math.pow(h,-(.35+1.3*(1-mem)));const p=history[history.length-h][i];mRe+=ww*p[0];mIm+=ww*p[1];ws+=ww;}
+  mRe/=ws;mIm/=ws;
+  return [a+dt*(.56*kinetic[0]-loss*a+coup*kappa*(nonlocal[0]/den-a)+.14*mem*(mRe-a)+forcing), b+dt*(.56*kinetic[1]-loss*b+coup*kappa*(nonlocal[1]/den-b)+.14*mem*(mIm-b)-forcing*.5)]
+ });
+ state=next;history.push(state.map(z=>z.slice()));if(history.length>maxhist+4)history.shift();
+}
+const excluded=new Set(words);const used=new Set();const lex=dict.map(x=>({...x,value:val(x.word)}));const candidates=[];
+for(let i=0;i<count;i++){
+ const [a,b]=state[i];const m=Math.hypot(a,b);const measured=m+.22*Math.abs(state[(i+1)%N][0]-a);
+ const target=Math.max(1,Math.round(readoutScale*(method==='ordinal'?0.33:1)*measured));
+ const options=lex.filter(x=>!excluded.has(x.word)).map(x=>({...x,delta:Math.abs(x.value-target)})).sort((x,y)=>x.delta-y.delta || x.word.length-y.word.length || x.word.localeCompare(y.word,'he'));
+ const chosen=options.find(x=>!used.has(x.word)) || options[0];if(chosen)used.add(chosen.word);
+ candidates.push({target,chosen,alternates:options.slice(0,4)});
+}
+return {words,wvals,lvals,coeff:{alpha,gamma,kappa,zeta,epsilon},candidates,lexCount:lex.length,total:sum(wvals)};
+}
+
+
+(function(){
+  'use strict';
+  const $=id=>document.getElementById(id);
+  const fmt=n=>Number(n).toLocaleString('en-US',{maximumFractionDigits:3});
+  $('blocked').className='ok';
+  $('status').textContent='Ready. Enter a word or sentence in Hebrew.';
+  $('source').value='';
+  let last=null;
+  function change(){for(const id of ['steps','coupling','memory','scale'])$(id+'Value').textContent=$(id).value+(['coupling','memory'].includes(id)?'%':''); if(last!==null||splitWords($('source').value).length)run();}
+  function reset(){last=null;$('output').style.display='none';$('empty').style.display='block';$('words').textContent='';$('translations').textContent='';$('matches').replaceChildren();$('inputTotals').textContent='';$('variables').textContent='';}
+  function run(){try{
+    const s=$('source').value;
+    if(!splitWords(s).length){reset();$('status').textContent='Enter Hebrew letters to calculate.';return;}
+    const opts={mode:$('method').value,steps:Number($('steps').value),coupling:Number($('coupling').value),memory:Number($('memory').value),scale:Number($('scale').value),count:Number($('count').value)};
+    const out=runEngine(s,opts.mode,opts.steps,opts.coupling,opts.memory,opts.scale,opts.count);
+    if(!out||!out.candidates.length)throw new Error('No numerical output');
+    last=out;
+    $('empty').style.display='none';$('output').style.display='block';
+    $('words').textContent=out.candidates.map(c=>c.chosen?.word||'—').join(' ');
+    $('translations').textContent=out.candidates.map(c=>c.chosen?.meaning||'No dictionary match').join(' · ');
+    $('matches').replaceChildren();
+    for(const item of out.candidates){
+      const card=document.createElement('div');card.className='pair';
+      const top=document.createElement('div');top.className='row';
+      const num=document.createElement('span');num.className='n';num.textContent=fmt(item.target);
+      const arrow=document.createElement('span');arrow.textContent='→';
+      top.append(num,arrow);
+      const heb=document.createElement('div');heb.className='word';heb.textContent=item.chosen?.word||'—';
+      const tr=document.createElement('div');tr.className='desc';tr.textContent=item.chosen?.meaning||'No word found';
+      const note=document.createElement('div');note.className=item.chosen?.delta===0?'tag':'warn';note.style.fontSize='11px';note.textContent=item.chosen?(item.chosen.delta===0?'Exact match':'Nearest · difference '+fmt(item.chosen.delta)):'No match';
+      card.append(top,heb,tr,note);$('matches').append(card);
+    }
+    $('inputTotals').textContent=out.words.map((w,i)=>w+' = '+fmt(out.wvals[i])).join(' · ')+' · Total = '+fmt(out.total);
+    $('variables').textContent='Equation parameters: '+Object.entries(out.coeff).map(([k,v])=>k+'='+fmt(v)).join(' · ')+'. Output numbers: '+out.candidates.map(i=>i.target).join(', ');
+    $('status').textContent='Calculation complete · '+opts.steps+' iterations · '+opts.count+' word outputs.';
+  }catch(err){reset();$('status').textContent='Calculation error: '+String(err.message||err);}
+  }
+  $('run').addEventListener('click',()=>{run();if(last)$('output').scrollIntoView({behavior:'smooth',block:'nearest'});});
+  $('clear').addEventListener('click',()=>{$('source').value='';reset();$('status').textContent='Cleared. Enter Hebrew to begin.';});
+  $('source').addEventListener('input',()=>{if(!splitWords($('source').value).length){reset();$('status').textContent='Enter Hebrew letters to calculate.';} else {run();}});
+  for(const id of ['steps','coupling','memory','scale']){$(id).addEventListener('input',change);$(id).addEventListener('change',change);}
+  for(const id of ['method','count'])$(id).addEventListener('change',change);
+})();
+</script></body></html>
