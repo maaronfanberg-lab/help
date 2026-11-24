@@ -5,7 +5,7 @@
   "shares": 0.0,
   "first_close": 689.8099975585938,
   "first_date": "2026-11-20",
-  "last_processed": "2026-11-20",
+  "last_processed": "2026-11-23",
   "pending_target": false,
   "trades": [],
   "history": [
@@ -14,6 +14,12 @@
       "portfolio": 20.0,
       "benchmark": 20.0,
       "close": 689.8099975585938
+    },
+    {
+      "date": "2026-11-23",
+      "portfolio": 20.0,
+      "benchmark": 20.941708,
+      "close": 722.2899780273438
     }
   ]
 }
