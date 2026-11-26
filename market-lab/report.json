@@ -2,16 +2,16 @@
   "title": "Market Lab \u2014 paper trading only",
   "status": "ok",
   "error": null,
-  "updated_utc": "2026-11-25T05:40:21+00:00",
+  "updated_utc": "2026-11-26T05:27:49+00:00",
   "symbol": "SPY.US",
   "starting_virtual_dollars": 20.0,
   "current_virtual_dollars": 20.0,
   "virtual_profit_dollars": 0.0,
   "virtual_return_percent": 0.0,
-  "benchmark_virtual_dollars": 20.839942,
+  "benchmark_virtual_dollars": 20.779635,
   "max_drawdown_percent": 0.0,
-  "days_observed": 3,
-  "as_of_market_date": "2026-11-24",
+  "days_observed": 4,
+  "as_of_market_date": "2026-11-25",
   "current_position": "cash",
   "next_session_instruction": "hold cash",
   "strategy": "20/50-day simple moving average; prior-close signal executes next open",
@@ -34,6 +34,12 @@
       "portfolio": 20.0,
       "benchmark": 20.839942,
       "close": 718.780029296875
+    },
+    {
+      "date": "2026-11-25",
+      "portfolio": 20.0,
+      "benchmark": 20.779635,
+      "close": 716.7000122070312
     }
   ],
   "trades": [],
